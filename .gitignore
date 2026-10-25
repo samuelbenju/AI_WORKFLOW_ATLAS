@@ -1,0 +1,27 @@
+node_modules/
+.next/
+out/
+coverage/
+test-results/
+playwright-report/
+.cache/
+*.tsbuildinfo
+next-env.d.ts
+.env*
+!.env.example
+*.log
+.DS_Store
+.vercel/
+
+# Private credentials and local authentication material
+.aws/
+.ssh/
+secrets/
+.npmrc.local
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+service-account*.json
+service_account*.json
