@@ -467,6 +467,9 @@ model NewsletterSubscriber {
   consentSource  String           @db.VarChar(200)
   confirmedAt    DateTime?        @db.Timestamptz(3)
   unsubscribedAt DateTime?        @db.Timestamptz(3)
+  generation     Int              @default(1)
+  deliveries     NewsletterDelivery[]
+  consents       NewsletterConsent[]
   tokenHash      String?          @unique @db.Char(64)
   tokenExpiresAt DateTime?        @db.Timestamptz(3)
   createdAt      DateTime         @default(now()) @db.Timestamptz(3)
@@ -477,6 +480,11 @@ model NewsletterSubscriber {
 
 model NewsletterCampaign {
   id                    String               @id @default(uuid()) @db.Uuid
+  preheader             String               @default("") @db.VarChar(250)
+  revision              Int                  @default(1)
+  sourceArticleIds      String[]             @default([]) @db.Uuid
+  preparedMode          String?              @db.VarChar(20)
+  deliveries            NewsletterDelivery[]
   subject               String               @db.VarChar(200)
   body                  Json
   status                NewsletterStatus     @default(DRAFT)
@@ -622,4 +630,47 @@ model CommercialRateLimit {
   attempts Int @default(1)
   windowStarted DateTime @default(now()) @db.Timestamptz(3)
   @@index([windowStarted])
+}
+
+
+model NewsletterConsent {
+  id           String @id @default(uuid()) @db.Uuid
+  subscriberId String @db.Uuid
+  subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id], onDelete: Restrict)
+  generation   Int
+  action       String @db.VarChar(20)
+  version      String @db.VarChar(100)
+  source       String @db.VarChar(200)
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+
+  @@unique([subscriberId, generation, action])
+}
+
+model NewsletterDelivery {
+  id                String @id @default(uuid()) @db.Uuid
+  subscriberId      String @db.Uuid
+  subscriber        NewsletterSubscriber @relation(fields: [subscriberId], references: [id], onDelete: Restrict)
+  campaignId        String? @db.Uuid
+  campaign          NewsletterCampaign? @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+  generation        Int
+  kind              String @db.VarChar(20)
+  status            String @default("QUEUED") @db.VarChar(20)
+  mode              String @db.VarChar(20)
+  idempotencyKey    String @unique @db.VarChar(120)
+  payload           String @db.Text
+  providerMessageId String? @unique @db.VarChar(200)
+  errorCode         String? @db.VarChar(80)
+  attemptedAt       DateTime? @db.Timestamptz(3)
+  acceptedAt        DateTime? @db.Timestamptz(3)
+  createdAt         DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([campaignId, status])
+  @@index([subscriberId, createdAt])
+}
+
+model NewsletterRateLimit {
+  keyHash       String @id @db.Char(64)
+  attempts      Int
+  windowStarted DateTime @default(now()) @db.Timestamptz(3)
 }

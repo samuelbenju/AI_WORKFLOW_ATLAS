@@ -667,3 +667,24 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px s
 .crm-history small { display:block; color:#acb8cf; font-size:11px; margin-top:8px; }
 @media(max-width:900px) { .sponsor-inquiry-layout { gap:35px; } .crm-columns { grid-template-columns:1fr; } }
 @media(max-width:760px) { .sponsor-page { padding-top:35px; } .sponsor-benefits,.sponsor-package-grid { grid-template-columns:1fr; } .sponsor-inquiry-layout { grid-template-columns:1fr; margin-top:65px; gap:30px; } .sponsor-form { padding:22px 18px; } .sponsor-form-grid { grid-template-columns:1fr; } .sponsor-package { padding:23px; } .crm-definition { grid-template-columns:1fr; gap:6px; } .crm-definition dd { margin-bottom:10px; } }
+
+/* Newsletter: same accessible controls in public and editorial contexts. */
+.newsletter-form { width:100%; max-width:560px; min-width:0; display:grid; gap:12px; }
+.newsletter-form>label:first-child { font-size:.875rem; font-weight:600; }
+.newsletter-input-row { display:flex; gap:8px; }
+.newsletter-input-row input { min-width:0; flex:1; border:1px solid var(--border,#444456); background:#11111d; color:#f8fafc; padding:12px; border-radius:9px; }
+.newsletter-consent { display:flex; align-items:flex-start; gap:10px; font-size:.8rem; line-height:1.6; color:#cbd5e1; }
+.newsletter-consent input { margin-top:5px; width:18px; height:18px; flex-shrink:0; accent-color:#818cf8; }
+.newsletter-form [role="alert"] { color:#fda4af; }
+.newsletter-form [role="status"] { color:#a5f3fc; }
+.form-honeypot { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
+.newsletter-action { display:grid; gap:24px; max-width:650px; }
+.newsletter-action button { justify-self:start; }
+.newsletter-section.container { max-width:100%; }
+.newsletter-campaigns { display:grid; gap:20px; }
+.newsletter-preview { white-space:pre-wrap; overflow-wrap:anywhere; max-width:100%; font:inherit; }
+@media(max-width:600px){ .newsletter-input-row { flex-direction:column; } .newsletter-input-row .button { justify-content:center; } }
+
+.newsletter-policy { max-width:800px; padding-top:32px; padding-bottom:64px; line-height:1.85; color:#b9bacb; }
+.newsletter-policy h2 { color:#f8fafc; font-size:1.8rem; margin-bottom:20px; }
+.newsletter-policy p+p { margin-top:16px; }

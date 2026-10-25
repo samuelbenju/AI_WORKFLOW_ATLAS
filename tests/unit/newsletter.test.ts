@@ -1,0 +1,6 @@
+import {test} from "node:test";
+import {strict as assert} from "node:assert";
+import {randomUUID} from "node:crypto";
+import {signupSchema,newsletterConsentVersion,newsletterDraftSchema,escapeEmail} from "../../src/lib/newsletter";
+test("newsletter accepts normalized email and requires current explicit consent",()=>{const input={email:"Person@Example.org",consent:true,consentVersion:newsletterConsentVersion,source:"home",nonce:randomUUID(),formToken:"signed",website:""};assert.equal(signupSchema.parse(input).email,"person@example.org");for(const changed of [{email:"bad"},{consent:false},{consentVersion:"old"},{website:"bot"},{source:"arbitrary"},{admin:true}])assert.equal(signupSchema.safeParse({...input,...changed}).success,false);});
+test("newsletter drafts use bounded plain text rather than executable HTML",()=>{assert.equal(escapeEmail('<img src="x" onerror="alert(1)">'),"&lt;img src=&quot;x&quot; onerror=&quot;alert(1)&quot;&gt;");assert.equal(newsletterDraftSchema.safeParse({subject:"Test",body:{version:1,paragraphs:["A practical briefing"]}}).success,true);assert.equal(newsletterDraftSchema.safeParse({subject:"Test",body:{version:1,html:"<script>bad</script>"}}).success,false);});

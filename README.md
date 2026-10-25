@@ -1,6 +1,6 @@
 # AI Workflow Atlas
 
-Plataforma independiente sobre herramientas y flujos prácticos de IA. Nombre comercial provisional. Público en inglés, administración en español. **Entrega actual: Fases 1–6**, portada y directorios de herramientas/casos conectados a PostgreSQL. Panel con login, roles, CRUD real, CMS editorial y CRM comercial; blog con fuentes/SEO y solicitudes desde /sponsor. Inicialización humana pendiente de contraseña por CLI; sin envíos, cobros ni agentes activos. Operación de la base en [docs/DATABASE.md](docs/DATABASE.md); rutas, filtros y demo explícita en [docs/PUBLIC_CATALOG.md](docs/PUBLIC_CATALOG.md).
+Plataforma independiente sobre herramientas y flujos prácticos de IA. Nombre comercial provisional. Público en inglés, administración en español. **Entrega actual: Fases 1–6 y Fase 7 local (Resend externo pendiente)**, portada y directorios de herramientas/casos conectados a PostgreSQL. Panel con login, roles, CRUD real, CMS editorial y CRM comercial; blog con fuentes/SEO y solicitudes desde /sponsor. Inicialización humana pendiente de contraseña por CLI; sin envíos, cobros ni agentes activos. Operación de la base en [docs/DATABASE.md](docs/DATABASE.md); rutas, filtros y demo explícita en [docs/PUBLIC_CATALOG.md](docs/PUBLIC_CATALOG.md).
 
 Administración e inicialización segura en [docs/ADMIN.md](docs/ADMIN.md). Blog, CMS, fuentes y control de indexación en [docs/EDITORIAL.md](docs/EDITORIAL.md).
 
@@ -118,7 +118,7 @@ docs/DATABASE.md      migración, operación, límites y recuperación
 .github/workflows/    CI de lint, tipos, tests, build y navegador
 ```
 
-PostgreSQL/Prisma, 25 modelos, diez migraciones y cuatro seeds de desarrollo disponibles. La portada, `/tools`, `/tools/[slug]`, `/use-cases` y `/use-cases/[slug]` consumen datos de DB. El modo público excluye demos/borradores; sin contenido publicado muestra vacíos reales. La demo local se identifica claramente. `/login` y `/admin` protegidos por sesiones y roles; cuatro CRUD, dashboard y configuración editorial real. No hay registro público ni cuenta con contraseña predeterminada. `/sponsor` recibe solicitudes con consentimiento y el CRM administra empresas, paquetes, notas, propuestas y campañas condicionadas. Newsletter y pagos externos siguen pendientes; no se simulan envíos o cobros.
+PostgreSQL/Prisma, 28 modelos, once migraciones y cuatro seeds de desarrollo disponibles. La portada, `/tools`, `/tools/[slug]`, `/use-cases` y `/use-cases/[slug]` consumen datos de DB. El modo público excluye demos/borradores; sin contenido publicado muestra vacíos reales. La demo local se identifica claramente. `/login` y `/admin` protegidos por sesiones y roles; cuatro CRUD, dashboard y configuración editorial real. No hay registro público ni cuenta con contraseña predeterminada. `/sponsor` recibe solicitudes con consentimiento y el CRM administra empresas, paquetes, notas, propuestas y campañas condicionadas. Entrega externa de newsletter y pagos siguen pendientes; no se simulan envíos o cobros.
 
 ## Despliegue y operación futuros
 
@@ -130,4 +130,8 @@ La configuración de CI de estas fases sigue local y su ejecución remota no est
 
 ## Continuar por fases
 
-Leer `AGENTS.md`, `PROGRESS.md` y la fase pertinente de `PLANS.md`. `PRODUCT_SPEC.md` conserva el alcance integral; `ARCHITECTURE.md` explica decisiones; `BUILD_LOG.md` registra pruebas y bloqueos. No iniciar una fase posterior automáticamente. La Fase 7 requiere una nueva solicitud expresa. El contenido inicial sigue sin aprobar/publicar; no se activa indexación automáticamente. Repositorio oficial: `samuelbenju/AI_WORKFLOW_ATLAS`; la Fase 1 está en GitHub y los avances posteriores siguen locales.
+Leer `AGENTS.md`, `PROGRESS.md` y la fase pertinente de `PLANS.md`. `PRODUCT_SPEC.md` conserva el alcance integral; `ARCHITECTURE.md` explica decisiones; `BUILD_LOG.md` registra pruebas y bloqueos. No iniciar una fase posterior automáticamente. La Fase 8 requiere una nueva solicitud expresa. El contenido inicial sigue sin aprobar/publicar; no se activa indexación automáticamente. Repositorio oficial: `samuelbenju/AI_WORKFLOW_ATLAS`; la Fase 1 está en GitHub y los avances posteriores siguen locales.
+
+## Newsletter (Fase 7)
+
+Captación en home/blog/artículos y `/newsletter`; administración privada en `/admin/newsletter`. PostgreSQL, consentimiento/doble opt-in, baja, borradores, preparación y lotes manuales. `npm run newsletter:secret` prepara firma/cifrado local sin imprimir la clave. Default disabled registra bloqueos sin enviar. Resend requiere configuración segura y prueba externa autorizada pendiente; no se han enviado campañas reales. Ver [guía operativa](docs/NEWSLETTER.md). Fase 8 no iniciada.

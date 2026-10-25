@@ -4,7 +4,7 @@ Actualizado: 25 de octubre de 2026, zona America/Bogota.
 
 ## Alcance autorizado
 
-La consolidación solicitada conserva Fases 1–6 en Git local; una solicitud posterior autoriza Fase 7, que comenzará después de cerrar este respaldo local. El push sigue requiriendo aprobación expresa del propietario. Repositorio existente `/workspace/Quesito`, identidad remota oficial `samuelbenju/AI_WORKFLOW_ATLAS`. Se conservan Fases 1–5, su historial y cambios locales; no se reconstruyó la aplicación ni se inició Fase 7.
+La consolidación conserva Fases 1–6 en los commits locales `62d201bc33989464f25ebf7ba80b3656b95ef358` y `dfde5d718691f29b81e88d4508538ffd65f23d77`, sin push. La solicitud posterior autorizó Fase 7: implementación local verificada; prueba externa de Resend bloqueada por configuración/remitente/destinatario autorizado pendientes. El push sigue requiriendo aprobación expresa del propietario. Se usa el checkout existente y origin oficial `samuelbenju/AI_WORKFLOW_ATLAS`; no se reconstruyó la aplicación ni se inició Fase 8.
 
 | Fase | Estado |
 | --- | --- |
@@ -14,7 +14,7 @@ La consolidación solicitada conserva Fases 1–6 en Git local; una solicitud po
 | 4. Administración y autenticación | Implementada y probada; activación de la cuenta humana pendiente de contraseña por CLI. |
 | 5. Blog y SEO | Implementada y verificada; seis artículos preparados, sin publicar y pendientes de revisión humana. |
 | 6. Patrocinios y CRM | Implementada y verificada; precios reales e inicialización humana pendientes del propietario. |
-| 7. Newsletter | No iniciada. |
+| 7. Newsletter | Implementada y verificada localmente; falta prueba real de Resend con configuración y destinatario autorizados. |
 | 8. Wompi Sandbox | No iniciada. |
 | 9. Infraestructura de agentes | No iniciada. |
 | 10. Agentes especializados | No iniciada. |
@@ -145,3 +145,24 @@ Fase 6 cumple los criterios de implementación y comprobación documentados: 28 
 Commit integrado de implementación: 62d201bc33989464f25ebf7ba80b3656b95ef358. Las dependencias cruzadas entre fases se guardan juntas, sin recrear estados intermedios inexistentes ni alterar fechas/autoría. Este registro se guarda en un commit documental posterior. Fetch del repositorio oficial confirmó main remoto en 411621ab95c9ad10725a5c5cb74688c6ffc9e6ef, igual al punto de partida; no había commits remotos nuevos. El avance será fast-forward, pendiente de nueva comprobación y aprobación antes de push.
 
 Este respaldo Git conserva código, configuración pública, esquema, migraciones, lockfile, tests y guías. Las variables privadas, archivos generados y datos PostgreSQL no se incluyen en Git y se mantienen locales. La cuenta humana, precios reales, revisión editorial y snapshot cloud siguen con sus pendientes anteriores. La Fase 7 fue autorizada en una nueva solicitud; esta consolidación no implementa todavía newsletter ni envía correos.
+
+
+## Ejecución 7/12 — newsletter y suscriptores
+
+- Formularios funcionales en home, blog, artículos publicados y `/newsletter`: validación estricta, consentimiento versionado/fecha/origen, firma/honeypot/límites persistentes y deduplicación concurrente sin revelar existencia o estado de una dirección.
+- Doble opt-in real con token aleatorio/digest/24 h. Confirmación y baja por enlace seguro en fragmento, retirado del historial, con acción POST explícita; GET no cambia estado. Baja idempotente, supresión de pendientes y reinscripción con generación nueva conservando auditoría de consentimiento. No se aprueban direcciones manualmente.
+- `/admin/newsletter` solo OWNER/ADMIN: búsqueda/estados/paginación, datos privados, borradores editables, propuestas desde artículos publicados/revisados, asociación comercial, preparación de audiencia confirmada e historial. Origin/CSRF y autorización por operación/servicio; anónimos, EDITOR y VIEWER no acceden a contactos o campañas.
+- Preparar y enviar son acciones separadas: audiencia inmutable de hasta 1000, lotes manuales de hasta 10 con confirmación exacta, comprobación fresca de consentimiento/fuentes/patrocinio y copia/cancelación explícitas. No se activaron agentes, cron, envíos o publicaciones automáticas. El futuro agente editor tiene entrada para proponer DRAFT desde contenido aprobado, sin herramientas de envío automático.
+- EmailService desacoplado con Resend mediante fetch nativo y plantillas HTML/texto escapadas, timeout/idempotencia. Payload AES-GCM en PostgreSQL, barrera UNKNOWN duradera antes de I/O y sin reintento automático de incertidumbre/rechazo. Historial distingue BLOCKED/CAPTURED/ACCEPTED/FAILED/UNKNOWN/CANCELLED; ACCEPTED requiere respuesta con ID real y no significa entregado o leído. CAPTURED nunca produce SENT.
+- Patrocinio Newsletter reutiliza aprobación, contrato/periodo, pago PRODUCTION con transacción/evento verificados y versión de campaña. Creatividad identificada SPONSORED; se bloquea si cambian las condiciones. No se crearon órdenes, ventas, anunciantes o campañas reales para llenar espacios.
+- Migración 11 aditiva aplicada: generación/revisión y modelos NewsletterConsent/NewsletterDelivery/NewsletterRateLimit; total **28 modelos y once migraciones**. Historial actual sin pendientes/editadas/fallidas; restricciones/FK previas conservadas. Lockfile/dependencias sin cambios; no se reinstaló.
+- Aprobados sobre el código final: esquema/generación Prisma, lint sin warnings, TypeScript, **30 unitarias**, **44 PostgreSQL reales**, build y **80/80 E2E** (escritorio/móvil, cero fallidas/omitidas en la tanda final). Alta → DB → confirmación explícita → panel/borrador/edición → preparación → lote autorizado CAPTURED → baja/persistencia. Casos de duplicados, consentimiento inválido, expiración, permisos/CSRF/origen, generación, ausencia de proveedor, propuestas desde aprobados, patrocinio condicionado, axe y 320 px. Wrappers solo usan/eliminan sus DB temporales; no modifican desarrollo. Capturas desktop/móvil de newsletter inspeccionadas.
+- Primeras pruebas detectaron retorno void de advisory lock y una fixture editorial sin fuente requerida: se corrigieron sin relajar restricciones. Primer E2E 75/80: se corrigió la tabla móvil para acceso por teclado, origen del servidor aislado y una aserción de formulario insertada accidentalmente en preview privado. Tanda final 80/80, sin ocultar fallos con reintentos.
+- Configuración local: NEWSLETTER_SECRET privado 0600 preparado sin imprimirlo; modo por defecto disabled. **No hay RESEND_API_KEY ni RESEND_FROM**: altas reales quedarían PENDING/BLOCKED con mensaje explícito, sin correo ficticio. No se envió ningún correo externo. PostgreSQL de desarrollo conserva cero suscriptores/campañas/entregas y cero administradores humanos inicializados; contraseña propia continúa pendiente por CLI.
+- `start_skill` actualizado en borrador cloud; añadidos requisitos de RESEND_API_KEY (destino exclusivo `api.resend.com`) y variables de modo/origen/remitente. Guardado confirmado, `requires_publish: true`; install_script y miembros/red preexistentes preservados. Revisar/guardar ajustes y publicar el entorno para activarlo. No se probó restauración en tarea nueva ni se presume que Git local esté en GitHub.
+
+**Bloqueo externo de Fase 7:** configurar API key y dominio/remitente verificados, origen HTTPS de destino y un destinatario autorizado para verificar Resend real. No se declara verificado ese envío ni completada la aceptación externa. Publicar campañas requiere autorización humana independiente. Guía de operación/recuperación en `docs/NEWSLETTER.md`. Fase 8 no iniciada.
+
+Revisión de archivos legítimos sin patrones de credenciales reales ni identidad privada del operador detectados; `.env.local`, generados/reportes/dependencias excluidos. Se conserva íntegro el respaldo Git de Fases 1–6; la entrega incluye un segundo respaldo Git con Fase 7. GitHub continúa pendiente de aprobación de push, sin force push ni cambios a otros repositorios.
+
+Cierre Git: Fase 7 se conserva en un commit propio `feat: implement consent-based newsletter and authorized delivery` sobre main, posterior a los dos de consolidación. Fetch oficial comprobado: origin/main sigue `411621ab95c9ad10725a5c5cb74688c6ffc9e6ef`, ancestro del historial local. La respuesta de entrega registra el hash concreto y resultado de preparación de push; ningún push se autoriza por estas comprobaciones.

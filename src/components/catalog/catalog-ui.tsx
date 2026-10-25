@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, BookOpen, Layers3, Search, Route } from "lucide-react";
+import { ArrowRight, ArrowUpRight,  Layers3, Search, Route } from "lucide-react";
 import type { PublicTool, PublicWorkflow, Facets } from "@/server/data/public-catalog";
 import { catalogHref, type CatalogQuery } from "@/lib/catalog-query";
 import { difficultyLabels } from "@/lib/catalog-content";
@@ -35,6 +35,4 @@ export function DirectoryHeading({ kind }: { kind: "tools" | "use-cases" }) {
   return <div className="directory-heading"><p className="eyebrow"><span className="status-dot" /> {kind === "tools" ? "THE TOOL ATLAS" : "FROM IDEA TO ACTION"}</p><h1>{kind === "tools" ? <>Find your next <span className="gradient-text">unfair advantage.</span></> : <>Good ideas deserve <span className="gradient-text">a practical workflow.</span></>}</h1><p>{kind === "tools" ? "Explore AI tools by what they help you do. Find a starting point, understand its purpose, and make it your own." : "Start with a problem. Discover the tools, steps, and human judgment needed to work through it."}</p></div>;
 }
 
-export function NewsletterBlock() {
-  return <section className="newsletter-section container" id="newsletter" aria-labelledby="newsletter-title"><div><span className="newsletter-icon"><BookOpen size={24} aria-hidden="true" /></span><p className="eyebrow muted">A LITTLE SIGNAL IN YOUR INBOX</p><h2 id="newsletter-title">Better ideas. Less noise.</h2><p>A practical briefing on tools worth exploring and workflows worth understanding.</p></div><div className="newsletter-status"><span className="status-pill">NEWSLETTER · COMING SOON</span><p>We’re preparing the first edition.<br />Subscriptions aren’t open yet.</p></div></section>;
-}
+export {NewsletterSection as NewsletterBlock} from "@/components/newsletter/section";

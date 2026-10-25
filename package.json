@@ -30,6 +30,7 @@
     "db:restore-check": "node scripts/local-db.mjs restore-check",
     "test:db": "node scripts/test-db.mjs",
     "db:seed:editorial": "node --conditions=react-server --import tsx prisma/seed-editorial.ts",
+    "newsletter:secret": "node scripts/newsletter-secret.mjs",
     "commercial:secret": "node scripts/commercial-secret.mjs",
     "db:seed:commercial": "node --conditions=react-server --import tsx prisma/seed-commercial.ts"
   },

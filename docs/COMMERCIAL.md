@@ -82,3 +82,7 @@ No repetir ese procedimiento a ciegas en otra migración: confirmar estado real 
 `npm run check`, `npm run test:db`, `npm run build` y `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e`. Bases temporales propias, contraseñas/cuentas `.invalid` y estados financieros de fixture explícitos; no se publican anuncios o ventas ficticias en desarrollo. El circuito requerido se prueba con formulario real, lectura CRM, cambio de estado y relectura PostgreSQL.
 
 La cuenta humana sigue requiriendo `npm run admin:init` y contraseña ingresada sin eco. Precios/condiciones reales quedan en manos del propietario. No se inició Fase 7, no se envió comunicación externa, no se desplegó ni hizo push automáticamente. Indexación de preestreno sigue bloqueada.
+
+## Extensión posterior de Fase 7
+
+La newsletter ya dispone de borradores, doble opt-in y entregas manuales. El bloqueo de formato descrito para Fase 6 queda sustituido por la integración de NEWSLETTER.md: se permite aprobar una campaña de ese tipo solo con las mismas condiciones comerciales, y su entrega se valida nuevamente al preparar/enviar el boletín. No se activa ninguna campaña automáticamente y los espacios web siguen excluyendo ese formato. Pagos externos y ventas reales continúan sin configurar; no se inició Fase 8.

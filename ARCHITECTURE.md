@@ -2,7 +2,7 @@
 
 ## Estado y límites
 
-Fases 1–6: portada, directorios públicos y administración conectados a PostgreSQL/Prisma, 25 modelos, diez migraciones, conexión de servidor, repositorios y seeds. Existen búsqueda/filtros/paginación y fichas de herramientas/casos con relaciones. Blog y CMS con bloques/fuentes/revisión/publicación, SEO dinámico y control de indexación de preestreno. Login real con sesiones opacas y CRUD administrativo; inicialización de la cuenta humana pendiente de contraseña mediante CLI seguro. No hay captación/envíos newsletter, pagos ni agentes operativos. Patrocinios y CRM operativos para solicitudes, propuestas privadas y campañas condicionadas; newsletter/pagos externos/agentes siguen pendientes.
+Fases 1–7 (integración externa de correo pendiente): portada, directorios públicos y administración conectados a PostgreSQL/Prisma, 28 modelos, once migraciones, conexión de servidor, repositorios y seeds. Existen búsqueda/filtros/paginación y fichas de herramientas/casos con relaciones. Blog y CMS con bloques/fuentes/revisión/publicación, SEO dinámico y control de indexación de preestreno. Login real con sesiones opacas y CRUD administrativo; inicialización de la cuenta humana pendiente de contraseña mediante CLI seguro. Hay captación, confirmación/baja, borradores y envío manual desacoplado; la entrega real de Resend está pendiente de configuración/prueba autorizada. No hay pagos ni agentes operativos. Patrocinios y CRM operativos para solicitudes, propuestas privadas y campañas condicionadas; entrega externa de correo/pagos/agentes siguen pendientes.
 
 ## Componentes actuales
 
@@ -25,7 +25,7 @@ Navegador
       └─ server/data → server/db → Prisma + adapter-pg → PostgreSQL 17
 ```
 
-La UI pública consulta contenido y admite solicitudes comerciales mediante un POST protegido y acotado. Búsqueda y filtros mediante GET; formulario newsletter no habilitado porque no existe aún su flujo. El diagrama sigue siendo una ilustración, no una ejecución de agentes. No hay métricas comerciales ficticias; los ejemplos se identifican como tales.
+La UI pública consulta contenido y admite solicitudes comerciales mediante un POST protegido y acotado. Búsqueda y filtros mediante GET; newsletter con consentimiento/doble opt-in, baja y protección propia. El diagrama sigue siendo una ilustración, no una ejecución de agentes. No hay métricas comerciales ficticias; los ejemplos se identifican como tales.
 
 ## Decisiones registradas
 
@@ -97,7 +97,7 @@ Controles actuales: escape de React, validación Zod de `SITE_URL`, headers nosn
 
 ### Correo
 
-Adaptador de Resend o equivalente para confirmación/baja y envíos aprobados; consentimiento persistido, tokens de acción con expiración, lista de supresión e idempotencia. Un mensaje enviado debe corresponder a un evento real del proveedor. Dominio remitente verificado y credenciales se pedirán únicamente cuando se integre.
+Adaptador de Resend o equivalente para confirmación/baja y envíos aprobados; consentimiento persistido, tokens de acción con expiración, lista de supresión e idempotencia. ACCEPTED exige ID de respuesta real del proveedor y no significa entregado/leído. Dominio remitente verificado y credenciales están pendientes; actualmente no se envían correos externos. Ver decisiones de Fase 7 y docs/NEWSLETTER.md.
 
 ### IA y tareas
 
@@ -148,3 +148,14 @@ Operación, contratos, fuentes y límites en `docs/EDITORIAL.md`. RSS, redirecci
 - ADR-036: entrega pública revisa condiciones por petición, no solo una bandera ACTIVE. Bloques separados y etiquetados Sponsored, rel sponsored en enlaces comerciales; ni Sandbox ni demo entregan anuncios. Precios, disponibilidad, citas y contactos nunca se presentan como métricas comerciales inventadas.
 
 Guía operativa, controles y límites actuales en `docs/COMMERCIAL.md`. No se inició Fase 7, no se enviaron propuestas y no se activaron campañas reales.
+
+
+### Decisiones de Fase 7
+
+- ADR-037: ampliar modelos Newsletter existentes con generación de consentimiento y audiencia/modo; NewsletterConsent, NewsletterDelivery y NewsletterRateLimit son entidades propias para trazabilidad, outbox cifrado y límites compartidos. Migración 11 aditiva, 28 modelos, datos anteriores conservados.
+- ADR-038: doble opt-in con token aleatorio/digest/24h; bajas HMAC por generación, links en fragmento y POST explícito (GET no muta). Respuestas públicas iguales para direcciones nuevas/conocidas; contactos privados solo OWNER/ADMIN y cada mutación conserva Origin/CSRF/rol fresco.
+- ADR-039: EmailService desacoplado y adaptador Resend con fetch nativo, timeout e idempotencia, sin nuevas dependencias. Payload AES-GCM con NEWSLETTER_SECRET privado local. Default disabled registra BLOCKED; capture solo en DB de tests aisladas, nunca fake SENT. Sin claves/configuración no se afirman envíos reales.
+- ADR-040: preparación inmutable de audiencia confirmada (máximo 1000), aprobación humana y cada lote de hasta 10 autorizado explícitamente. Barrera UNKNOWN duradera antes de I/O impide replay tras caídas; no reintentos automáticos de resultados inciertos/rechazados. Cancelación/supresión y guardias de consentimiento, fuentes y patrocinio en servidor. No cron ni campaña automática.
+- ADR-041: patrocinio Newsletter reutiliza validación comercial de pago PRODUCTION, aprobación/periodo/contrato y versión. Se etiqueta en plantilla y no se entrega en espacios web. Propuesta editorial solo desde artículos publicados/revisados crea DRAFT; prepara futura entrada de agente sin activarlo. No Fase 8.
+
+Guía de configuración, privacidad, envío, estados, límites, recuperación y pruebas en `docs/NEWSLETTER.md`. Las decisiones/secciones previas conservan su contexto histórico de Fase 6; la restricción de formato Newsletter queda sustituida por las guardias de Fase 7. API key, dominio/remitente y destinatario autorizado siguen pendientes para verificar entrega externa.

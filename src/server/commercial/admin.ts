@@ -81,12 +81,12 @@ export async function saveCampaign(userId:string,input:unknown,id?:string,db:Pri
 export async function campaignConditions(id:string,db:Db) {
  const row=await db.sponsorshipCampaign.findUnique({where:{id},include:{package:true,order:{include:{transactions:{where:{status:"APPROVED",environment:"PRODUCTION",confirmedAt:{lte:new Date()},events:{some:{verifiedAt:{lte:new Date()},processedAt:{lte:new Date()}}}},select:{id:true}}}},tool:{select:{status:true,isDemo:true,publishedAt:true}},article:{select:{status:true,isDemo:true,publishedAt:true,reviewedAt:true}}}});
  if(!row)throw new AccessError(404,"La campaña no existe.");
- if(!row.package.active||row.package.kind==="NEWSLETTER_SPONSORSHIP")throw new AccessError(422,"El paquete no está habilitado para entregar publicidad. Newsletter sigue pendiente de su fase.");
+ if(!row.package.active)throw new AccessError(422,"El paquete no está habilitado para entregar publicidad.");
  if(!row.order||row.order.status!=="PAID"||row.order.environment!=="PRODUCTION"||!row.order.paidAt||row.order.paidAt>new Date()||!row.order.transactions.length)throw new AccessError(422,"Se requiere una orden de producción pagada con transacción y evento verificados. No se aceptan Sandbox ni confirmaciones manuales desde este panel.");
  if(!row.startsAt||!row.endsAt||row.endsAt<=row.startsAt||row.endsAt<=new Date()||!row.headline||!row.message||!row.destinationUrl||!row.contractDurationDays||!row.contractAmountMinor||row.contractAmountMinor!==row.order.amountMinor||row.contractCurrency!==row.order.currency)throw new AccessError(422,"Completa creatividad, fechas y condiciones del contrato.");
  if(row.endsAt.getTime()-row.startsAt.getTime()>row.contractDurationDays*86400000)throw new AccessError(422,"El periodo excede la duración contratada.");
  const content=row.package.kind==="FEATURED_TOOL_LISTING"?row.tool:row.package.kind==="SPONSORED_ARTICLE"?row.article:null;
- if(row.package.kind!=="HOMEPAGE_FEATURED_SPONSOR"&&(!content||content.status!=="PUBLISHED"||content.isDemo||!content.publishedAt||content.publishedAt>new Date()||("reviewedAt" in content&&!content.reviewedAt)))throw new AccessError(422,"El contenido vinculado debe estar publicado y revisado.");
+ if(!["HOMEPAGE_FEATURED_SPONSOR","NEWSLETTER_SPONSORSHIP"].includes(row.package.kind)&&(!content||content.status!=="PUBLISHED"||content.isDemo||!content.publishedAt||content.publishedAt>new Date()||("reviewedAt" in content&&!content.reviewedAt)))throw new AccessError(422,"El contenido vinculado debe estar publicado y revisado.");
  return row;
 }
 export async function transitionCampaign(userId:string,id:string,input:unknown,db:PrismaClient=getDatabase()) {
