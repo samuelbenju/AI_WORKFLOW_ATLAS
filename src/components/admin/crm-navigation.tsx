@@ -1,0 +1,2 @@
+import Link from "next/link";
+export function CrmNavigation(){return <nav className="crm-nav" aria-label="CRM comercial"><Link className="admin-secondary" href="/admin/sponsors">Solicitudes</Link><Link className="admin-secondary" href="/admin/sponsors/companies">Empresas</Link><Link className="admin-secondary" href="/admin/sponsors/packages">Paquetes</Link><Link className="admin-secondary" href="/admin/sponsors/campaigns">Campañas</Link></nav>;}

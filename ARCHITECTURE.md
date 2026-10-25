@@ -2,21 +2,30 @@
 
 ## Estado y límites
 
-Fase 1: aplicación web ejecutable, shell público, configuración validada, componentes, comprobaciones y CI. No existen aún base de datos, login, directorios, CMS, newsletter, pagos ni agentes operativos. Esas capacidades se describen como contratos futuros, no implementaciones disponibles.
+Fases 1–6: portada, directorios públicos y administración conectados a PostgreSQL/Prisma, 25 modelos, diez migraciones, conexión de servidor, repositorios y seeds. Existen búsqueda/filtros/paginación y fichas de herramientas/casos con relaciones. Blog y CMS con bloques/fuentes/revisión/publicación, SEO dinámico y control de indexación de preestreno. Login real con sesiones opacas y CRUD administrativo; inicialización de la cuenta humana pendiente de contraseña mediante CLI seguro. No hay captación/envíos newsletter, pagos ni agentes operativos. Patrocinios y CRM operativos para solicitudes, propuestas privadas y campañas condicionadas; newsletter/pagos externos/agentes siguen pendientes.
 
 ## Componentes actuales
 
 ```text
 Navegador
   └─ Next.js App Router
-      ├─ /                 página pública (Server Component)
+      ├─ /                 portada dinámica con contenido PostgreSQL
+      ├─ /tools[/slug]     directorio y ficha de herramientas
+      ├─ /use-cases[/slug] directorio y ficha de casos
+      ├─ /blog[/slug]      artículos publicados y revisados
+      ├─ /sponsor         paquetes y solicitudes con consentimiento
+      ├─ /admin/sponsors  CRM privado, empresas/paquetes/propuestas/campañas
+      ├─ /robots.txt, /sitemap.xml  SEO dinámico según política explícita
       ├─ rutas inexistentes → not-found.tsx / HTTP 404
+      ├─ /login, /admin   sesiones, roles, dashboard y CRUD privados
+      ├─ /api/admin/*     autorización/Origin/CSRF y servicios transaccionales
       ├─ /api/health       liveness HTTP 200, sin dependencias externas
       ├─ components/      layout, marca, diagrama ilustrativo
-      └─ lib/config/      Zod + configuración de origen en servidor
+      ├─ lib/config/      Zod + configuración de origen en servidor
+      └─ server/data → server/db → Prisma + adapter-pg → PostgreSQL 17
 ```
 
-La UI no contiene lógica comercial. Los enlaces apuntan a secciones implementadas; no se ofrece búsqueda ni suscripción inactiva. El diagrama es una ilustración, no una ejecución de agentes. No hay datos comerciales o métricas ficticias.
+La UI pública consulta contenido y admite solicitudes comerciales mediante un POST protegido y acotado. Búsqueda y filtros mediante GET; formulario newsletter no habilitado porque no existe aún su flujo. El diagrama sigue siendo una ilustración, no una ejecución de agentes. No hay métricas comerciales ficticias; los ejemplos se identifican como tales.
 
 ## Decisiones registradas
 
@@ -25,10 +34,10 @@ La UI no contiene lógica comercial. Los enlaces apuntan a secciones implementad
 | ADR-001: monolito modular Next.js | Un solo repositorio, despliegue y runtime inicial; Route Handlers y Server Actions según cada operación futura. Evitar microservicios sin necesidad. |
 | ADR-002: Node 24 / npm 11, dependencias exactas | Runtime disponible y compatible con Next.js 16.4.3 + React 19.3.1. `.nvmrc` fija 24.19.0; lockfile reproducible; TypeScript 5.9.3 estable satisface el contrato de Next sin incorporar TS 7 innecesariamente. |
 | ADR-003: CSS de diseño + Tailwind 4 | Tailwind integrado por PostCSS; tokens en `@theme`, clases semánticas para composición del shell y media queries. Sin librería de componentes adicional. Lucide para iconos locales. |
-| ADR-004: Server Components por defecto | No JS de cliente propio para una portada estática. Menú móvil mediante `details`/`summary`, sin SDK externo ni llamadas a APIs. |
+| ADR-004: Server Components por defecto | Server Components para datos; wrapper cliente mínimo selecciona el shell público/administrativo según ruta. Formularios privados usan JS cliente sin DB o permisos locales. Menú móvil mediante `details`/`summary`, sin SDK externo ni llamadas a APIs. |
 | ADR-005: aplazar infraestructura por fases | PostgreSQL/Prisma en Fase 2; auth en 4; email en 7; Wompi en 8; IA/worker en 9–10. No instalar servicios, SDK ni pedir credenciales antes de utilizarlos. No cambia la arquitectura exigida. |
 | ADR-006: internacionalización incremental | `lang=en`, configuración `publicLocale=en` y `adminLocale=es`. Inglés público y español administrativo. Añadir routing/diccionarios al implementar localización; no afirmar que exista traducción actualmente. |
-| ADR-007: sin indexación durante desarrollo | Meta robots y `X-Robots-Tag: noindex, nofollow` en todas las rutas. SEO completo en Fase 5; retirar bloqueo solo tras revisión de lanzamiento. `SITE_URL` validado en servidor; no dominio inventado. |
+| ADR-007: indexación controlada | Fase 5 mantiene noindex por defecto, robots y sitemap dinámicos. Solo se habilita con flag explícito, HTTPS/origen no loopback y demo desactivada; privados siempre noindex. Retirar bloqueo requiere revisión de lanzamiento; SITE_URL es la base canónica, sin dominio inventado. |
 | ADR-008: CI + navegador real | ESLint, tipos, tests unitarios, build y Playwright en Chromium desktop/móvil; dos workers, sin reintentos que oculten fallos. Soporte explícito para Chromium del entorno. |
 | ADR-009: fuentes del sistema | No descargar fuentes de Google en build ni añadir llamadas externas al cargar la portada. Marca e icono originales en código/SVG local. |
 | ADR-010: compatibilidad del linter | ESLint 9.39.5 está marcado como fuera de soporte por npm; se conserva temporalmente porque los plugins React/import/jsx-a11y de la configuración oficial Next declaran compatibilidad hasta 9. No forzar ESLint 10 ni ignorar peer dependencies. Sin vulnerabilidades reportadas en el audit de esta ejecución; revisar actualización conjunta antes de lanzamiento. |
@@ -39,16 +48,46 @@ La UI no contiene lógica comercial. Los enlaces apuntan a secciones implementad
 - `src/components/`: presentación reusable. No consultas Prisma ni permisos en componentes de cliente.
 - `src/lib/config/`: validación de configuración. `site.ts` marcado `server-only`; no exponer secretos con `NEXT_PUBLIC_`.
 - En futuras fases, `src/server/<dominio>/` contendrá servicios, validación, repositorios y adaptadores usados por Route Handlers/Server Actions. Crear módulos solo cuando tengan código real.
-- `prisma/` se añadirá en Fase 2: schema, migraciones revisadas y seeds de desarrollo. No usar `db push` como sustituto de migraciones de producción.
+- `prisma/`: schema, diez migraciones y seeds de desarrollo/editorial/comercial; `src/generated/prisma` se genera y no se versiona. No usar `db push` como sustituto de migraciones.
 - `tests/`: contratos de configuración y comportamiento real HTTP/navegador; no depender de servicios ficticios.
 
 ## Persistencia y seguridad futuras
 
-PostgreSQL será fuente de verdad. Modelos por fase según `PRODUCT_SPEC.md`; índices para slugs/estados/fechas, restricciones únicas para referencias e idempotencia. Transacciones en cambios comerciales relacionados. Importes enteros en unidades mínimas y moneda explícita, nunca floats para dinero.
+PostgreSQL es la fuente de verdad de la capa de datos. En esta solicitud el propietario autorizó explícitamente modelar todos los dominios comerciales listados, ampliando la selección inicialmente prevista para Fase 2. Modelos: User con Role enum; Category/Tag/Tool/UseCase/Article; Sponsor/SponsorshipPackage/CommercialLead/SponsorshipCampaign; PaymentOrder/PaymentTransaction/PaymentEvent; NewsletterSubscriber/NewsletterCampaign; Agent/AgentTask/AgentExecution/ContentDraft; SiteSetting/AuditLog. Fase 4 añade Session y LoginRateLimit, hash de contraseña nullable en User y endpoints administrativos; no se añade Account/OAuth. Los endpoints comerciales se incorporan únicamente en Fase 6. Relaciones de contenido usan tablas de unión generadas; financieras usan FK restrictivas y claves compuestas para coherencia. Detalle de constraints y límites en `docs/DATABASE.md`.
 
-Auth.js es la opción prevista en Fase 4, pendiente de proveedor confirmado; sesión HttpOnly/Secure/SameSite, roles y autorización por operación servidor. No crear `/admin` sin protección. Contenido editorial estructurado y saneado; nunca renderizar HTML externo sin validación. Formularios necesitarán límites y protección CSRF/origen según mecanismo.
+Repositorios de servidor internos: borradores y búsqueda de herramientas, casos y artículos publicados, lead + auditoría atómicos. El singleton se inicializa al primer uso y limita cada pool a cinco conexiones, con timeout; el shell estático sigue compilando sin DB. Validación Zod, consultas parametrizadas, exclusión de demos/borradores y selección de autor sin email. Fase 4 expone únicamente los servicios administrativos con autorización fresca por operación, validación estricta, límites y CSRF. Fase 6 expone intake público validado y CRM con permiso commercial (solo OWNER/ADMIN), manteniendo autorización fresca/Origin/CSRF en operaciones privadas.
 
-Controles actuales: escape de React, validación Zod de `SITE_URL`, headers nosniff/frame denial/referrer/permissions, ausencia de captura de datos y de secretos. **No constituyen auditoría completa.** CSP con nonce requiere diseño compatible con Next al introducir scripts/clientes; HSTS depende de HTTPS de producción. No aplicar políticas que rompan hidratación sin verificarlas.
+Importes `BigInt` en unidades mínimas y moneda explícita; micros USD separados para consumo IA. Valores JSON futuros requieren serialización BigInt a texto. TypeScript pasa a ES2020 porque usa BigInt; se conserva strict. Los estados y restricciones de SQL no constituyen verificación real de pagos ni ejecución de agentes.
+
+### Decisiones de Fase 2
+
+- ADR-011: PostgreSQL 17 local con Docker funcional, imagen oficial fijada por digest y puerto exclusivo loopback 55432; volumen persistente. Credenciales aleatorias solo en `.env.local` ignorado; no servicios de pago. Conexión externa disponible por `DATABASE_URL` sin sustituir PostgreSQL ni forzar Docker.
+- ADR-012: Prisma/cliente/adaptador 7.10.1 estable, en lugar del CLI `latest` que apuntaba a 8.0.0-rc.27. Native CLI bloqueado por 403 en binaries.prisma.sh. Se utilizan artefactos oficiales npm/WASM del mismo commit de motor mediante wrapper aislado con versiones exactas, sin parchear paquetes ni desactivar integridad. Las APIs internas y avisos WASM de Node exigen prueba de migraciones al actualizar. Instalación reproducida con `npm ci --ignore-scripts`; generación explícita. CommonJS evita un problema de imports ESM sin extensión de los módulos oficiales de generación. Ver `docs/DATABASE.md` para el alcance del bloqueo nativo y de introspección.
+- ADR-013: migraciones aplicadas con `SchemaEngine.applyMigrations`, manteniendo `_prisma_migrations` y checksums. CHECK SQL complementan el schema Prisma. No modificar migraciones aplicadas; se agregaron migraciones posteriores al reforzar consistencia comercial.
+- ADR-014: pruebas en base aleatoria creada desde una conexión `_test`, con privilegio CREATEDB, eliminando solo esa base. Seed transaccional, repetible y no destructivo, exclusivamente desarrollo; fixtures en borrador, sin estadísticas, transacciones o agentes reales.
+- ADR-015: backup privado de desarrollo con pg_dump y restauración en otra DB; comparación de todas las tablas sin sobrescribir la original. Procedimientos administrados y RPO/RTO quedan para infraestructura de producción.
+
+### Decisiones de Fase 3
+
+- ADR-016: consultas públicas aisladas en `server/data/public-catalog.ts`, DTOs sin datos administrativos, rutas force-dynamic y cache React solo por petición para detalles/metadata. No arrays como fallback ni cache persistente que esconda errores de PostgreSQL. Estados de error genéricos con reintento.
+- ADR-017: modo público por defecto exige PUBLISHED/no-demo/fecha no futura en cada entidad y relación. El flag de proceso explícito `CATALOG_DEMO_MODE=true` permite solo fixtures DRAFT/isDemo y muestra avisos persistentes. No se habilita por parámetros del navegador. Se conserva el contenido previo; el nuevo seed no publica ni sobreescribe ediciones.
+- ADR-018: filtros GET validados con Zod, páginas fijas de seis registros, orden estable, facets desde DB y transacción RepeatableRead para resultados/totales. Pasos y referencias JSON limitados y escapados, enlaces HTTP(S) seguros; sin render HTML externo.
+- ADR-019: migración aditiva añade `featured` editorial y `solution`; no se inventan métricas para llamar populares a los casos ni se interpreta featured como patrocinio. Newsletter/patrocinios se presentan como futuras capacidades, sin inputs o checkout ficticios. El blog completo sigue fuera de fase.
+- ADR-020: E2E usa DB temporal propia con los dos seeds; comparte helper de aislamiento con tests de persistencia, conserva filtros/links reales y provoca fallos/lentitud en entornos de test. Regresión con Chromium desktop/móvil, 320 px, teclado, reduced motion y axe. Build no captura el catálogo de desarrollo.
+
+Detalles de contratos, rutas, modo demo y límites en `docs/PUBLIC_CATALOG.md`.
+
+### Decisiones de Fase 4
+
+- ADR-021: alternativa justificada a Auth.js para identidad local sin OAuth: scrypt nativo Node y sesiones opacas aleatorias, con digest en PostgreSQL, revocación, expiración de ocho horas y estado/rol fresco por petición. Evita proveedor externo sin configurar; no es acceso simulado. Detalles y límites en `docs/ADMIN.md`.
+- ADR-022: bootstrap de propietario y recuperación exclusivamente por CLI privilegiado interactivo sin eco. Sin registro web, contraseña fija o archivo de contraseña. Correo humano solo en configuración privada; su cuenta requiere que el propietario elija su contraseña. Seeds normales mantienen usuarios inactivos y sin credenciales.
+- ADR-023: Route Handlers de administración exigen sesión, permiso, Origin exacto y CSRF para mutaciones; JSON acotado, Zod estricto, respuestas no-store y errores genéricos. Login tiene rate limit PostgreSQL por cuenta/global y no admite callbacks externos. HTTPS/cookie __Host en despliegue; HTTP solo loopback.
+- ADR-024: CRUD de cuatro entidades con relaciones reales, transacciones Serializable junto con auditoría, confirmación por nombre actual y rechazo de borrado con relaciones entrantes. EDITOR solo borrador/revisión; OWNER/ADMIN publican/eliminan/configuran. VIEWER no entra al panel. Dashboard consulta recuentos reales y separa ejemplos; ajustes editoriales se consumen en los formularios. Los módulos futuros informan que no están implementados.
+- ADR-025: pruebas de autenticación/CRUD en bases temporales, usuarios .invalid y contraseñas aleatorias en memoria. No se inicializa la cuenta humana con fixtures para declarar completas las pruebas. Shell público conservado mediante composición; shell administrativo independiente y español.
+
+Contenido editorial estructurado y escapado; no renderizar HTML externo sin validación.
+
+Controles actuales: escape de React, validación Zod de `SITE_URL`, headers nosniff/frame denial/referrer/permissions, sesiones/roles, validación de formularios y ausencia de secretos en respuestas. **No constituyen auditoría completa.** CSP con nonce requiere diseño compatible con Next al introducir scripts/clientes; HSTS depende de HTTPS de producción. No aplicar políticas que rompan hidratación sin verificarlas.
 
 ## Contratos de integraciones (pendientes)
 
@@ -78,7 +117,7 @@ Logs con IDs de correlación, actor, entidad, transición y fecha; sin secretos,
 
 No hay servicios facturables configurados. Desarrollo Fase 1 es local; disponibilidad de créditos/planes gratuitos no se presupone. Objetivo futuro US$0–100/mes no autoriza gasto. Hosting, DB, dominio, email, tokens IA, worker y comisiones necesitan evaluación y límites antes de alta.
 
-Vercel o Node compatible será el destino previsto, aún no desplegado. Fase 2 definirá backups, restauración local de prueba y configuración administrada; antes de producción habrá RPO/RTO acordados, prueba de restauración, monitorización y rollback. Un snapshot de cloud no sustituye backups de PostgreSQL. CI está escrito pero su ejecución remota depende de subir el repo; no se ha publicado ni hecho push.
+Vercel o Node compatible será el destino previsto, aún no desplegado. Backup y restauración local de desarrollo se ensayaron en Fase 2; bases administradas no se han contratado. Antes de producción habrá RPO/RTO acordados, backups externos, prueba de restauración, monitorización y rollback. Un snapshot de cloud no sustituye backups PostgreSQL ni garantiza conservar el volumen Docker. La Fase 1 está publicada en `samuelbenju/AI_WORKFLOW_ATLAS`; Fases 2–6 y la CI ampliada siguen locales, sin push automático. La ejecución remota de CI no se ha comprobado.
 
 ## Referencias oficiales consultadas
 
@@ -86,3 +125,26 @@ Vercel o Node compatible será el destino previsto, aún no desplegado. Fase 2 d
 - Plantillas oficiales Next.js para TypeScript, ESLint y Tailwind: https://github.com/vercel/next.js/tree/canary/packages/create-next-app/templates/app-tw/ts.
 - Registro oficial npm para versiones y peer dependencies de Next.js, React y herramientas; versiones instaladas definitivas en `package.json`/`package-lock.json`.
 - Para integraciones futuras consultar documentación oficial al implementar: https://www.prisma.io/docs, https://authjs.dev, https://docs.wompi.co, https://resend.com/docs, https://platform.openai.com/docs. Estas integraciones **no están validadas** en Fase 1.
+
+
+### Decisiones de Fase 5
+
+- ADR-026: ampliar Article/ContentDraft existentes, sin duplicar CMS/taxonomías. Fuentes, revisión, imagen/noindex y FK de snapshots en séptima migración aditiva; registros heredados preservados, con snapshot íntegro antes de convertirlos. Cada guardado genera revisión histórica y auditoría en la misma transacción.
+- ADR-027: edición mediante bloques JSON tipados (párrafos, h2/h3, listas, código, notas y enlaces por UUID); escape de React y JSON-LD seguro. Sin HTML ejecutable, iframes o fetch de URLs del editor. Enlaces internos se validan y resuelven contra destinos públicos vigentes.
+- ADR-028: borrador/en revisión por editor, aprobación explícita y publicación por OWNER/ADMIN. Fuentes comprobadas, metadatos, categoría y enlaces públicos son requisitos. Guardar invalida revisión y retira la publicación anterior; expectedUpdatedAt evita sobrescribir otra edición, timestamps de servicio monótonos. Preview exclusivamente privado.
+- ADR-029: blog siempre PUBLISHED/no-demo/no-futuro/revisado/formato 1, incluso si el catálogo está en demo. Listados SQL, relacionados por categoría y DTO sin correo/credenciales. No convertir silenciosamente previews viejos o seeds en publicaciones.
+- ADR-030: canonical/OG/Twitter, BlogPosting/BreadcrumbList/CollectionPage y robots/sitemap dinámicos. SEO_INDEXING_ENABLED exige origen HTTPS explícito y no demo; por defecto noindex. Proxy Next se limita a headers SEO, autorización permanece en páginas/API/servicios. Filtrados noindex, noindex individual excluido de sitemap y privados nunca indexables.
+- ADR-031: seis borradores originales útiles, fuentes oficiales consultadas con fecha/huella y revisión humana pendiente. Sin estadísticas de resultados o publicación masiva. Seis diagramas locales propios, next/image con dimensiones/sizes, AVIF/WebP y allowlist local; no optimizador para imágenes remotas proporcionadas por usuarios. No se afirma rendimiento CWV de producción.
+
+Operación, contratos, fuentes y límites en `docs/EDITORIAL.md`. RSS, redirecciones históricas, restauración de versiones y producción no se presentan como implementados. Este registro de Fase 5 se conserva; las adiciones comerciales autorizadas están abajo.
+
+
+### Decisiones de Fase 6
+
+- ADR-032: reutilizar Sponsor/SponsorshipPackage/CommercialLead/Campaign y ContentDraft. Nuevos CommercialNote para notas con autor/fecha y CommercialRateLimit para intake compartido; sin duplicar productos, CRM o propuestas. Enums históricos de leads conservados, nuevas escrituras en el pipeline de cinco estados solicitado. Diez migraciones totales, con recuperación oficial documentada de un intento pre-DDL fallido en la octava.
+- ADR-033: intake firmado por HMAC, origen exacto, JSON/Zod estricto, consentimiento versionado, nonce único, digest de contenido/versión del paquete, ventana de duplicados y rate limit persistente. Solo referencia/received en respuesta. Snapshot del precio/moneda/duración mostrado, rechazo si cambian términos; no Sponsor automático a partir de formularios no verificados.
+- ADR-034: conservar precios desconocidos como null/por cotizar y duración por acordar. Aceptar interés no implica habilitación del paquete, reserva, pago o promesa de audiencia. Estado/fechas/notas/propuestas son datos reales del operador; WON no altera finanzas ni publica nada. Propuestas solo DRAFT privadas sin envío.
+- ADR-035: campañas pueden nacer sin orden para no inventar registros financieros. Guardar invalida aprobación/activación; aprobar/activar exige permiso, confirmación, orden PAID/PRODUCTION y transacción/evento verificados, snapshot, fechas y contenido público. Bloqueo de solapamientos por espacio; newsletter bloqueado por fase. No se integra checkout/proveedor de pagos en esta entrega.
+- ADR-036: entrega pública revisa condiciones por petición, no solo una bandera ACTIVE. Bloques separados y etiquetados Sponsored, rel sponsored en enlaces comerciales; ni Sandbox ni demo entregan anuncios. Precios, disponibilidad, citas y contactos nunca se presentan como métricas comerciales inventadas.
+
+Guía operativa, controles y límites actuales en `docs/COMMERCIAL.md`. No se inició Fase 7, no se enviaron propuestas y no se activaron campañas reales.

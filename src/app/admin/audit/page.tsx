@@ -1,0 +1,5 @@
+import { auditActionLabel, auditEntityLabel } from "@/lib/admin-audit";
+import { requirePageActor } from "@/server/auth/request";
+import { auditEntries } from "@/server/admin/content";
+import { AdminHeading, EmptyState, formatDate } from "@/components/admin/presentation";
+export default async function AuditPage() { const { actor } = await requirePageActor("settings"); const rows = await auditEntries(actor.id); return <><AdminHeading title="Auditoría" description="Últimas 100 operaciones registradas. Horarios en UTC; no se muestran credenciales ni metadatos privados." /><section className="admin-panel">{rows.length ? <div className="admin-table-scroll"><table><thead><tr><th>Fecha (UTC)</th><th>Acción</th><th>Entidad</th><th>Identificador</th></tr></thead><tbody>{rows.map(row => <tr key={row.id}><td>{formatDate(row.createdAt)}</td><td>{auditActionLabel(row.action)}</td><td>{auditEntityLabel(row.entityType)}</td><td><code>{row.entityId}</code></td></tr>)}</tbody></table></div> : <EmptyState title="Sin operaciones registradas" />}</section></>; }

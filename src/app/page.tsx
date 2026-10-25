@@ -1,58 +1,29 @@
-import { ArrowDownRight, ArrowRight, ArrowUpRight, BookOpen, Check, Compass, Layers3, Lightbulb, ListChecks, Route, Sparkles } from "lucide-react";
+import { SponsoredPlacements } from "@/components/commercial/placements";
+import { site } from "@/lib/config/site";
+import { publicMetadata } from "@/lib/seo";
+import Link from "next/link";
+import { ArrowDownRight, ArrowRight, ArrowUpRight, Compass, GitBranch, ShieldCheck, Sparkles } from "lucide-react";
 import { WorkflowMap } from "@/components/home/workflow-map";
+import { SearchForm, ToolCard, WorkflowCard, EmptyState, NewsletterBlock } from "@/components/catalog/catalog-ui";
+import { homeCatalog } from "@/server/data/public-catalog";
 
-const directions = [
-  { number: "01", icon: Layers3, title: "Find the right tools", text: "Understand what a tool does, where it fits, and the trade-offs that matter.", label: "AI tools", className: "direction-indigo" },
-  { number: "02", icon: Route, title: "Connect ideas to action", text: "Start with a real problem. Follow a practical workflow, one clear step at a time.", label: "Practical use cases", className: "direction-cyan" },
-  { number: "03", icon: BookOpen, title: "Build your understanding", text: "Learn the reasoning behind a workflow, including its limitations and alternatives.", label: "Guides & tutorials", className: "direction-purple" },
-];
+export const dynamic = "force-dynamic";
+export function generateMetadata() { return publicMetadata(`${site.name} — Discover What AI Can Actually Do`, "Explore practical AI workflows, powerful tools, and real-world automation ideas.", "/"); }
 
-export default function Home() {
-  return (
-    <>
-      <section className="hero container" aria-labelledby="hero-title">
-        <div className="hero-copy">
-          <div className="eyebrow"><span className="status-dot" /> AN INDEPENDENT GUIDE TO APPLIED AI</div>
-          <h1 id="hero-title">Less AI noise.<br />More <span className="gradient-text">possibility.</span></h1>
-          <p className="hero-description">A clearer path from <em>“what if”</em> to <em>“here’s how.”</em> Discover the tools, workflows, and ideas that help you do meaningful work with AI.</p>
-          <div className="hero-actions"><a className="button button-primary" href="#explore">Explore the atlas <ArrowUpRight size={18} aria-hidden="true" /></a><a className="button button-text" href="#approach">A practical approach <ArrowRight size={17} aria-hidden="true" /></a></div>
-          <p className="hero-note"><Compass size={14} aria-hidden="true" /> Currently taking shape. Built for the curious.</p>
-        </div>
-        <WorkflowMap />
-        <div className="hero-bottom"><span className="mono">A BETTER WAY TO NAVIGATE WHAT’S NEXT</span><ArrowDownRight size={20} aria-hidden="true" /></div>
-      </section>
-
-      <section className="explore-section" id="explore" aria-labelledby="explore-title">
-        <div className="container">
-          <div className="section-heading"><div><p className="eyebrow muted">YOUR NEXT DIRECTION</p><h2 id="explore-title">Start with what you want to do.</h2></div><p>Tools are only the beginning.<br />The real value is in how you use them.</p></div>
-          <div className="direction-grid">
-            {directions.map(({ number, icon: Icon, title, text, label, className }) => (
-              <article className={`direction-card ${className}`} key={number}>
-                <div className="card-top"><span className="direction-icon"><Icon size={23} strokeWidth={1.6} aria-hidden="true" /></span><span className="mono card-number">/{number}</span></div>
-                <h3>{title}</h3><p>{text}</p>
-                <div className="card-bottom"><span>{label}</span><span className="upcoming-label">In development</span></div>
-              </article>
-            ))}
-          </div>
-          <p className="section-note">The directories are being built. No tool listings or editorial reviews have been published yet.</p>
-        </div>
-      </section>
-
-      <section className="approach-section container" id="approach" aria-labelledby="approach-title">
-        <div className="approach-intro"><p className="eyebrow muted">A LITTLE MORE INTENTION</p><h2 id="approach-title">Useful comes<br />before impressive.</h2><p>AI should make work better. Our editorial approach starts with that simple idea.</p><span className="approach-symbol" aria-hidden="true"><Lightbulb size={46} strokeWidth={1} /></span></div>
-        <div className="principles">
-          <article><span className="principle-number">01</span><div><h3>A problem before a product</h3><p>Start with the work. Choose tools for the problem they solve, rather than the attention they attract.</p></div></article>
-          <article><span className="principle-number">02</span><div><h3>Sources, steps, and limitations</h3><p>Useful guidance should explain where information comes from, how to apply it, and when it falls short.</p></div></article>
-          <article><span className="principle-number">03</span><div><h3>Clarity about commercial relationships</h3><p>Future sponsorships and affiliate links will be clearly labeled. Paid placement should never be a hidden recommendation.</p></div></article>
-        </div>
-      </section>
-
-      <section className="container status-section" id="project-status" aria-labelledby="status-title">
-        <div className="status-panel">
-          <div className="status-copy"><span className="status-pill"><span className="status-dot" /> FOUNDATION RELEASE</span><h2 id="status-title">Good things start<br />with a solid foundation.</h2><p>This is the first step of AI Workflow Atlas. The application shell is here; the directories, editorial content, and business features will follow in separate releases.</p><div className="status-caption"><Sparkles size={15} aria-hidden="true" /> No sign-ups, payments, or automated agents are active.</div></div>
-          <div className="release-checklist"><div className="release-heading"><ListChecks size={19} aria-hidden="true" /><span>Building with intention</span></div><div className="release-item"><span className="check-icon"><Check size={14} aria-hidden="true" /></span><span>Application foundation</span><span className="release-state">Available</span></div><div className="release-item"><span className="pending-icon" /><span>Persistent data & directories</span><span className="release-state">Planned</span></div><div className="release-item"><span className="pending-icon" /><span>Editorial & business features</span><span className="release-state">Planned</span></div><div className="release-item"><span className="pending-icon" /><span>Agents & automation</span><span className="release-state">Planned</span></div><p>Quality over shortcuts. One verified release at a time.</p></div>
-        </div>
-      </section>
-    </>
-  );
+export default async function Home() {
+  const data = await homeCatalog();
+  return <>
+    <section className="hero atlas-hero container" aria-labelledby="hero-title">
+      <div className="hero-copy"><p className="eyebrow"><span className="status-dot" /> YOUR GUIDE TO APPLIED AI</p><h1 id="hero-title">Discover What AI <span className="gradient-text">Can Actually Do</span></h1><p className="hero-description">Explore practical AI workflows, powerful tools, and real-world automation ideas.</p><SearchForm /><div className="hero-actions"><Link href="/use-cases" className="button button-text">Explore practical workflows <ArrowUpRight size={16} aria-hidden="true" /></Link></div><p className="hero-note"><Compass size={14} aria-hidden="true" /> Find a direction. Understand the possibilities.</p></div>
+      <WorkflowMap /><div className="hero-bottom"><span className="mono">LESS HYPE. MORE KNOW-HOW.</span><ArrowDownRight size={20} aria-hidden="true" /></div>
+    </section>
+    <div className="value-strip"><div className="container"><span><Compass size={16} aria-hidden="true" /> Start with a real problem</span><span><GitBranch size={16} aria-hidden="true" /> Connect tools to practical steps</span><span><ShieldCheck size={16} aria-hidden="true" /> Keep human judgment in the loop</span></div></div>
+    <section className="container catalog-section" id="categories" aria-labelledby="categories-title"><div className="section-heading"><div><p className="eyebrow muted">FIND YOUR FOCUS</p><h2 id="categories-title">What are you working on?</h2></div><Link className="text-link" href="/tools">Explore the atlas <ArrowRight size={15} aria-hidden="true" /></Link></div><div className="category-cloud">{data.categories.map((category) => <Link key={category.slug} href={`/tools?category=${encodeURIComponent(category.slug)}`}><Sparkles size={14} aria-hidden="true" />{category.name}<ArrowUpRight size={13} aria-hidden="true" /></Link>)}</div>{data.categories.length === 0 && <p className="section-note">Categories will appear as tools and workflows are published.</p>}</section>
+    <section className="tinted-section" id="tools" aria-labelledby="tools-title"><div className="container"><div className="section-heading"><div><p className="eyebrow muted">BUILD YOUR TOOLKIT</p><h2 id="tools-title">Tools with a purpose.</h2></div><Link className="text-link" href="/tools">Browse all tools <ArrowRight size={15} aria-hidden="true" /></Link></div><div className="catalog-grid">{data.tools.map((tool) => <ToolCard key={tool.slug} tool={tool} />)}</div>{data.tools.length === 0 && <EmptyState title="The toolkit is taking shape." description="No featured tools have been selected yet. Explore the directory for available listings." href="/tools" />}</div></section>
+    <section className="container catalog-section" id="workflows" aria-labelledby="workflows-title"><div className="section-heading"><div><p className="eyebrow muted">TURN A POSSIBILITY INTO A PROCESS</p><h2 id="workflows-title">A starting point for your next idea.</h2></div><Link className="text-link" href="/use-cases">All use cases <ArrowRight size={15} aria-hidden="true" /></Link></div><div className="catalog-grid">{data.workflows.map((workflow) => <WorkflowCard key={workflow.slug} workflow={workflow} />)}</div>{data.workflows.length === 0 && <EmptyState title="New workflows are on the way." description="There are no featured workflows yet. Check the directory for available use cases." href="/use-cases" label="Explore use cases" />}<p className="section-note">Editorial selections. We don’t present these as popularity rankings.</p></section>
+    <div className="container"><SponsoredPlacements kind="HOMEPAGE_FEATURED_SPONSOR" /></div><section className="container sponsor-section" id="sponsor" aria-labelledby="sponsor-title"><div className="sponsor-slot"><span className="mono">RESERVED FOR CLEARLY LABELED SPONSORSHIPS</span><h2 id="sponsor-title">Useful discoveries deserve the right audience.</h2><p>This space is prepared for future partners. Explore formats and send an inquiry. Dates and terms are confirmed before any booking.</p><Link className="text-link" href="/sponsor">Explore sponsorships →</Link></div></section>
+    <section className="container approach-section" id="approach" aria-labelledby="approach-title"><div className="approach-intro"><p className="eyebrow muted">THE ATLAS APPROACH</p><h2 id="approach-title">Useful comes<br />before impressive.</h2><p>Start with the work. Understand the process. Choose tools with intention.</p></div><div className="principles"><article><span className="principle-number">01</span><div><h3>Practical, before everything</h3><p>A clear problem, a possible solution, and steps you can evaluate for yourself.</p></div></article><article><span className="principle-number">02</span><div><h3>The trade-offs belong in the guide</h3><p>Limitations, references, and human review are part of the workflow.</p></div></article><article><span className="principle-number">03</span><div><h3>Commercial relationships stay visible</h3><p>Future sponsorships and affiliate relationships will be explicitly labeled.</p></div></article></div></section>
+    <section className="container reading-section" aria-labelledby="reading-title"><div className="section-heading"><div><p className="eyebrow muted">KEEP YOUR CURIOSITY CLOSE</p><h2 id="reading-title">Ideas to take a little further.</h2></div></div><div className="reading-grid">{data.articles.map((article) => <article key={article.slug}><span className="record-type">{article.isDemo ? "SAMPLE EDITORIAL PREVIEW" : "EDITORIAL PREVIEW"}</span><h3>{article.title}</h3><p>{article.excerpt}</p><Link className="text-link" href={`/blog/${article.slug}`}>Read the guide <ArrowRight size={15} aria-hidden="true" /></Link></article>)}</div>{data.articles.length === 0 && <p className="section-note">No articles have been published yet.</p>}</section>
+    <NewsletterBlock />
+  </>;
 }

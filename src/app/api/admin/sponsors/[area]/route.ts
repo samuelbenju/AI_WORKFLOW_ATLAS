@@ -1,0 +1,6 @@
+import {adminApi,privateJson,readJson,requireRequestActor} from "@/server/auth/request";
+import {crmCompanies,crmPackages,crmCampaigns,saveCompany,saveCampaign,crmOverview} from "@/server/commercial/admin";
+import {AccessError} from "@/server/auth/policy";
+type Context={params:Promise<{area:string}>};
+export async function GET(request:Request,context:Context){return adminApi(async()=>{const {actor}=await requireRequestActor(request,"commercial");const {area}=await context.params;if(area==="companies")return privateJson(await crmCompanies(actor.id));if(area==="packages")return privateJson(await crmPackages(actor.id));if(area==="campaigns")return privateJson(await crmCampaigns(actor.id));if(area==="leads")return privateJson(await crmOverview(actor.id,Object.fromEntries(new URL(request.url).searchParams)));throw new AccessError(404,"El módulo no existe.");});}
+export async function POST(request:Request,context:Context){return adminApi(async()=>{const {actor}=await requireRequestActor(request,"commercial");const {area}=await context.params;const input=await readJson(request,16000);if(area==="companies")return privateJson(await saveCompany(actor.id,input),201);if(area==="campaigns")return privateJson(await saveCampaign(actor.id,input),201);throw new AccessError(404,"El módulo no existe.");});}

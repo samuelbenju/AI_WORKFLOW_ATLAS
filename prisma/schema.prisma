@@ -1,0 +1,625 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum ContentStatus {
+  DRAFT
+  IN_REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum PackageKind {
+  HOMEPAGE_FEATURED_SPONSOR
+  NEWSLETTER_SPONSORSHIP
+  FEATURED_TOOL_LISTING
+  SPONSORED_ARTICLE
+}
+
+enum Currency {
+  COP
+  USD
+  EUR
+}
+
+enum PaymentEnvironment {
+  SANDBOX
+  PRODUCTION
+}
+
+enum LeadStatus {
+  CONTACTED
+  NEGOTIATING
+  WON
+  LOST
+  NEW
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  CLOSED
+}
+
+enum PackageAvailability {
+  AVAILABLE
+  WAITLIST
+  UNAVAILABLE
+}
+
+enum CampaignStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+  EXPIRED
+}
+
+enum TransactionStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  VOIDED
+  ERROR
+}
+
+enum SubscriberStatus {
+  PENDING
+  CONFIRMED
+  UNSUBSCRIBED
+}
+
+enum NewsletterStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  SENT
+  CANCELLED
+}
+
+enum AgentRole {
+  CEO
+  RESEARCHER
+  EDITOR
+  SEO
+  COMMERCIAL
+}
+
+enum TaskStatus {
+  PENDING
+  RUNNING
+  AWAITING_APPROVAL
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum ExecutionStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum DraftKind {
+  TOOL
+  USE_CASE
+  ARTICLE
+  COMMERCIAL_PROPOSAL
+  REPORT
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique @db.VarChar(320)
+  name      String?  @db.VarChar(120)
+  role      Role     @default(VIEWER)
+  active    Boolean  @default(false)
+  passwordHash String? @db.VarChar(255)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  articles      Article[]
+  reviewedArticles Article[] @relation("ArticleReviewer")
+  drafts        ContentDraft[]
+  approvedLeads CommercialLead[]
+  approvedAds   SponsorshipCampaign[]
+  newsletters   NewsletterCampaign[]
+  approvedTasks AgentTask[]
+  auditLogs     AuditLog[]
+  sessions      Session[]
+  commercialNotes CommercialNote[]
+}
+
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  tokenHash String   @unique @db.Char(64)
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+
+  @@index([userId, expiresAt])
+  @@index([expiresAt])
+}
+
+model LoginRateLimit {
+  keyHash       String   @id @db.Char(64)
+  attempts      Int      @default(1)
+  windowStarted DateTime @default(now()) @db.Timestamptz(3)
+  @@index([windowStarted])
+}
+
+model Category {
+  id          String    @id @default(uuid()) @db.Uuid
+  slug        String    @unique @db.VarChar(100)
+  name        String    @db.VarChar(120)
+  description String?   @db.Text
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+  tools       Tool[]
+  useCases    UseCase[]
+  articles    Article[]
+}
+
+model Tag {
+  id       String    @id @default(uuid()) @db.Uuid
+  slug     String    @unique @db.VarChar(100)
+  name     String    @db.VarChar(100)
+  tools    Tool[]
+  useCases UseCase[]
+  articles Article[]
+}
+
+model Tool {
+  id          String                @id @default(uuid()) @db.Uuid
+  slug        String                @unique @db.VarChar(150)
+  name        String                @db.VarChar(160)
+  summary     String                @db.VarChar(500)
+  description String                @db.Text
+  websiteUrl  String                @db.VarChar(2048)
+  featured    Boolean               @default(false)
+  status      ContentStatus         @default(DRAFT)
+  isDemo      Boolean               @default(false)
+  publishedAt DateTime?             @db.Timestamptz(3)
+  createdAt   DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime              @updatedAt @db.Timestamptz(3)
+  categories  Category[]
+  tags        Tag[]
+  useCases    UseCase[]
+  articles    Article[]
+  campaigns   SponsorshipCampaign[]
+
+  @@index([status, isDemo, publishedAt])
+  @@index([name, id])
+  @@index([featured, status, isDemo, publishedAt])
+}
+
+model UseCase {
+  id           String        @id @default(uuid()) @db.Uuid
+  slug         String        @unique @db.VarChar(150)
+  title        String        @db.VarChar(200)
+  problem      String        @db.Text
+  solution     String        @default("") @db.Text
+  instructions Json
+  limitations  String        @db.Text
+  references   Json
+  difficulty   Difficulty    @default(BEGINNER)
+  featured     Boolean       @default(false)
+  status       ContentStatus @default(DRAFT)
+  isDemo       Boolean       @default(false)
+  publishedAt  DateTime?     @db.Timestamptz(3)
+  createdAt    DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime      @updatedAt @db.Timestamptz(3)
+  categories   Category[]
+  tags         Tag[]
+  tools        Tool[]
+  articles     Article[]
+
+  @@index([status, isDemo, difficulty, publishedAt])
+  @@index([featured, status, isDemo, publishedAt])
+}
+
+model Article {
+  id              String                @id @default(uuid()) @db.Uuid
+  slug            String                @unique @db.VarChar(150)
+  title           String                @db.VarChar(200)
+  excerpt         String                @db.VarChar(500)
+  body            Json
+  sources         Json                  @default("[]")
+  noindex         Boolean               @default(false)
+  coverKey        String?               @db.VarChar(30)
+  coverAlt        String?               @db.VarChar(250)
+  reviewedAt      DateTime?             @db.Timestamptz(3)
+  reviewedById    String?               @db.Uuid
+  reviewedBy      User?                 @relation("ArticleReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  revisions       ContentDraft[]
+  status          ContentStatus         @default(DRAFT)
+  isDemo          Boolean               @default(false)
+  publishedAt     DateTime?             @db.Timestamptz(3)
+  metaTitle       String?               @db.VarChar(200)
+  metaDescription String?               @db.VarChar(500)
+  authorId        String?               @db.Uuid
+  author          User?                 @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  useCaseId       String?               @db.Uuid
+  useCase         UseCase?              @relation(fields: [useCaseId], references: [id], onDelete: SetNull)
+  createdAt       DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime              @updatedAt @db.Timestamptz(3)
+  categories      Category[]
+  tags            Tag[]
+  tools           Tool[]
+  campaigns       SponsorshipCampaign[]
+
+  @@index([status, isDemo, publishedAt])
+  @@index([authorId])
+  @@index([reviewedById])
+  @@index([noindex, status, isDemo, publishedAt])
+  @@index([useCaseId])
+}
+
+model Sponsor {
+  id           String                @id @default(uuid()) @db.Uuid
+  name         String                @db.VarChar(200)
+  websiteUrl   String?               @db.VarChar(2048)
+  contactEmail String                @db.VarChar(320)
+  createdAt    DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime              @updatedAt @db.Timestamptz(3)
+  leads        CommercialLead[]
+  campaigns    SponsorshipCampaign[]
+  orders       PaymentOrder[]
+
+  @@index([contactEmail])
+}
+
+model SponsorshipPackage {
+  id          String                @id @default(uuid()) @db.Uuid
+  slug        String                @unique @db.VarChar(100)
+  name        String                @db.VarChar(160)
+  kind        PackageKind           @unique
+  description String                @db.Text
+  amountMinor BigInt?
+  currency    Currency              @default(COP)
+  active      Boolean               @default(false)
+  acceptingInquiries Boolean        @default(true)
+  durationDays Int?
+  availability PackageAvailability  @default(WAITLIST)
+  createdAt   DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime              @updatedAt @db.Timestamptz(3)
+  leads       CommercialLead[]
+  campaigns   SponsorshipCampaign[]
+  orders      PaymentOrder[]
+}
+
+model CommercialLead {
+  reference    String?            @unique @db.VarChar(100)
+  submissionId String?            @unique @db.Uuid
+  payloadDigest String?           @db.Char(64)
+  contactName  String?            @db.VarChar(160)
+  websiteUrl   String?            @db.VarChar(2048)
+  consentAt    DateTime?          @db.Timestamptz(3)
+  consentVersion String?          @db.VarChar(100)
+  requestedStartsAt DateTime?     @db.Timestamptz(3)
+  quotedAmountMinor BigInt?
+  quotedCurrency Currency?
+  quotedDurationDays Int?
+  quotedPackageName String?       @db.VarChar(160)
+  notes        CommercialNote[]
+  proposals    ContentDraft[]
+  id           String             @id @default(uuid()) @db.Uuid
+  email        String             @db.VarChar(320)
+  companyName  String             @db.VarChar(200)
+  message      String             @db.Text
+  status       LeadStatus         @default(NEW)
+  packageId    String             @db.Uuid
+  package      SponsorshipPackage @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  sponsorId    String?            @db.Uuid
+  sponsor      Sponsor?           @relation(fields: [sponsorId], references: [id], onDelete: Restrict)
+  approvedById String?            @db.Uuid
+  approvedBy   User?              @relation(fields: [approvedById], references: [id], onDelete: Restrict)
+  approvedAt   DateTime?          @db.Timestamptz(3)
+  createdAt    DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime           @updatedAt @db.Timestamptz(3)
+  orders       PaymentOrder[]
+
+  @@index([status, createdAt])
+  @@index([payloadDigest, createdAt])
+  @@index([email])
+  @@index([packageId])
+  @@index([sponsorId])
+  @@index([approvedById])
+}
+
+model SponsorshipCampaign {
+  headline     String?              @db.VarChar(160)
+  message      String?              @db.VarChar(500)
+  destinationUrl String?            @db.VarChar(2048)
+  contractAmountMinor BigInt?
+  contractCurrency Currency?
+  contractDurationDays Int?
+  id           String               @id @default(uuid()) @db.Uuid
+  name         String               @db.VarChar(200)
+  status       CampaignStatus       @default(DRAFT)
+  sponsorId    String               @db.Uuid
+  sponsor      Sponsor              @relation(fields: [sponsorId], references: [id], onDelete: Restrict)
+  packageId    String               @db.Uuid
+  package      SponsorshipPackage   @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  orderId      String?              @unique @db.Uuid
+  order        PaymentOrder?        @relation(fields: [orderId, sponsorId, packageId], references: [id, sponsorId, packageId], onDelete: Restrict, onUpdate: Restrict)
+  approvedById String?              @db.Uuid
+  approvedBy   User?                @relation(fields: [approvedById], references: [id], onDelete: Restrict)
+  approvedAt   DateTime?            @db.Timestamptz(3)
+  startsAt     DateTime?            @db.Timestamptz(3)
+  endsAt       DateTime?            @db.Timestamptz(3)
+  toolId       String?              @db.Uuid
+  tool         Tool?                @relation(fields: [toolId], references: [id], onDelete: Restrict)
+  articleId    String?              @db.Uuid
+  article      Article?             @relation(fields: [articleId], references: [id], onDelete: Restrict)
+  createdAt    DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime             @updatedAt @db.Timestamptz(3)
+  newsletters  NewsletterCampaign[]
+
+  @@unique([orderId, sponsorId, packageId])
+  @@index([status, startsAt, endsAt])
+  @@index([sponsorId])
+  @@index([packageId])
+  @@index([approvedById])
+  @@index([toolId])
+  @@index([articleId])
+}
+
+model PaymentOrder {
+  id           String               @id @default(uuid()) @db.Uuid
+  reference    String               @unique @db.VarChar(100)
+  status       OrderStatus          @default(PENDING)
+  amountMinor  BigInt
+  currency     Currency             @default(COP)
+  environment  PaymentEnvironment   @default(SANDBOX)
+  sponsorId    String               @db.Uuid
+  sponsor      Sponsor              @relation(fields: [sponsorId], references: [id], onDelete: Restrict)
+  packageId    String               @db.Uuid
+  package      SponsorshipPackage   @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  leadId       String?              @db.Uuid
+  lead         CommercialLead?      @relation(fields: [leadId], references: [id], onDelete: Restrict)
+  paidAt       DateTime?            @db.Timestamptz(3)
+  expiresAt    DateTime?            @db.Timestamptz(3)
+  createdAt    DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime             @updatedAt @db.Timestamptz(3)
+  transactions PaymentTransaction[]
+  campaign     SponsorshipCampaign?
+
+  @@unique([id, amountMinor, currency, environment])
+  @@unique([id, sponsorId, packageId])
+  @@index([environment, status, createdAt])
+  @@index([sponsorId])
+  @@index([packageId])
+  @@index([leadId])
+}
+
+model PaymentTransaction {
+  id                    String             @id @default(uuid()) @db.Uuid
+  provider              String             @db.VarChar(50)
+  providerTransactionId String             @db.VarChar(200)
+  status                TransactionStatus  @default(PENDING)
+  amountMinor           BigInt
+  currency              Currency
+  environment           PaymentEnvironment @default(SANDBOX)
+  orderId               String             @db.Uuid
+  order                 PaymentOrder       @relation(fields: [orderId, amountMinor, currency, environment], references: [id, amountMinor, currency, environment], onDelete: Restrict, onUpdate: Restrict)
+  confirmedAt           DateTime?          @db.Timestamptz(3)
+  createdAt             DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime           @updatedAt @db.Timestamptz(3)
+  events                PaymentEvent[]
+
+  @@unique([provider, environment, providerTransactionId])
+  @@unique([id, provider, environment])
+  @@index([orderId, amountMinor, currency, environment])
+  @@index([environment, status, createdAt])
+}
+
+model PaymentEvent {
+  id              String              @id @default(uuid()) @db.Uuid
+  provider        String              @db.VarChar(50)
+  environment     PaymentEnvironment  @default(SANDBOX)
+  providerEventId String              @db.VarChar(200)
+  transactionId   String?             @db.Uuid
+  transaction     PaymentTransaction? @relation(fields: [transactionId, provider, environment], references: [id, provider, environment], onDelete: Restrict, onUpdate: Restrict)
+  eventType       String              @db.VarChar(120)
+  payloadDigest   String              @db.Char(64)
+  verifiedAt      DateTime?           @db.Timestamptz(3)
+  processedAt     DateTime?           @db.Timestamptz(3)
+  receivedAt      DateTime            @default(now()) @db.Timestamptz(3)
+
+  @@unique([provider, environment, providerEventId])
+  @@index([transactionId])
+  @@index([processedAt, receivedAt])
+}
+
+model NewsletterSubscriber {
+  id             String           @id @default(uuid()) @db.Uuid
+  email          String           @unique @db.VarChar(320)
+  status         SubscriberStatus @default(PENDING)
+  consentAt      DateTime         @db.Timestamptz(3)
+  consentVersion String           @db.VarChar(100)
+  consentSource  String           @db.VarChar(200)
+  confirmedAt    DateTime?        @db.Timestamptz(3)
+  unsubscribedAt DateTime?        @db.Timestamptz(3)
+  tokenHash      String?          @unique @db.Char(64)
+  tokenExpiresAt DateTime?        @db.Timestamptz(3)
+  createdAt      DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime         @updatedAt @db.Timestamptz(3)
+
+  @@index([status, createdAt])
+}
+
+model NewsletterCampaign {
+  id                    String               @id @default(uuid()) @db.Uuid
+  subject               String               @db.VarChar(200)
+  body                  Json
+  status                NewsletterStatus     @default(DRAFT)
+  sponsorshipCampaignId String?              @db.Uuid
+  sponsorshipCampaign   SponsorshipCampaign? @relation(fields: [sponsorshipCampaignId], references: [id], onDelete: Restrict)
+  approvedById          String?              @db.Uuid
+  approvedBy            User?                @relation(fields: [approvedById], references: [id], onDelete: Restrict)
+  approvedAt            DateTime?            @db.Timestamptz(3)
+  scheduledAt           DateTime?            @db.Timestamptz(3)
+  sentAt                DateTime?            @db.Timestamptz(3)
+  providerCampaignId    String?              @unique @db.VarChar(200)
+  createdAt             DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime             @updatedAt @db.Timestamptz(3)
+
+  @@index([status, scheduledAt])
+  @@index([sponsorshipCampaignId])
+  @@index([approvedById])
+}
+
+model Agent {
+  id                     String      @id @default(uuid()) @db.Uuid
+  identifier             String      @unique @db.VarChar(100)
+  role                   AgentRole
+  prompt                 String      @db.Text
+  promptVersion          Int         @default(1)
+  enabled                Boolean     @default(false)
+  model                  String?     @db.VarChar(100)
+  allowedTools           String[]    @default([])
+  configuration          Json        @default("{}")
+  monthlyBudgetUsdMicros BigInt      @default(0)
+  requiresApproval       Boolean     @default(true)
+  createdAt              DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt              DateTime    @updatedAt @db.Timestamptz(3)
+  tasks                  AgentTask[]
+}
+
+model AgentTask {
+  id               String           @id @default(uuid()) @db.Uuid
+  agentId          String           @db.Uuid
+  agent            Agent            @relation(fields: [agentId], references: [id], onDelete: Restrict)
+  idempotencyKey   String           @unique @db.VarChar(200)
+  input            Json
+  status           TaskStatus       @default(PENDING)
+  scheduledAt      DateTime         @default(now()) @db.Timestamptz(3)
+  leaseExpiresAt   DateTime?        @db.Timestamptz(3)
+  attempts         Int              @default(0)
+  maxAttempts      Int              @default(3)
+  tokenBudget      Int              @default(0)
+  budgetUsdMicros  BigInt           @default(0)
+  requiresApproval Boolean          @default(true)
+  approvedById     String?          @db.Uuid
+  approvedBy       User?            @relation(fields: [approvedById], references: [id], onDelete: Restrict)
+  approvedAt       DateTime?        @db.Timestamptz(3)
+  createdAt        DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime         @updatedAt @db.Timestamptz(3)
+  executions       AgentExecution[]
+  drafts           ContentDraft[]
+
+  @@index([status, scheduledAt, leaseExpiresAt])
+  @@index([agentId, createdAt])
+  @@index([approvedById])
+}
+
+model AgentExecution {
+  id            String          @id @default(uuid()) @db.Uuid
+  taskId        String          @db.Uuid
+  task          AgentTask       @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  attempt       Int
+  status        ExecutionStatus @default(RUNNING)
+  model         String          @db.VarChar(100)
+  inputTokens   Int             @default(0)
+  outputTokens  Int             @default(0)
+  costUsdMicros BigInt          @default(0)
+  output        Json?
+  errorCode     String?         @db.VarChar(100)
+  startedAt     DateTime        @default(now()) @db.Timestamptz(3)
+  finishedAt    DateTime?       @db.Timestamptz(3)
+
+  @@unique([taskId, attempt])
+  @@index([status, startedAt])
+}
+
+model ContentDraft {
+  leadId    String?       @db.Uuid
+  lead      CommercialLead? @relation(fields: [leadId], references: [id], onDelete: Restrict)
+  articleId String?       @db.Uuid
+  article   Article?      @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  id        String        @id @default(uuid()) @db.Uuid
+  kind      DraftKind
+  title     String        @db.VarChar(200)
+  body      Json
+  status    ContentStatus @default(DRAFT)
+  authorId  String?       @db.Uuid
+  author    User?         @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  taskId    String?       @db.Uuid
+  task      AgentTask?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  createdAt DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime      @updatedAt @db.Timestamptz(3)
+
+  @@index([status, createdAt])
+  @@index([authorId])
+  @@index([taskId])
+  @@index([articleId, createdAt])
+  @@index([leadId, createdAt])
+}
+
+model SiteSetting {
+  key       String   @id @db.VarChar(100)
+  value     Json
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  actorId    String?  @db.Uuid
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     String   @db.VarChar(120)
+  entityType String   @db.VarChar(100)
+  entityId   String   @db.VarChar(200)
+  requestId  String?  @db.VarChar(100)
+  metadata   Json     @default("{}")
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([requestId])
+}
+
+model CommercialNote {
+  id String @id @default(uuid()) @db.Uuid
+  leadId String @db.Uuid
+  lead CommercialLead @relation(fields:[leadId], references:[id], onDelete:Restrict)
+  authorId String @db.Uuid
+  author User @relation(fields:[authorId], references:[id], onDelete:Restrict)
+  text String @db.VarChar(5000)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([leadId, createdAt])
+  @@index([authorId])
+}
+
+model CommercialRateLimit {
+  keyHash String @id @db.Char(64)
+  attempts Int @default(1)
+  windowStarted DateTime @default(now()) @db.Timestamptz(3)
+  @@index([windowStarted])
+}

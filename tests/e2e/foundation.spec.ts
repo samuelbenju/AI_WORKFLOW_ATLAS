@@ -8,13 +8,13 @@ test("the homepage renders and navigation reaches real sections", async ({ page 
   expect(response?.status()).toBe(200);
   await expect(page).toHaveTitle(/AI Workflow Atlas/);
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Less AI noise.More possibility.");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Discover What AI Can Actually Do");
+  await expect(page.getByRole("complementary", { name: "Development preview" })).toBeVisible();
+  await expect(page.getByTestId("tool-card")).toHaveCount(3);
+  await expect(page.getByTestId("workflow-card")).toHaveCount(3);
   await page.getByRole("link", { name: "Explore the atlas" }).click();
-  await expect(page).toHaveURL(/#explore$/);
-  await expect(page.getByRole("heading", { name: "Start with what you want to do." })).toBeInViewport();
-  await expect(page.getByText("In development", { exact: true })).toHaveCount(3);
-  await expect(page.getByText("No sign-ups, payments, or automated agents are active.")).toBeVisible();
-  await expect(page.getByRole("textbox")).toHaveCount(0);
+  await expect(page).toHaveURL(/\/tools$/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Find your next");
   await expect(page.locator("a[href='#']")).toHaveCount(0);
   expect(errors).toEqual([]);
   await page.goto("/");
@@ -61,7 +61,7 @@ test("missing routes give a real 404 with a working return link", async ({ page 
   expect(response?.status()).toBe(404);
   await expect(page.getByRole("heading", { name: "This path isn’t on the atlas." })).toBeVisible();
   await page.getByRole("link", { name: "Back to the atlas" }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Less AI noise.");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Discover What AI");
 });
 
 test("reduced motion is respected", async ({ page }) => {
