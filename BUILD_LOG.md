@@ -78,3 +78,292 @@ No se hicieron commits, push, despliegue, comunicaciones, pagos ni llamadas de I
 - Entrega preparada para `git add` y commit con mensaje exacto `feat: initialize AI Workflow Atlas phase 1`. El hash final se obtiene con `git rev-parse HEAD` y se comunica al propietario; no se introduce una referencia circular dentro del propio commit.
 - Publicación remota pendiente de aprobación. Si el remoto sigue vacío, `git push origin work:refs/heads/main` creará `main` conservando `work` local, sin force; después comprobar la rama predeterminada de GitHub. Si aparecen commits remotos, detenerse y revisar historia antes de publicar.
 - No se modificó código funcional ni se repitieron instalación, build o suite completa. Las pruebas básicas de la revisión anterior fueron aprobadas. No se inició la Fase 2.
+
+## Revalidación solicitada — ejecución 1/12
+
+Se verificó la Fase 1 existente; no se ejecutó create-next-app ni se reemplazó ningún componente. Raíz descubierta desde el directorio actual mediante inspección y `git rev-parse --show-toplevel`: `/workspace/Quesito`. Árbol inicialmente limpio, commit `14abcba98976aaa8c33ef83d625d7463d620d0e3`, 33 archivos versionados.
+
+| Verificación de esta ejecución | Resultado |
+| --- | --- |
+| Node / npm | `v24.19.0` / `11.9.0`, compatibles con los pins existentes. |
+| Escritura | Archivo temporal creado, escrito y eliminado automáticamente en la raíz del proyecto. Sin cambiar permisos globales. |
+| Documentación | Los ocho archivos de control existen y tienen contenido; roadmap de doce fases presente. |
+| Registro npm | Una sola prueba `npm --cache /workspace/.cache/npm ping --registry=https://registry.npmjs.org --fetch-retries=0 --fetch-timeout=15000`; exit 0, PONG 278 ms. Sin bypass de proxy ni TLS. |
+| Dependencias | `npm --cache /workspace/.cache/npm ci --offline --no-audit`; exit 0, 381 paquetes instalados desde caché. Se ejecutó por la solicitud expresa del paso 5; no se cambió el lockfile. |
+| Typecheck | `NEXT_TELEMETRY_DISABLED=1 npm run typecheck`; exit 0. |
+| Lint | `npm run lint`; exit 0, cero warnings/errores. |
+| Build | `NEXT_TELEMETRY_DISABLED=1 npm run build`; exit 0, producción con Turbopack. Caché válida reutilizada, generación con cuatro workers. |
+| Smoke de producción | Servidor temporal propio en 3300 y Chromium del sistema: portada HTTP 200/contenido correcto, ancho sin desbordamiento a 1280/393, menú móvil y navegación a `#approach`, health JSON correcto y ruta inexistente HTTP 404. Exit 0; navegador y servidor temporales cerrados. |
+| Conservación | `git diff --exit-code -- package.json package-lock.json src tsconfig.json next.config.ts`: exit 0. Ningún cambio funcional o de dependencias. |
+
+El primer intento de smoke leyó la URL inmediatamente después del click móvil y falló antes de completarse la navegación asíncrona de Next. Se corrigió únicamente el script temporal para esperar `page.waitForURL`; la repetición pasó en ambos viewports. No se modificó la aplicación ni se eliminó ninguna aserción.
+
+Se conserva el aviso conocido de npm sobre fin de soporte de ESLint 9 y su justificación de compatibilidad ADR-010; no bloqueó instalación ni lint. No se ejecutó un nuevo audit, la suite unitaria ni la suite E2E completa; los resultados previos no se presentan como nuevos. No se inició Fase 2, no se publicó en GitHub y no se modificó configuración cloud. Los scripts reutilizables ya guardados siguen correspondiendo a este workflow.
+
+Solo se actualizaron `PROGRESS.md` y este registro para reflejar el commit existente y la revalidación; cambios documentales disponibles en el árbol de trabajo, sin crear otro commit automáticamente.
+
+## Ejecución 2/12 — PostgreSQL y modelo comercial
+
+### Alcance e inspección
+
+Leídos AGENTS.md, PRODUCT_SPEC.md, ARCHITECTURE.md, PLANS.md y PROGRESS.md. Se conservaron el commit inicial y las modificaciones documentales existentes. El propietario autorizó en esta fase todos los dominios comerciales enumerados, además de categorías/herramientas/casos inicialmente previstos. No se modificó la portada ni se implementó Fase 3.
+
+No había psql/initdb ni bindings DATABASE_URL/TEST_DATABASE_URL. Comprobado daemon Docker local por socket con selectores de contexto/TLS eliminados para ese comando. PostgreSQL oficial 17 descargado con checksum/digest verificado y fijado a `sha256:b8faeff7712663c2773a190181e1246e37e364b887611c04658c28b44e2408fe`. Servidor observado: `17.11 (Debian 17.11-1.pgdg13+2)`.
+
+`db:local` creó bindings aleatorios en `.env.local` ignorado por Git sin imprimir valores; solo loopback 55432, bases atlas_dev y atlas_test, volumen nombrado. La conexión externa queda disponible con DATABASE_URL privada, sin contratar servicios.
+
+### Versiones y motor
+
+Consultado registro oficial: Prisma CLI `latest` apuntaba a `8.0.0-rc.27`; se eligió versión estable `7.10.1` para prisma, cliente y adapter-pg, compatible con Node 24.19.0. `pg@8.23.1`, `dotenv@18.0.9` y tipos pg fijados. Consultados ejemplos oficiales de Prisma para configuración, schema y adaptador PostgreSQL.
+
+El primer acceso a una ruta de documentación oficial antigua devolvió 404; se usaron los ejemplos oficiales existentes. El CLI nativo intentó obtener motor/checksums desde binaries.prisma.sh y recibió 403 del proxy. No se estableció PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING ni se desactivó TLS. Se guardó la adición del dominio al borrador, no se presupone acceso aplicado.
+
+Se verificó una alternativa local con los módulos **oficiales** npm de Prisma: internals, client-generator-ts y schema-engine-wasm del mismo commit `d1b3f377ca835d73fd50954a5e22128b9ebdd6b8` que exige Prisma 7.10.1. El generador oficial produjo el cliente TypeScript y SchemaEngine generó/aplicó SQL con historial/checksums Prisma. No se inventó un migrador ni se sustituyó el ORM. La carga de un helper internals buscaba un WASM ausente en su ruta de bundle; se utilizó el export directo SchemaEngine del paquete oficial que sí incluye el artefacto. Entradas ESM del generador tenían imports sin extensión no resolubles por Node; se utilizó su entrada CommonJS publicada, sin parchear node_modules. Todos los paquetes quedaron fijados y con integridad npm en lockfile.
+
+`scripts/prisma-wasm.mjs` aísla esas APIs internas y su limitación de estabilidad; Node emite aviso experimental de imports WASM. El flujo reproducible instala con `npm ci --ignore-scripts` y genera explícitamente, evitando hooks que descargan binarios nativos no usados. No se utilizaron artefactos cuya verificación se hubiese omitido.
+
+### Datos implementados
+
+21 modelos de dominio en schema.prisma, más tablas de unión generadas y 16 enums. Roles de usuarios en enum, sin implementar login/sesiones. UUID, índices de FK/estados/fechas/slugs, JSON estructurado y timestamps con zona. Dinero BigInt en unidades mínimas, Sandbox por defecto, aprobación y consumo con estados seguros. El objetivo TypeScript pasó a ES2020 tras detectar que ES2017 rechazaba literales BigInt; se mantuvo strict y noUncheckedIndexedAccess.
+
+Cuatro migraciones aplicadas:
+
+1. `20261025000100_initial_domain`: SQL generado por motor Prisma WASM, relaciones y unicidad.
+2. `20261025000200_domain_constraints`: CHECK SQL para dinero, emails, fechas, consentimiento, aprobación, JSON y límites.
+3. `20261025000300_commercial_consistency`: FK compuestas campaña/orden y evento/transacción; añade coherencia de patrocinador/paquete/proveedor/entorno.
+4. `20261025000400_campaign_relation_key`: índice único compuesto exigido por el validador Prisma en una relación uno a uno. Se añadió después de detectar P1012 por unicidad insuficiente de la tupla, conservando las migraciones ya aplicadas.
+
+Conexión solo servidor, lazy y reutilizable, máximo cinco conexiones; sin log de consultas ni secretos. Repositorios internos con Zod: borradores, búsqueda/filtros/paginación estable, snapshot de lista/total, lectura pública sin demos ni emails de autor, leads + auditoría en una transacción. No hay rutas HTTP nuevas ni proveedores externos.
+
+Seed transaccional con upserts no destructivos y guardas NODE_ENV/nombre de DB: usuario ficticio inactivo, categorías/tag de desarrollo, tool/caso/artículo DRAFT con isDemo, cuatro paquetes inactivos sin precio y marcador de seed. No genera métricas, ventas, suscriptores o ejecuciones reales. Reejecutado dos veces; además los tests comprobaron que conserva una edición manual y no duplica registros.
+
+### Verificación final y reproducibilidad
+
+| Comando / comprobación | Resultado observado |
+| --- | --- |
+| `npm --cache /workspace/.cache/npm ci --ignore-scripts --offline --no-audit` | Exit 0, 567 paquetes desde caché; instalación limpia para comprobar el flujo guardado, sin editar lockfile. Audit ejecutado por separado después. |
+| `npm run db:validate` | Schema validado por parser oficial Prisma WASM, exit 0. |
+| `npm run db:generate` | Cliente oficial TypeScript generado, exit 0, ignorado en Git. |
+| `npm run db:deploy` / `db:status` | Cuatro migraciones completadas en PostgreSQL, historial actual, sin checksums editados ni migraciones fallidas. |
+| `npm run check` final | Validación, ESLint sin warnings, tipos y 11 unit tests aprobados; 0 fallidos/omitidos/cancelados. |
+| `npm run test:db` final | Todas las migraciones aplicadas en DB temporal; segundo deploy aplicó cero; 8 tests de PostgreSQL real aprobados, 0 fallidos/omitidos/cancelados, 684 ms de tests. |
+| `npm run build` final | Exit 0, generación previa y build Next 16.4.3/Turbopack; generación con cuatro workers y caché válida. |
+| `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e` | 14 aprobados en 7.7 s, desktop/móvil y axe; 0 fallidos/omitidos. Regresión de la portada sin cambios. |
+| npm audit | Exit 0, 0 vulnerabilidades reportadas; no sustituye auditoría de producto. |
+| `npm run db:backup` y `db:restore-check` | pg_dump -Fc privado; pg_restore --exit-on-error en otra DB; todas las tablas con igual recuento. La DB temporal se eliminó, sin sobrescribir desarrollo. |
+| `npm run db:stop` / `db:local` / `db:status` | Contenedor detenido/reiniciado, health correcto e historial preservado en volumen. |
+| Consulta SQL posterior al reinicio | PostgreSQL 17.11; 4 migraciones; 1 Tool, 1 UseCase, 1 Article y 4 paquetes de seed. Ninguna DB temporal de tests/restauración quedó tras las tandas terminadas. |
+
+Los 8 tests DB ejercitan: singleton real; seed/relaciones/ediciones; repositorios y paginación; FK/unicidad/emails/fechas; captura + rollback de lead/auditoría mediante un trigger temporal que falla; importes, moneda/entorno/proveedor y ownership comercial; consentimiento/aprobación newsletter; budgets, idempotencia e intentos de modelos de agentes. Las filas con nombres de ejecución/pago son fixtures de persistencia aislados, no operaciones de IA o pagos realizados. El runner solo elimina una base aleatoria que él mismo creó desde TEST_DATABASE_URL dedicada, nunca la DB configurada del usuario.
+
+### Límites y comprobaciones no aprobadas
+
+- CLI nativo: bloqueado por descarga 403. No se presenta como validado; `npm run db:*` fue probado con módulos oficiales WASM.
+- Introspección/drift adicional, fuera de las pruebas requeridas: primer intento por URL usó una variante retirada por Prisma; el intento con schemaDatasource y adaptador llegó a PostgreSQL pero falló por `Column type 'char' could not be deserialized from the database`. Es una limitación del tooling oficial en la descripción del catálogo. No se afirma que esa comprobación pasó ni que no exista drift. Historial/checksums, DDL, generación, constraints y lecturas/escrituras sí se comprobaron. Para ampliar esa validación, usar CLI nativo después de habilitar su dominio o una actualización conjunta probada del tooling.
+- Avisos no bloqueantes: import WASM experimental en Node, ESLint 9 fuera de soporte por compatibilidad heredada, NO_COLOR/FORCE_COLOR del runner. No se ocultaron ni se desactivaron aserciones.
+- No se ejecutó GitHub Actions remotamente, no se contrató DB administrada ni se verificó recuperación de producción. No se implementaron auth, pagos, envío de correo, workers/agentes ni Fase 3.
+
+### Persistencia de configuración y Git
+
+`update_environment_config_draft` confirmó `status: saved` y `requires_publish: true` al guardar instalación y arranque de Fase 2, además de la adición previa de binaries.prisma.sh. No se declararon secretos externos ni valores de las credenciales locales. Guardar el borrador no publica, no aplica red ni demuestra restauración en nueva tarea; el propietario debe revisar/guardar y publicar el entorno para activar el snapshot.
+
+Conservados todos los archivos funcionales previos y las actualizaciones documentales existentes. Nuevos archivos Prisma, scripts, repositorios, tests y documentación disponibles en el árbol de trabajo. No se creó un commit ni se hizo push automáticamente en esta ejecución. El commit inicial `14abcba98976aaa8c33ef83d625d7463d620d0e3` sigue conservando Fase 1.
+
+## Ejecución 3/12 — plataforma pública y directorios
+
+### Inspección y decisiones
+
+Leídos los cuatro documentos solicitados y las instrucciones del repositorio existente. Confirmada la capa de Fase 2 local, PostgreSQL accesible y un tool/caso/artículo ficticios en borrador. Se preservaron cambios previos y el remoto oficial, sin reinicializar ni publicar. Consultadas guías instaladas de Next.js para componentes de servidor, params/searchParams asíncronos y convenciones de rutas. Se reutilizaron versiones y dependencias ya instaladas.
+
+El seed anterior no era contenido público verificado. Se definió un modo demo explícito a nivel de proceso, siempre visible en banner/tarjetas/fichas, sin publicar drafts o activar ese modo desde una URL. Modo publicado exige no-demo + PUBLISHED + fecha no futura en consultas y relaciones. En vez de inventar popularidad se añadió una selección editorial featured, identificada como tal. No se activó newsletter ni ventas; sus bloques comunican el estado real.
+
+### Implementación
+
+- Portada con los textos exactos solicitados, hero/buscador, categorías, herramientas destacadas, workflows editoriales, previews desde Article, bloques preparados, navegación y footer.
+- Tools/use-cases con búsqueda PostgreSQL, filtros, tags/dificultad, tres órdenes, páginas de seis, parámetros Zod, links que conservan filtros y vacíos/errores honestos. Fichas con relaciones y contenido estructurado; UUID privados/credenciales/datos de usuarios no forman parte de los DTO de presentación (solo IDs de contenido cuando necesarios para render/tests).
+- Rutas force-dynamic y consultas parametrizadas con snapshot RepeatableRead; cache React por petición para fichas/metadata. No arrays de contenido como fallback ni consultas descartadas silenciosamente.
+- Migración `20261025000500_public_catalog` aplicada mediante motor Prisma: featured Tool/UseCase, solution UseCase e índices. No se editaron migraciones aplicadas. Cliente regenerado y schema validado.
+- Seed adicional no destructivo en PostgreSQL: ocho herramientas de ejemplo con sitios de origen, seis workflows con pasos/limitaciones/referencias y dos previews. Los nombres de productos son referencias ilustrativas, no afirmaciones de pruebas, reviews o integraciones; no se inventaron estadísticas. El seed previo sigue conservado. Flag demo activado explícitamente en `.env.local` privado, sin imprimir valores de conexión.
+- UI responsive con foco/labels, estados loading/error, reduced motion, links HTTP(S) sin credenciales y texto escapado. Un dominio .invalid de fixture no se presenta como enlace oficial utilizable. No hay formularios de suscripción o ventas que aparenten funcionar.
+- Helper de DB temporal compartido entre tests de datos y E2E: aplica todas las migraciones y verifica segundo deploy sin cambios, carga seeds y elimina solo su DB. Las pruebas del catálogo no usan ni modifican la DB local de desarrollo.
+
+### Fallos diagnosticados y corregidos
+
+1. Typecheck inicial detectó inferencia string|undefined al desestructurar arrays de seed; se fijaron como tuplas readonly. No se desactivó strict.
+2. Primera tanda unitaria: 15/16 aprobadas; normalización de filtros conservaba claves opcionales undefined. El parser ahora omite entradas ausentes/vacías antes de aplicar defaults; 16/16 al repetir.
+3. Primera tanda E2E: 24/30 aprobadas. Los tests SQL reutilizaban un parámetro para columnas varchar y text, provocando inferencia incompatible; se asignaron parámetros distintos al fixture, sin alterar lógica de producción. Las dos pruebas afectadas se ejecutaron después correctamente en ambos proyectos.
+4. Axe detectó contraste 4.46:1 del texto blanco sobre el indigo original en el botón de filtros. Se oscurecieron botones/estado de paginación manteniendo la paleta y se repitió el análisis sin excluir reglas.
+5. Se añadió prueba de loading real mediante lock temporal de PostgreSQL para comprobar el fallback de streaming, sin sustituir una consulta por un temporizador ficticio. Se libera en finally.
+
+### Resultados ejecutados
+
+| Comprobación | Resultado |
+| --- | --- |
+| `npm run db:generate` / `db:validate` | Aprobadas con módulos oficiales WASM, sin desactivar checksum/TLS ni intentar reparar el CLI nativo. |
+| `db:deploy` | Aplicada la quinta migración aditiva a desarrollo. |
+| `npm run check` final | Validación, lint sin warnings, typecheck y 16 unit tests aprobados; cero fallidos/omitidos/cancelados. |
+| `npm run test:db` | 10 pruebas reales aprobadas, cero fallidas/omitidas/canceladas; 899 ms de tests. Incluye aislamiento de modos, filtros/categorías/tags/dificultad y páginas sin duplicados, además de Fase 2. |
+| `npm run build` final | Aprobado, Next 16.4.3/Turbopack; rutas /, /tools[/slug], /use-cases[/slug] dinámicas; caché válida reutilizada y generación con cuatro workers. |
+| `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e` final | 32 aprobadas, cero fallidas/omitidas, 22.4 s, dos workers y proyectos desktop/mobile. DB temporal y ambos seeds; cleanup propio al finalizar. |
+| Datos en vivo | Insertar una fila propia de fixture en PostgreSQL la hizo aparecer en búsqueda y ficha tras una nueva petición; eliminada al finalizar. |
+| Visibilidad | Un servidor publicado sin flag ocultó demos y sirvió un registro PUBLISHED de fixture; ningún borrador se publicó para hacer pasar la prueba. |
+| Error de infraestructura | Otro servidor con conexión deliberadamente indisponible mostró error genérico/reintento, sin falso vacío ni credenciales en HTML. |
+| Loading | Bloqueo SQL de lectura mostró fallback real antes de liberar DB y obtener resultados; aprobado en escritorio y móvil. |
+| Accesibilidad/responsive | Axe en home, ambos directorios y ambas fichas; teclado/reduced motion y sin overflow en viewports ensayados, incluido 320 px. Capturas de home desktop y directorio móvil revisadas. No es certificación WCAG manual completa. |
+
+No se reinstalaron paquetes, modificaron versiones o incorporaron servicios. No se ejecutó nuevo audit porque no cambió el conjunto de dependencias. Los avisos heredados WASM/NO_COLOR siguen distinguidos de fallos. No hubo comprobaciones requeridas bloqueadas por infraestructura en esta fase; el bloqueo nativo y la introspección opcional de Fase 2 continúan documentados, sin presentarlos como resueltos.
+
+Actualizados PROGRESS, arquitectura, guías y README. Avances locales de Fases 2–3 conservados; Fase 1 sigue publicada en `samuelbenju/AI_WORKFLOW_ATLAS`. No se creó commit, hizo push, desplegó, cobró, envió correo ni inició Fase 4 en esta ejecución.
+
+### Cierre de Fase 3
+
+- `db:status` final: historial actual, sin migraciones editadas/fallidas. `.last-run.json` de Playwright: passed, failedTests vacío.
+- `git diff --check`: sin errores. Revisión de 73 archivos legítimos del proyecto: sin patrones de tokens reales o claves privadas detectados; fixtures de pruebas siguen siendo ficticios y no se imprimieron valores privados. `.env.local`, cliente generado, node_modules, builds, reportes y backups ignorados en Git.
+- HEAD publicado permanece `411621ab95c9ad10725a5c5cb74688c6ffc9e6ef`; esta ejecución no cambió refs ni origin. Los avances de Fase 3 permanecen locales junto con Fase 2.
+- `update_environment_config_draft` confirmó `status: saved` y `requires_publish: true` para start_skill actualizado: PostgreSQL obligatorio al servir, quinta migración, ambos seeds, flag demo explícito, nueva readiness y wrapper E2E aislado. El install_script previo sigue correspondiendo a los comandos probados, sin reinstalación innecesaria ni cambios de red. La revisión/guardado/publicación del entorno corresponde al propietario; no se afirma snapshot publicado o restauración en tarea nueva.
+
+## 2026-10-25 — Ejecución 4/12 / autenticación y administración
+
+### Implementación y decisiones
+
+Se conservó el checkout oficial y todo el trabajo local de Fases 2–3. No se reinstaló ni reconstruyó la aplicación. Autenticación local mediante scrypt nativo Node y sesiones opacas persistidas, alternativa justificada a Auth.js sin proveedor OAuth ficticio. ADR-021–025 y `docs/ADMIN.md` documentan propiedades, permisos y límites. Sin nuevas dependencias o cambios de versiones.
+
+Migración aditiva sexta `20261025000600_admin_auth`: hash opcional validado en User, Session con digest/expiración/FK e índices, y LoginRateLimit compartido entre procesos. `db:deploy` aplicado a desarrollo y `db:status` confirma historial actual sin editadas/fallidas. Los wrappers de pruebas aplican las seis migraciones a bases propias y comprueban segundo deploy sin cambios.
+
+Servicios de auth/CRUD solo servidor, autorización fresca por operación, Zod estricto, Origin/CSRF, límites de cuerpo, respuestas no-store y errores españoles sin SQL. Escrituras y auditoría comparten transacciones; se bloquean confirmaciones incorrectas y eliminaciones con relaciones. Roles OWNER/ADMIN, EDITOR restringido y VIEWER sin panel. Dashboard real, cuatro CRUD, filtros/páginas, configuración editorial persistente y auditoría. Shell público conservado por composición; administración española independiente con responsive, loading/error/empty. Módulos comerciales/newsletter/agentes explican que están pendientes, sin simular acciones.
+
+La identidad humana elegida quedó solo en configuración privada 0600; el usuario debe elegir contraseña con `npm run admin:init` (TTY, doble ingreso sin eco). No se guardó una contraseña plana ni se creó un administrador humano con fixtures. `admin:password` cambia hash y revoca sesiones. El bootstrap real y sus restricciones se probaron con cuentas temporales, sin activar la identidad humana.
+
+### Diagnósticos y correcciones
+
+1. ESLint detectó nombre reservado `module`; renombrado. Navegación tras login usa origen absoluto local calculado para recargar el contexto autenticado y descartar estado previo. No se relajó el linter. Typecheck detectó inferencia unknown en las columnas opcionales de lista; se añadieron comprobaciones de tipo.
+2. Primer intento E2E no llegó a ejecutar navegador: el helper de cuentas usaba top-level await en salida CJS de tsx. Se encapsuló en main async, sin cambiar configuración global o paquetes.
+3. Primera tanda de 48: 40 aprobadas y 8 fallidas (cuatro tipos por dos proyectos). El selector de alert coincidía con el announcer Next; se acotó al error del formulario. Playwright serializaba como string JSON un cuerpo que debía ser inválido; se enviaron bytes. El test de editor autenticaba un API context distinto al navegador; se usa page.request. El label Slug incluía texto de ayuda; se dio nombre/descripción accesibles independientes. Después, 48/48 aprobadas.
+4. Se agregó verificación de configuración editorial/defaults. Primera tanda de 50: 48 aprobadas y 2 fallidas por selector de label que incluía el contenido inicial del textarea. Se selecciona por rol/nombre accesible; no se cambió la lógica de persistencia para hacer pasar el test.
+5. Revisión final: acciones/entidades del resumen/auditoría traducidas al español; opciones de estado conservan el estado actual en el formulario bloqueado de editor. No se habilitó publicación para ese rol. Capturas separan viewport original y 320 px.
+
+### Resultados ejecutados
+
+| Comprobación | Resultado |
+| --- | --- |
+| `npm run check` | Validación Prisma, ESLint sin warnings, tipos Next/TypeScript y 20 unitarias aprobadas. |
+| `npm run test:db` | 18 pruebas reales, 18 aprobadas, 0 fallidas/omitidas/canceladas; 5.4 s. Bootstrap/hash, login, rate limit persistente, expiración/rotación/revocación, roles frescos, CRUD de cuatro entidades, integridad/confirmaciones, settings, indicadores y regresión del dominio. |
+| `npm run build` último | Aprobado. Rutas privadas/login/API/admin dinámicas; directorios públicos conservados. Generación del cliente incluida. |
+| Regresión pública | 32 E2E aprobadas en las tandas completas anteriores; últimas correcciones posteriores se limitaron a administración/tests/documentación. |
+| Cierre E2E administrativo | `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e -- tests/e2e/admin.spec.ts`: 18/18 aprobadas, 0 fallidas/omitidas, 22.6 s, dos workers, desktop/móvil, sobre el último build. No se afirma una única tanda final de 50 aprobadas. |
+| Privacidad/acceso | Anónimo/API sin cookie o con cookie falsa recibe 401; páginas redirigen a login. VIEWER recibe 403 en login. EDITOR no publica/elimina/configura. Inactivación revoca acceso con cookie existente. CSRF ausente/origen externo rechazados; login inválido no concede sesión. |
+| CRUD/navegador | Los cuatro formularios crean/editan y conservan datos tras reload; borrado incorrecto se rechaza y confirmación actual elimina. Slugs duplicados/relaciones entrantes dan conflicto. Ajustes sobreviven reload y se aplican a nuevos formularios. |
+| Accesibilidad/diseño | Axe sin infracciones en pantallas ensayadas; sin overflow hasta 320 px; capturas de dashboard en viewport original y móvil revisadas. No certificación WCAG integral. |
+| Estado local | 6 migraciones aplicadas, 9 herramientas/7 casos previos conservados y 0 administradores humanos activos con contraseña. Pruebas no alteraron desarrollo. |
+| Secretos/Git | Revisión automatizada de archivos legítimos sin patrones de tokens/claves privadas; .env.local 0600 y privados/generados/reportes ignorados. HEAD main sigue 411621ab95c9ad10725a5c5cb74688c6ffc9e6ef. Sin commit/push. |
+
+Los avisos WASM experimental/NO_COLOR heredados y deprecación del adaptador pg por consultas concurrentes dentro de transacción no son fallos de estas pruebas; no se deshabilitaron validaciones. Sin cambio de dependencias no se repitió instalación/audit. Persisten las limitaciones nativas/de drift opcional ya registradas, sin bloquear las comprobaciones requeridas actuales. No se verificó CI remota, despliegue o activación de una cuenta humana.
+
+`update_environment_config_draft` confirmó borrador guardado y requires_publish:true para start_skill de Fase 4. Se conserva install_script y no se cambian red/secretos. Activación exige revisión/guardado/publicación del entorno por el propietario; no se afirma publicación de snapshot o restauración en tarea nueva. No se inició Fase 5 ni hubo gastos/envíos/operaciones comerciales.
+
+Revisión visual final: se esperó explícitamente el heading del dashboard antes de la captura de viewport original para evitar fotografiar el fallback de streaming. Tanda focalizada `--grep 'admin screens'`: 2/2 aprobadas en 6.5 s; capturas desktop y móvil revisadas. Solo cambió la espera del test, sin modificar código de aplicación después del cierre anterior. Revisión final de 112 archivos: sin patrones de secretos ni correo humano en archivos versionables; origin oficial confirmado y diff --check limpio.
+
+
+## 2026-10-25 — Ejecución 5/12 / blog, CMS y SEO
+
+### Inspección y alcance
+
+Leídos AGENTS, PRODUCT_SPEC, ARCHITECTURE, PLANS y PROGRESS, guías de base/catálogo/admin y documentación Next instalada de metadata, sitemap/robots, image y proxy. Runtime cloud conectado, política restringida vigente y sin VPN; acceso a fuentes mediante proxy/CA existentes. Se conservó el checkout oficial y todo el árbol de Fases 2–4. No se inició Fase 6 ni se cambió origin/HEAD.
+
+### Implementación
+
+Migración aditiva `20261025000700_editorial_cms` aplicada a desarrollo, cliente generado y schema validado con el tooling WASM oficial existente. Article conserva datos anteriores y añade fuentes, noindex, imagen y revisión; ContentDraft enlaza snapshots mediante FK. No se editó SQL aplicado. Servicios transaccionales con autorización fresca, control de edición obsoleta y auditoría; conversión de formato heredado guarda el registro y relaciones originales antes de sobrescribirlo.
+
+Blog público con consultas PostgreSQL por petición y DTOs sin credenciales; búsqueda/categorías/páginas/relacionados y bloques/fuentes/fechas. El modo demo de tools/cases no publica artículos. CMS español con editor seguro, referencias, relaciones, metadatos, preview privado, snapshots y acciones de revisión/publicación/despublicación. No se acepta status PUBLISHED mediante guardado ordinario. Revisión humana explícita por OWNER/ADMIN, invalidada al editar; los publicados pasan a borrador al guardar una edición. EDITOR no publica ni edita publicados.
+
+SEO dinámico con canonical/OG/Twitter, BlogPosting/BreadcrumbList/CollectionPage y serialización JSON-LD que escapa cierres de script. Robots/sitemap y headers de proxy respetan bloqueo de preestreno; habilitación explícita solo con HTTPS/SITE_URL/no-demo. Privados siempre noindex. Sitemap no incluye noindex, borradores, demos o futuras publicaciones; no se inventan fechas de modificación de índices. Seis ilustraciones originales PNG locales, 1200×630 y aproximadamente 52–56 KB, next/image responsive, AVIF/WebP y allowlist local. Sin fuentes remotas/SDK en la lectura pública.
+
+Seed editorial desarrollado y ejecutado una vez en desarrollo: seis artículos originales IN_REVIEW en los temas solicitados, sin aprobación/publicación. No destructivo, conserva ediciones y solo opera sobre _dev/_test fuera de producción. Fuentes recuperadas y leídas desde repositorios oficiales de n8n, OpenAI Python, Ollama, Google Workspace, GitHub Docs y pandas. Notas con fecha/huella/alcance, sin afirmar ejecución de integraciones o benchmarks. Un enlace histórico de tutorial n8n falló; se usó el README oficial disponible. No se amplió red ni se eludió un bloqueo. Guía y fuentes en `docs/EDITORIAL.md`.
+
+### Diagnósticos y correcciones
+
+1. TypeScript detectó un href indexado posiblemente undefined y un default ProcessEnv incompatible con un Pick de claves opcionales. Se mantuvo strict, se acotó el href tras comprobarlo y se tipó la política como mapa de variables opcionales.
+2. Primera tanda E2E completa: 58/60. Los dos tests de portada fallaron porque el nuevo título raíz no incluía marca; Next no aplica su plantilla de título a la misma ruta raíz. Se corrigió el título de aplicación y se mantuvieron los tests y el texto exacto del hero. La suite final pasó completa.
+3. Revisión de conservación detectó que un formato heredado no debía reemplazarse sin guardar el original. Se agregó snapshot íntegro previo y recuperación de bloques compatibles en el formulario; prueba PostgreSQL específica aprobada. No se eliminó ni reinicializó contenido anterior.
+4. El generador local de ilustraciones emitió avisos de caché Fontconfig no escribible; los PNG se generaron correctamente, se inspeccionaron en las páginas y su optimización en Next se verificó en navegador. No se cambiaron permisos del sistema.
+
+### Verificaciones finales
+
+| Comando/comprobación | Resultado |
+| --- | --- |
+| `npm run check` | Schema oficial válido, lint sin errores/warnings, TypeScript estricto y 25/25 unitarias; cero fallidas/omitidas. |
+| `npm run test:db` | 25/25 pruebas PostgreSQL, cero fallidas/omitidas/canceladas, 6.25 s; incluye las 18 previas, seed editorial, versiones, roles/revisión, publicación/edición/despublicación, enlaces, categorías/paginación/sitemap y snapshot heredado. |
+| `npm run build` | Aprobado, Next 16.4.3/Turbopack; blog, CMS, robots/sitemap y proxy nuevos; rutas privadas protegidas/dinámicas. |
+| `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e` | **60/60**, cero fallidas/omitidas, 49.7 s; dos workers, Chromium desktop/Pixel 7, sin reintentos. Aplicó siete migraciones y verificó segundo deploy sin cambios en su DB temporal. |
+| Ciclo editorial real | Formulario crea y edita; reload conserva datos; preview privado no ejecuta texto script; aprobación y publicación separadas muestran página/metadata reales; despublicar retira la ficha. |
+| Autorización | Anónimo redirigido/API 401; editor no puede publicar; CSRF y permisos heredados conservados. No se activó cuenta humana con fixtures. |
+| SEO | Canonical/OG/article schema y noindex verificados; servidor aislado con configuración de lanzamiento permite indexar fixtures, robots bloquea privados y sitemap excluye noindex/borradores. Retirar un fixture lo elimina del sitemap en nueva petición. Desarrollo permanece bloqueado. |
+| Seguridad de contenido | Bloques/URLs/mass assignment validados, texto HTML literal sin ejecución, JSON-LD seguro; referencias internas no públicas no crean href. |
+| Responsive e imágenes | Axe sin infracciones en pantallas ensayadas, editor a 320 px sin overflow, portadas srcset/_next/image cargadas; capturas de artículos desktop/móvil revisadas. No se afirma certificación WCAG o CWV de producción. |
+| Estado de desarrollo | 6 borradores editoriales pendientes, 0 publicados, indexación false, 0 administradores humanos activos con contraseña; no se usó su identidad en pruebas. |
+| Git/secretos | 140 archivos de texto revisados sin patrones de tokens/claves privadas; .env.local 0600 e ignorado junto a artefactos. diff --check limpio; main/HEAD 411621ab95c9ad10725a5c5cb74688c6ffc9e6ef sin commit/push. |
+
+No se añadieron dependencias o versiones; no se reinstaló ni se repitió audit. Avisos heredados WASM/NO_COLOR y deprecación pg no se ocultaron ni causaron fallos de las tandas finales. No hubo pruebas requeridas bloqueadas por infraestructura; el CLI nativo y drift opcional anteriores no se declaran resueltos.
+
+Documentación permanente/guías actualizadas. `update_environment_config_draft` confirmó status:saved y requires_publish:true para instrucciones de arranque de Fase 5; install_script/red/bindings conservados. La activación requiere revisión/guardado/publicación del entorno por el propietario y no equivale a push/deploy. No se declara snapshot publicado/restaurado. Cuenta humana, aprobación del contenido y futura decisión de indexación siguen en manos del propietario; no se comenzó Fase 6.
+
+
+## 2026-10-25 — Ejecución 6/12 / patrocinios y CRM
+
+### Alcance y persistencia
+
+Leídos controles permanentes, guías de base/admin/editorial y documentación Next instalada de Route Handlers. Runtime conectado; no se requirió red externa, servicios de pago o nuevas dependencias. Checkout/origin oficiales y cambios locales anteriores conservados.
+
+Reutilizados los cuatro productos y modelos comerciales. Se agregaron consentimiento/contacto/referencia/nonce/digest y snapshot del precio solicitado, configuración de duración/disponibilidad/intake y creatividad/condiciones de campaña. CommercialNote guarda notas con actor/fecha; CommercialRateLimit comparte límites entre procesos. Propuestas usan ContentDraft COMMERCIAL_PROPOSAL con FK a lead. Campaña admite orderId null en borrador, preservando FK financieras cuando hay orden. No se fabrican órdenes para poder editar campañas.
+
+Migraciones 8 (enums), 9 (CRM) y 10 (CHECK de requeridos) aplicadas a desarrollo. Primer intento 8 falló en el comentario antes de ALTER TYPE: executeScript del adaptador oficial separa por punto y coma. Comprobados los cinco valores originales y logs del fallo antes de DDL; corregido el comentario de la migración no aplicada, marcado el intento rolled back mediante el motor oficial y reaplicado. La fila fallida queda como auditoría, sin reset o modificación manual de checksums. No se editaron migraciones exitosas. Los wrappers aplican las diez desde cero y comprueban segunda aplicación sin cambios. db:status final actual sin fallidas pendientes/editadas.
+
+### Funcionalidad
+
+Página sponsor inglesa y responsive con formatos/precios/disponibilidad desde DB, beneficios sin estadísticas de audiencia, consentimiento descrito, privacidad de la solicitud y confirmación con referencia solo tras persistir. Firma HMAC local aleatoria en configuración privada 0600, nunca impresa/versionada; origen exacto, nonce, caducidad, honeypot, JSON limitado, Zod y rate limits PostgreSQL. Idempotencia y ventana de duplicados con bloqueo/unique/reintento acotado; cambio de términos pide refrescar. No exposición pública de PII o consulta de leads.
+
+CRM español protegido por permiso commercial OWNER/ADMIN, tablas/filtros/páginas/fechas, estados solicitados, empresas manuales y vínculos, paquetes/precios, notas y propuestas privadas con snapshot. Guardar propuestas no envía mensajes. Estado WON no confirma un pago. Versiones por updatedAt evitan sobrescribir cambios concurrentes; auditoría junto a escrituras.
+
+Campañas con borrador, solicitud de revisión, aprobación, activación, pausa/cancelación y finalización. Guardado reinicia revisión. Guardas de pago PRODUCTION, transacción/evento verificados, presupuesto/moneda/duración/periodo, contenido público y solapamientos; newsletter/Sandbox bloqueados. Componentes públicos en home/tools/artículos reconsultan condiciones, etiquetan Sponsored y enlaces sponsored/noopener/noreferrer, ocultando anuncios fuera de fecha, sin pago o en demo. No se conectó ningún proveedor ni se cambió un pago desde UI.
+
+Seed comercial no destructivo preserva los cuatro productos y configuraciones, actualiza solo texto provisional exacto previo y no crea clientes/leads/ventas/campañas. Se conservaron precios null/por cotizar y duración pendiente por falta de una decisión comercial real del propietario.
+
+### Diagnósticos corregidos
+
+1. Typecheck detectó inferencia de groupBy de Prisma para el contador de nuevas solicitudes. Se usó count del estado requerido, sin desactivar strict o serializar resultados ambiguos. Lint señaló un let no reasignado de fixture; cambiado a const.
+2. Primer E2E: 68/72. El test de circuito guardaba page.url antes de terminar un Link; se esperó la URL del detalle. El de campañas omitía seleccionar el paquete que pretendía probar y el navegador bloqueaba un campo relacionado obligatorio; se eligió explícitamente Homepage.
+3. Repetición focalizada: circuito 2/2, campañas 0/2. El payload del formulario contenía UTC con minutos sin segundos y Zod lo rechazaba. Se corrigió la normalización con Date.toISOString, conservando validación/zonas. Check/build y suite completa posteriores aprobados.
+4. Se reforzó CHECK de campos requeridos con COALESCE en una nueva décima migración, evitando que UNKNOWN/NULL se acepten como validación. No se reescribió la novena ya aplicada.
+
+### Resultados finales
+
+| Verificación | Resultado |
+| --- | --- |
+| `npm run check` | Prisma válido, lint sin warnings, TypeScript estricto y 28/28 unitarias, cero fallidas/omitidas. |
+| `npm run test:db` | 33/33 pruebas PostgreSQL, cero fallidas/omitidas/canceladas, 6.67 s. Incluye firma/caducidad, consentimiento/referencia/snapshot, duplicados, CRM/roles, precios históricos, abuso persistente y guardas de campañas/periodos. |
+| `npm run build` | Aprobado. Sponsor, intake/API y CRM dinámicos; aplicación existente conservada. Sin dependencias nuevas ni instalación repetida. |
+| `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e` final | **72/72**, cero fallidas/omitidas, 1.3 min según Playwright; desktop y móvil, dos workers sin reintentos. |
+| Circuito principal | Formulario guardó referencia, contacto/consentimiento; CRM encontró la oportunidad, cambió a CONTACTED y relectura de DB/reload confirmó estado. Notas/propuestas quedaron persistidas y privadas, sin envío. |
+| Precios | Cambio real en paquete desde admin se mostró en /sponsor; edición obsoleta rechazada y snapshots anteriores conservados en tests DB. |
+| Privacidad/abuso | Consentimiento ausente, origen externo, firma alterada, campos monetarios del cliente y rol editor rechazados. Dos POST concurrentes devolvieron una misma referencia, sin PII en respuesta. |
+| Entrega | Borrador sin orden guardado; aprobación sin condiciones rechazada. Solo un fixture con orden/transacción/evento PRODUCTION y aprobación/periodo llegó al componente con etiqueta y rel correcto; cancelar el pago lo ocultó. Todo en DB temporal, nunca una venta real. |
+| Diseño | Axe sin infracciones en rutas ensayadas, formulario a 320 px sin overflow, capturas desktop/móvil de sponsor revisadas. No certificación WCAG manual o métricas de producción. |
+| Desarrollo | 4 paquetes sin precios/habilitación, 0 sponsors/leads/campañas/órdenes y 0 admins humanos con contraseña; firma local disponible, indexación desactivada. No quedaron fixtures de venta en desarrollo. |
+| Git/secretos | 173 archivos de texto sin patrones de tokens/claves privadas detectados, .env.local 0600/ignorado junto a artefactos. Origin oficial confirmado; main/HEAD 411621ab95c9ad10725a5c5cb74688c6ffc9e6ef sin commit/push. diff --check limpio. |
+
+Sin pruebas requeridas bloqueadas por infraestructura. Avisos previos WASM/NO_COLOR/deprecación pg conservados, sin deshabilitar comprobaciones. CLI nativo y drift opcional siguen con sus límites históricos; no se afirma resolución. No se repitió audit al no cambiar dependencias.
+
+Actualizados documentación y guías. Borrador cloud start_skill de Fase 6 confirmado saved/requires_publish:true, install_script/red/bindings conservados; falta revisión/guardado/publicación del entorno por el propietario. No se declara snapshot restaurado en nueva tarea ni deploy. Cuenta propia y condiciones comerciales reales siguen pendientes de su decisión. La Fase 7 no comenzó; no hubo mensajes externos, gastos, proveedores de pagos o envíos simulados.
+
+
+## 2026-10-25 — Consolidación local de Fases 2–6
+
+Revisados los 166 cambios pendientes (20 archivos modificados, 146 nuevos) y los 179 archivos legítimos totales. No hay borrados ni symlinks. Manifiesto de hashes temporal conservó evidencia de contenido; esquema Prisma (25 modelos), diez SQL/migration_lock y lockfile v3 incluidos. Dependencias root del lock coinciden exactamente con package.json y versiones instaladas.
+
+Sin patrones de claves/tokens reales encontrados entre candidatos. .env.local/credenciales, builds, cliente generado, caché, reportes y dumps siguen ignorados. .npmrc inspeccionado por claves: save-exact, engine-strict, fund, update-notifier, sin auth. Contraseña ci_only y URLs con credenciales de rechazo son fixtures explícitas, nunca de despliegue. No se imprimieron valores privados.
+
+Se verificó last-run E2E passed sin fallos y que ningún archivo funcional/configuración/dependencias era posterior al build final 2026-10-25T22:38:08Z o al E2E 22:40:09Z. Se conservan como evidencia vigente lint/typecheck/build, 28 unitarias, 33 PostgreSQL y 72 E2E de Fase 6. No se reconstruyó, reinstaló o repitió suites aprobadas. db:status actual y diff --check limpio.
+
+Fetch autenticado normal del origin oficial: remote main 411621ab95c9ad10725a5c5cb74688c6ffc9e6ef; 0 ahead/0 behind antes de consolidar. No se cambió origin, hizo merge/reset, force push o publicación. Commit de implementación 62d201bc33989464f25ebf7ba80b3656b95ef358 contiene 164 archivos cambiados, incluyendo módulos/tests de Fases 2–6 y sus dependencias compartidas. PROGRESS/BUILD_LOG se conservan en un segundo commit documental, con autoría/fecha normal de Git y sin inventar historia de fases separadas.
+
+Nueva solicitud de Fase 7 recibida durante la revisión: se atenderá después de cerrar respaldo local. La autorización de implementarla no autoriza push; la operación remota seguirá esperando aprobación expresa. No se iniciaron campañas/envíos o Fase 8.
