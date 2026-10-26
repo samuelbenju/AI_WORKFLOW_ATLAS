@@ -2,6 +2,7 @@ import "server-only";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 import { requireDatabaseUrl } from "./url";
+import { reportDatabaseError } from "./diagnostics";
 
 const globalDatabase = globalThis as unknown as { atlasDatabase?: PrismaClient };
 
@@ -12,6 +13,9 @@ export function createDatabaseClient(url: string): PrismaClient {
       max: 5,
       connectionTimeoutMillis: 5_000,
       idleTimeoutMillis: 30_000,
+    }, {
+      onPoolError: (error) => { reportDatabaseError("database.pool", error); },
+      onConnectionError: (error) => { reportDatabaseError("database.connection", error); },
     }),
     // Never enable query logging: parameters may contain personal data.
     log: [],

@@ -56,3 +56,7 @@ Referencia oficial para comprobar condiciones vigentes: https://render.com/docs/
 Considerar suspensión por inactividad y arranques en frío, reinicios/horas o consumo mensuales limitados, recursos/tiempos de build reducidos, filesystem efímero y disponibilidad/restricciones de shell, jobs, disco, escalado y comunicaciones salientes. No prometer SLA, latencia o continuidad comercial. No guardar datos, uploads, dumps o sesiones en el filesystem del servicio; DB y backups requieren almacenamiento externo adecuado. Un free web service no equivale a un free background worker persistente. Verificar límites y precio actuales antes de cualquier alta; no se autoriza plan de pago al excederlos.
 
 La preparación de Render no resuelve bloqueos legales/fiscales, proveedor de pagos productivo, backup/restore, credenciales o pruebas externas pendientes de LAUNCH_CHECKLIST.md. No activar indexación, correos, pagos o IA por el solo hecho de arrancar staging.
+
+## Incidente posterior: catálogo indisponible en Render Live
+
+El propietario confirma 16 migraciones/55 tablas en Neon y rol atlas_staging_app en Render. Es un estado reportado externamente, no una validación remota realizada por esta ejecución. Diagnóstico, códigos seguros y verificación del SHA publicado: [RENDER_CATALOG_DIAGNOSTICS.md](RENDER_CATALOG_DIAGNOSTICS.md). Las lecturas vacías se comprobaron con un rol de solo lectura aislado; no asumir que la indisponibilidad significa falta de contenido o que ya está resuelta al compilar.
