@@ -12,7 +12,7 @@ export async function withAppServer<T>(environment: Record<string, string>, call
     });
   });
   const server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "--hostname", "127.0.0.1", "--port", String(port)], {
-    env: { ...process.env, NEWSLETTER_ORIGIN: `http://127.0.0.1:${port}`, ...environment }, stdio: "ignore",
+    env: { ...process.env, NEWSLETTER_ORIGIN: `http://127.0.0.1:${port}`, ANALYTICS_ORIGIN:`http://127.0.0.1:${port}`, ...environment }, stdio: "ignore",
   });
   const origin = `http://127.0.0.1:${port}`;
   try {

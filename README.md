@@ -1,6 +1,6 @@
 # AI Workflow Atlas
 
-Plataforma independiente sobre herramientas y flujos prácticos de IA. Nombre comercial provisional. Público en inglés, administración en español. **Entrega actual: Fases 1–9 y equipo empresarial local de Fase 10 (integraciones externas pendientes)**, portada y directorios de herramientas/casos conectados a PostgreSQL. Panel con login, roles, CRUD real, CMS editorial y CRM comercial; blog con fuentes/SEO y solicitudes desde /sponsor. Inicialización humana pendiente de contraseña por CLI; sin envíos, cobros ni agentes activos. Operación de la base en [docs/DATABASE.md](docs/DATABASE.md); rutas, filtros y demo explícita en [docs/PUBLIC_CATALOG.md](docs/PUBLIC_CATALOG.md).
+Plataforma independiente sobre herramientas y flujos prácticos de IA. Nombre comercial provisional. Público en inglés, administración en español. **Entrega actual: Fases 1–10 y crecimiento local de Fase 11 (integraciones externas pendientes)**, portada y directorios de herramientas/casos conectados a PostgreSQL. Panel con login, roles, CRUD real, CMS editorial y CRM comercial; blog con fuentes/SEO y solicitudes desde /sponsor. Inicialización humana pendiente de contraseña por CLI; sin envíos, cobros ni agentes activos. Operación de la base en [docs/DATABASE.md](docs/DATABASE.md); rutas, filtros y demo explícita en [docs/PUBLIC_CATALOG.md](docs/PUBLIC_CATALOG.md).
 
 Administración e inicialización segura en [docs/ADMIN.md](docs/ADMIN.md). Blog, CMS, fuentes y control de indexación en [docs/EDITORIAL.md](docs/EDITORIAL.md).
 
@@ -118,7 +118,7 @@ docs/DATABASE.md      migración, operación, límites y recuperación
 .github/workflows/    CI de lint, tipos, tests, build y navegador
 ```
 
-PostgreSQL/Prisma, 35 modelos, quince migraciones y cuatro seeds de desarrollo disponibles. La portada, `/tools`, `/tools/[slug]`, `/use-cases` y `/use-cases/[slug]` consumen datos de DB. El modo público excluye demos/borradores; sin contenido publicado muestra vacíos reales. La demo local se identifica claramente. `/login` y `/admin` protegidos por sesiones y roles; cuatro CRUD, dashboard y configuración editorial real. No hay registro público ni cuenta con contraseña predeterminada. `/sponsor` recibe solicitudes con consentimiento y el CRM administra empresas, paquetes, notas, propuestas y campañas condicionadas. Entrega externa de newsletter y pagos siguen pendientes; no se simulan envíos o cobros.
+PostgreSQL/Prisma, 45 modelos, dieciséis migraciones y cuatro seeds de desarrollo disponibles. La portada, `/tools`, `/tools/[slug]`, `/use-cases` y `/use-cases/[slug]` consumen datos de DB. El modo público excluye demos/borradores; sin contenido publicado muestra vacíos reales. La demo local se identifica claramente. `/login` y `/admin` protegidos por sesiones y roles; cuatro CRUD, dashboard y configuración editorial real. No hay registro público ni cuenta con contraseña predeterminada. `/sponsor` recibe solicitudes con consentimiento y el CRM administra empresas, paquetes, notas, propuestas y campañas condicionadas. Entrega externa de newsletter y pagos siguen pendientes; no se simulan envíos o cobros.
 
 ## Despliegue y operación futuros
 
@@ -130,7 +130,7 @@ La configuración de CI de estas fases sigue local y su ejecución remota no est
 
 ## Continuar por fases
 
-Leer `AGENTS.md`, `PROGRESS.md` y la fase pertinente de `PLANS.md`. `PRODUCT_SPEC.md` conserva el alcance integral; `ARCHITECTURE.md` explica decisiones; `BUILD_LOG.md` registra pruebas y bloqueos. No iniciar una fase posterior automáticamente. La Fase 11 requiere una nueva solicitud expresa. El contenido inicial sigue sin aprobar/publicar; no se activa indexación automáticamente. Repositorio oficial: `samuelbenju/AI_WORKFLOW_ATLAS`; las Fases 1–9 están publicadas en GitHub y los avances de Fase 10 siguen locales.
+Leer `AGENTS.md`, `PROGRESS.md` y la fase pertinente de `PLANS.md`. `PRODUCT_SPEC.md` conserva el alcance integral; `ARCHITECTURE.md` explica decisiones; `BUILD_LOG.md` registra pruebas y bloqueos. No iniciar una fase posterior automáticamente. La Fase 12 requiere una nueva solicitud expresa. El contenido inicial sigue sin aprobar/publicar; no se activa indexación automáticamente. Repositorio oficial: `samuelbenju/AI_WORKFLOW_ATLAS`; las Fases 1–10 están publicadas en GitHub y los avances de Fase 11 siguen locales.
 
 ## Newsletter (Fase 7)
 
@@ -151,3 +151,9 @@ Captación en home/blog/artículos y `/newsletter`; administración privada en `
 CEO, Investigador, Editor, SEO y Comercial usan el motor común con herramientas delimitadas, evidencia y resultados persistentes. Registro idempotente: `npm run agents:team:init` o panel privado `/admin/agents`. Nuevos perfiles y cinco automatizaciones deshabilitados, presupuesto/tarifas cero. CEO asigna propuestas pendientes y recibe informes para consolidación; Editor guarda borradores reales del CMS tras investigación aprobada; Comercial prepara propuestas privadas sin contactar ni modificar precios/órdenes. Fuentes recuperadas explícitamente con URL/fecha/digest; no feed de tendencias, crawler externo o métricas de buscadores configurados.
 
 Pruebas de generación con TEST_FIXTURE en PostgreSQL aislado, **sin ejecuciones reales OpenAI**. Falta credencial, modelo/tarifas y consumo autorizados. Configuración, decisiones y coordinación: [BUSINESS_AGENTS.md](docs/BUSINESS_AGENTS.md). No se activan costes recurrentes ni se inicia Fase 11.
+
+## Analítica y afiliados (Fase 11)
+
+`/admin/analytics` privado OWNER/ADMIN: tráfico consentido, contenido/atribución, newsletter/leads/campañas, pagos PRODUCTION confirmados, comisiones verificadas, gastos registrados y coste IA estimado, separados por fuente/moneda/periodo. Analítica propia deshabilitada por defecto (`ANALYTICS_ENABLED=false`), consentimiento versionado con DNT/GPC y retirada/borrado, sin IP/UA/queries/emails o SDK Google en navegador. GA4 Measurement Protocol y reportes GA4/Search Console preparados, sin credenciales/medición externa real; estados no configurados explícitos.
+
+Programas/enlaces de afiliados administrables, divulgación y `/go/[code]` controlado, clics solo consentidos. Conversiones/comisiones exclusivamente por webhook HMAC de un proveedor configurado que adopte el contrato; no socio/venta real verificados todavía. Gastos son registros, no pagos. Experimentos son propuestas, sin automatizar A/B o alegar causalidad. CEO consulta agregados e importaciones existentes bajo los mismos controles y sin claves de Google. Guía completa: [GROWTH.md](docs/GROWTH.md). No Fase 12 ni costes recurrentes activados.

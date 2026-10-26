@@ -1,10 +1,10 @@
 # Progreso real
 
-Actualizado: 26 de octubre de 2026 (UTC).
+Actualizado: 26 de octubre de 2026 (America/Bogota; métricas propias agregadas en UTC).
 
 ## Alcance autorizado
 
-Fases 1–9 publicadas con autorización expresa en `main` del repositorio oficial `samuelbenju/AI_WORKFLOW_ATLAS`, SHA `806e48bb502764f56a3f2282ed40e499eb5bcecc`. La solicitud actual autoriza exclusivamente Fase 10 sobre el motor existente: cinco agentes empresariales, herramientas, fuentes, borradores/propuestas y coordinación con aprobación humana. Implementación local; modelos probados solo mediante TEST_FIXTURE en PostgreSQL aislado. OpenAI real sigue deshabilitado por falta de credenciales y presupuesto autorizado. No se inició Fase 11 ni se autorizó gasto recurrente, publicación, contactos, contratos o pagos autónomos. La solicitud posterior de cierre autoriza un commit exclusivo de Fase 10; el push requiere aprobación expresa adicional y permanece pendiente. Las secciones históricas posteriores conservan su contexto; este resumen y la sección de Fase 10 indican el estado vigente.
+Fases 1–10 publicadas con autorización expresa en `main` del repositorio oficial `samuelbenju/AI_WORKFLOW_ATLAS`, SHA `1b468492d0d761f71706bf252ab25935ee3ce83d`. La solicitud vigente autoriza exclusivamente Fase 11: medición, crecimiento, afiliados y agregados para CEO sobre el proyecto existente. La recuperación autoriza cerrar la verificación y crear un commit exclusivo de Fase 11; el push requiere aprobación expresa adicional. Analítica propia inicialmente deshabilitada y sujeta a consentimiento; Google y proveedores de afiliados sin credenciales/configuración real, sin métricas externas inventadas. No se autorizan gastos recurrentes, llamadas reales de IA, cuentas comerciales o cobros. No se inició Fase 12. Las secciones históricas posteriores conservan su contexto; el resumen y la sección de Fase 11 reflejan el estado actual.
 
 | Fase | Estado |
 | --- | --- |
@@ -17,8 +17,8 @@ Fases 1–9 publicadas con autorización expresa en `main` del repositorio ofici
 | 7. Newsletter | Implementada y verificada localmente; falta prueba real de Resend con configuración y destinatario autorizados. |
 | 8. Wompi Sandbox | Infraestructura local probada y publicada en main; revisión oficial y pago Sandbox externo siguen pendientes. |
 | 9. Infraestructura de agentes | Motor/worker/scheduler locales verificados y versionados en main; publicación autorizada. OpenAI real pendiente de credenciales y presupuesto. |
-| 10. Agentes especializados | Implementada y versionada localmente sobre motor común; push pendiente de aprobación. Pruebas locales y modelos TEST_FIXTURE; OpenAI real pendiente de credenciales/consumo autorizados. |
-| 11. Analítica y afiliados | No iniciada. |
+| 10. Agentes especializados | Publicada y sincronizada en GitHub mediante push normal autorizado. Modelos TEST_FIXTURE; OpenAI real pendiente de credenciales/consumo autorizados. |
+| 11. Analítica y afiliados | Implementada, verificada y versionada localmente; push pendiente de aprobación. Google/proveedores reales pendientes de configuración/pruebas externas. |
 | 12. Auditoría y lanzamiento | No iniciada. |
 
 ## Implementación de Fase 1
@@ -35,11 +35,11 @@ Sin gastos, despliegue, push, emails, llamadas IA o cobros. PostgreSQL local est
 
 ## Siguiente actividad
 
-Activación humana mediante `npm run admin:init` en terminal interactiva sin eco (correo preparado únicamente en configuración privada). Para una primera ejecución real: configurar de forma segura la credencial de OpenAI, verificar acceso/modelo/tarifas, fijar límites y aprobar una tarea concreta. No compartir secretos por chat ni activar costes recurrentes. Revisar `docs/BUSINESS_AGENTS.md`. Los pendientes externos de Resend y Wompi se mantienen. Fase 11 requiere otra solicitud expresa; Fase 10 conservada en commit local; push pendiente de aprobación del propietario.
+Activación humana mediante `npm run admin:init` en terminal interactiva sin eco (correo preparado únicamente en configuración privada). Para una primera ejecución real: configurar de forma segura la credencial de OpenAI, verificar acceso/modelo/tarifas, fijar límites y aprobar una tarea concreta. No compartir secretos por chat ni activar costes recurrentes. Revisar `docs/BUSINESS_AGENTS.md`. Los pendientes externos de Resend y Wompi se mantienen. Fase 11 autorizada e implementada localmente; Fase 12 requiere otra solicitud expresa. Fase 10 publicada en GitHub; Fase 11 conservada en commit local; push pendiente de aprobación expresa.
 
 ## Historial de conservación y fases anteriores
 
-Las secciones que siguen documentan comprobaciones pasadas; sus restricciones por fase y SHAs se refieren a esas ejecuciones. Estado actual: Fases 1–9 en GitHub, Fase 10 versionada localmente sin publicar.
+Las secciones que siguen documentan comprobaciones pasadas; sus restricciones por fase y SHAs se refieren a esas ejecuciones. Estado actual: Fases 1–10 en GitHub, Fase 11 local sin publicar.
 
 ## Conservación en Git
 
@@ -248,3 +248,29 @@ Revisión de 246 archivos legítimos (240 texto/seis imágenes), sin secretos re
 `ls-remote` y fetch del remoto oficial confirmaron main en `806e48bb502764f56a3f2282ed40e499eb5bcecc`, padre del commit local de Fase 10. Commit `feat: implement coordinated business agents`, hash comunicado en la entrega para no añadir otro commit solo con su propio identificador. Push normal main→main preparado, pendiente de aprobación expresa; sin force push ni cambios remotos publicados. Antes de publicar deberá revalidarse el remoto.
 
 OpenAI real sigue pendiente de credenciales, acceso al modelo, tarifas/límites revisados y presupuesto/primera tarea aprobados; TEST_FIXTURE no acredita ejecuciones reales. Bootstrap humano de administrador y pruebas externas de Resend/Wompi mantienen sus pendientes. Ningún gasto o Fase 11 activados.
+
+## Fase 11 — analítica, crecimiento y afiliados
+
+Panel `/admin/analytics` solo OWNER/ADMIN con tráfico consentido, páginas/búsquedas/herramientas, fuentes y evolución diaria, suscripciones/leads/conversiones, campañas y dinero por moneda. Datos de negocio separados de muestra de tracking y de importaciones externas. Analítica propia con consentimiento versionado, DNT/GPC, hashes/cookies HttpOnly, rechazo de rutas privadas/queries/PII, idempotencia/límites y retirada/borrado. La retención de sesiones antiguas tiene acción administrativa auditada; no se activó cron. Atribución de newsletter doble opt-in y solicitudes comerciales desde operaciones reales de servidor, opcional y sin revertir negocio si falla.
+
+Afiliados: programas/hosts/enlaces/herramientas administrables y deshabilitados inicialmente, divulgación pública y redirección controlada, clics solo consentidos. No conversiones desde navegador/admin: webhook de proveedor HMAC con ventana, identidad/importe, idempotencia/evidencia y reversión sin borrar historial. Protocolo preparado para socios que lo adopten; ningún socio real o comisión comercial ficticia registrados.
+
+GA4 Measurement Protocol de servidor (sin SDK de navegador), modos disabled/validation/live e historial de aceptación/errores sin afirmar ingestión por HTTP. Informes GA4 Data y Search Console con OAuth readonly/snapshots/fechas de proveedor; no configurados sin credenciales y sin fallback de cifras. Discovery oficiales leídos mediante HTTPS. Pruebas de transportes son fixtures explícitas, no datos de cuentas reales.
+
+Gastos con referencia y anulación auditada, sin ejecutar pagos. Bruto PRODUCTION/confirmado y comisiones verificadas devengadas separados de gastos registrados, Sandbox y costes IA estimados; precisión BigInt, sin conversión de moneda/neto ficticio. Datos por fecha y moneda; pagos futuros o sin evidencia no cuentan como ingresos confirmados. Recomendaciones de enlaces internos sobre categorías/contenido real y experimentos como propuestas/observaciones, sin activar A/B o inferir causalidad.
+
+CEO dispone de analytics_summary: agregados y snapshots importados, sin contactos, referencias privadas, claves Google o fetch externo. Worker conserva motor común/aprobaciones/cuotas/fencing, recibe solo disponibilidad propia no secreta. Migración 16 aditiva aplicada (45 modelos/dieciséis migraciones), añade capacidad al perfil CEO conocido e invalida aprobaciones antiguas por versión, sin habilitarlo o cambiar presupuesto. Quince migraciones anteriores y lockfile intactos.
+
+Desarrollo: cinco agentes y cinco automatizaciones siguen deshabilitados, presupuesto IA cero/clave ausente y cero ejecuciones. Tracking propio false; sin claves Google, programas/conversiones/comisiones reales, gastos de ejemplo o snapshots ficticios en la DB local. No envíos/pagos/modelos externos. Guía de activación, contratos, privacidad, cálculos y pendientes en `docs/GROWTH.md`. Las pruebas se ejecutan en DB temporales y se detallan en BUILD_LOG; la verificación externa permanece pendiente. No Fase 12.
+
+## Recuperación y cierre de Fase 11 — 2026-10-26 (America/Bogota)
+
+Se recuperaron íntegros los cambios locales tras la interrupción. Las últimas correcciones ya estaban aplicadas y verificadas: tablas desplazables con regiones etiquetadas/tabIndex=0, resúmenes de desplegables de al menos 44 px y separación adecuada. No se cambió código funcional ni se reinició/reinicializó el proyecto durante el cierre.
+
+Reejecutados lint, TypeScript, build y únicamente las ocho E2E afectadas de crecimiento: **8/8 aprobadas**, escritorio/móvil, axe sin infracciones detectadas, ancho 320 px, consentimiento/retirada, permisos/CSRF, afiliados/disclosure/redirect/clics, gastos/anulación y experimentos. Se conserva sin repetir la evidencia de **42 unitarias**, **82 PostgreSQL** y las **96 E2E anteriores** aprobadas. Los agregados del CEO fueron consultados nuevamente contra la DB local, sin invocar un modelo. No se afirma una sola ejecución limpia de 104 E2E: regresión anterior y cierre focal se documentan por separado.
+
+Consulta actual: cinco agentes y cinco automatizaciones deshabilitados, presupuesto global cero, sin clave ni ejecuciones IA; tracking propio false, Google no configurado y cero sesiones/programas/gastos/importaciones de ejemplo en desarrollo. La migración 16 está aplicada y el historial no tiene pendientes/editadas/fallidas. Los transportes Google y eventos de socios se probaron con fixtures identificadas en DB temporal, no contra cuentas reales.
+
+El cierre conserva el worker sin reiniciarlo. Engine/team-tools de su snapshot coinciden; growth/metrics requiere refrescar el snapshot por el procedimiento documentado **antes de habilitarlo**, por los últimos filtros financieros. Los indicadores de la aplicación y el código actual del CEO están verificados; no se considera autorizada una ejecución real de modelo ni se activa un servicio para ocultar este pendiente de despliegue.
+
+Revisados 266 archivos legítimos (260 texto/seis imágenes) sin secretos reales detectados; alertas solo de placeholders, URLs construidas, CI y fixtures negativas. Privados/generados excluidos. Se conserva lockfile y quince SQL históricos, esquema/migración 16 y pruebas. Cierre en un único commit `feat: implement analytics and affiliate growth` sobre `1b468492d0d761f71706bf252ab25935ee3ce83d`. Hash y resultado de preparación remota en la entrega, sin commit adicional para su propio SHA. Remota oficial comprobada en ese padre; push normal main→main preparado para aprobación, sin force push o publicación automática. No Fase 12.

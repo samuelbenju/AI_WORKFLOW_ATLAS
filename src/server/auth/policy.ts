@@ -1,6 +1,6 @@
 import type { Role } from "@/generated/prisma/client";
 
-export type Permission = "panel" | "write" | "delete" | "publish" | "settings" | "commercial" | "newsletter" | "payments" | "agents";
+export type Permission = "panel" | "write" | "delete" | "publish" | "settings" | "commercial" | "newsletter" | "payments" | "agents" | "analytics";
 export type Actor = { id: string; email: string; name: string | null; role: Role };
 export class AccessError extends Error {
   constructor(public status: number, message: string) { super(message); }

@@ -1,0 +1,4 @@
+import {affiliateTarget} from '@/server/growth/affiliates';
+import {recordAffiliateClick} from '@/server/growth/tracking';
+import {getDatabase} from '@/server/db/client';
+export async function GET(request:Request,{params}:{params:Promise<{code:string}>}){const db=getDatabase(),target=await affiliateTarget((await params).code,db);const headers={'Cache-Control':'private, no-store','Referrer-Policy':'no-referrer','X-Robots-Tag':'noindex, nofollow'};if(!target)return new Response('Affiliate link unavailable.',{status:404,headers});if(request.method==='GET'&&request.headers.get('purpose')!=='prefetch'&&request.headers.get('sec-purpose')!=='prefetch')try{await recordAffiliateClick(db,request,target.id,target.toolPath);}catch{console.error('Optional affiliate click tracking unavailable.');}return new Response(null,{status:303,headers:{...headers,Location:target.url}});}

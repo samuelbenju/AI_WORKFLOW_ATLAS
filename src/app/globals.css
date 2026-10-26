@@ -695,3 +695,16 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px s
 
 .agent-record { min-width:0; overflow-wrap:anywhere; }
 .agent-record summary,.agent-record p,.agent-record li { overflow-wrap:anywhere; }
+
+.privacy-controls { padding:24px max(20px,calc((100vw - 1200px)/2)); border-top:1px solid #303040; background:#11111d; color:#c9c9db; font-size:13px; line-height:1.8; }
+.privacy-controls h2 { color:#f8f8ff; font-size:18px; margin-bottom:8px; }
+.privacy-actions { display:flex; flex-wrap:wrap; gap:12px; margin:16px 0; }
+.privacy-controls>.text-link { margin:8px 20px 0 0; }
+.growth-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr)); gap:18px; }
+.growth-panel { overflow-wrap:anywhere; min-width:0; }
+.growth-panel p { color:#bfc7d9; font-size:13px; margin:10px 0; line-height:1.8; }
+.growth-panel dl { display:grid; grid-template-columns:1fr auto; gap:12px; font-size:13px; }
+.growth-panel dd { font-variant-numeric:tabular-nums; }
+
+.growth-panel summary { min-height:44px; padding:12px 0; cursor:pointer; line-height:1.8; }
+.growth-panel details+details { border-top:1px solid #303b50; margin-top:8px; }

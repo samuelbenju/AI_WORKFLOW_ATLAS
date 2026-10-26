@@ -1,0 +1,37 @@
+import "server-only";
+import {createHash,randomBytes} from "node:crypto";
+import type {PrismaClient,Prisma} from "@/generated/prisma/client";
+import {getDatabase} from "@/server/db/client";
+import {AccessError} from "@/server/auth/policy";
+import {site} from "@/lib/config/site";
+import {consentVersion,eventSchema,publicPath} from "@/lib/growth";
+import {activePlacements} from "@/server/commercial/placements";
+import {forwardGa4} from "./google";
+export type GrowthDb=PrismaClient|Prisma.TransactionClient;
+export const cookieNames={consent:"atlas_analytics_choice",visitor:"atlas_analytics_visitor",session:"atlas_analytics_session"};
+export const analyticsEnabled=()=>process.env.ANALYTICS_ENABLED==="true";
+export const digest=(v:string)=>createHash('sha256').update(v).digest('hex');
+export function trackingOrigin(){const u=new URL(process.env.ANALYTICS_ORIGIN??site.origin);if((u.protocol!=="https:"&&!(u.protocol==="http:"&&["localhost","127.0.0.1"].includes(u.hostname)))||u.username||u.password||u.pathname!=="/"||u.search||u.hash)throw new Error("Invalid analytics origin");return u.origin;}
+export function checkTrackingOrigin(request:Request){if(request.headers.get('origin')!==trackingOrigin()||request.headers.get('sec-fetch-site')==='cross-site')throw new AccessError(403,"Origin not permitted.");}
+function cookie(request:Request,name:string){const value=(request.headers.get('cookie')??'').split(';').map(s=>s.trim()).find(s=>s.startsWith(name+'='))?.slice(name.length+1)??'';try{return decodeURIComponent(value);}catch{return '';}}
+export function consentChoice(request:Request){if(request.headers.get('sec-gpc')==='1'||request.headers.get('dnt')==='1')return 'rejected';const v=cookie(request,cookieNames.consent);return v===`${consentVersion}:yes`?'accepted':v===`${consentVersion}:no`?'rejected':'unset';}
+export type TrackingContext={token:string;path:string}|null;
+export function trackingContext(request:Request,fallbackPath?:string):TrackingContext{if(!analyticsEnabled()||consentChoice(request)!=='accepted')return null;const token=cookie(request,cookieNames.session);if(!/^[a-f0-9]{64}$/.test(token))return null;try{const ref=new URL(request.headers.get('referer')??'');const path=publicPath(ref.pathname)??(fallbackPath?publicPath(fallbackPath):null);return ref.origin===trackingOrigin()&&path?{token,path}:null;}catch{return null;}}
+export async function growthLock(db:GrowthDb){await db.$executeRaw`SELECT pg_advisory_xact_lock(995911)`;}
+export async function rate(db:GrowthDb,key:string,max:number){const rows=await db.$queryRaw<{attempts:number}[]>`INSERT INTO "AnalyticsRateLimit" ("key","attempts","windowStarted") VALUES (${key},1,CURRENT_TIMESTAMP) ON CONFLICT ("key") DO UPDATE SET "attempts"=CASE WHEN "AnalyticsRateLimit"."windowStarted"<CURRENT_TIMESTAMP-INTERVAL '1 minute' THEN 1 ELSE "AnalyticsRateLimit"."attempts"+1 END,"windowStarted"=CASE WHEN "AnalyticsRateLimit"."windowStarted"<CURRENT_TIMESTAMP-INTERVAL '1 minute' THEN CURRENT_TIMESTAMP ELSE "AnalyticsRateLimit"."windowStarted" END RETURNING "attempts"`;if(!rows[0]||rows[0].attempts>max)throw new AccessError(429,"Analytics request limit reached.");}
+export async function publicPage(db:GrowthDb,path:string){if(!publicPath(path))return false;const match=/^\/(tools|use-cases|blog)\/([^/]+)$/.exec(path);if(!match)return true;const where={slug:match[2],status:"PUBLISHED" as const,isDemo:false,publishedAt:{lte:new Date()}};if(match[1]==='blog')return !!await db.article.findFirst({where:{...where,reviewedAt:{not:null},body:{path:["version"],equals:1}},select:{id:true}});return match[1]==='tools'?!!await db.tool.findFirst({where,select:{id:true}}):!!await db.useCase.findFirst({where,select:{id:true}});}
+export async function setConsent(request:Request,accept:boolean,db:PrismaClient=getDatabase()){
+ const allowed=accept&&request.headers.get('sec-gpc')!=='1'&&request.headers.get('dnt')!=='1';
+ if(!allowed){const visitor=cookie(request,cookieNames.visitor);if(/^[a-f0-9]{64}$/.test(visitor))await db.analyticsSession.deleteMany({where:{visitorHash:digest(visitor)}});return {choice:'rejected' as const};}
+ if(!analyticsEnabled())return {choice:'accepted' as const};
+ return db.$transaction(async tx=>{await growthLock(tx);await rate(tx,'consent',100);const previous=cookie(request,cookieNames.visitor),visitor=/^[a-f0-9]{64}$/.test(previous)?previous:randomBytes(32).toString('hex'),token=randomBytes(32).toString('hex');await tx.analyticsSession.create({data:{tokenHash:digest(token),visitorHash:digest(visitor),consentVersion,consentAt:new Date(),expiresAt:new Date(Date.now()+1800000)}});return {choice:'accepted' as const,visitor,token};});
+}
+async function insertEvent(db:PrismaClient,context:TrackingContext,data:{id?:string;kind:string;path:string;entityId?:string;affiliateLinkId?:string;campaignId?:string}){
+ if(!analyticsEnabled()||!context)return {recorded:false};
+ const event=await db.$transaction(async tx=>{await growthLock(tx);const session=await tx.analyticsSession.findUnique({where:{tokenHash:digest(context.token)}});if(!session||session.expiresAt<=new Date()||session.consentVersion!==consentVersion)return null;if(!await publicPage(tx,data.path))return null;if(data.id&&await tx.analyticsEvent.findUnique({where:{id:data.id}}))return null;if(data.entityId&&await tx.analyticsEvent.findUnique({where:{kind_entityId:{kind:data.kind,entityId:data.entityId}}}))return null;
+ await rate(tx,'events',3000);if(await tx.analyticsEvent.count({where:{sessionId:session.id}})>=300)throw new AccessError(429,"Session event limit reached.");const row=await tx.analyticsEvent.create({data:{...data,sessionId:session.id}});await tx.analyticsSession.update({where:{id:session.id},data:{lastSeenAt:new Date(),expiresAt:new Date(Date.now()+1800000)}});return {row,visitorHash:session.visitorHash,startedAt:session.startedAt};});
+ if(event)await forwardGa4(db,event.row,event.visitorHash,event.startedAt);return {recorded:!!event};
+}
+export async function recordBrowserEvent(request:Request,input:unknown,db:PrismaClient=getDatabase()){const data=eventSchema.parse(input);const context=trackingContext(new Request(request.url,{headers:new Headers({...Object.fromEntries(request.headers),referer:trackingOrigin()+data.path})}));if(data.kind==='CAMPAIGN_CLICK'){const visible=(await Promise.all((["HOMEPAGE_FEATURED_SPONSOR","FEATURED_TOOL_LISTING","SPONSORED_ARTICLE"] as const).map(k=>activePlacements(k,undefined,db,'published')))).flat();if(!visible.some(c=>c.id===data.campaignId))throw new AccessError(422,"Campaign is not an active verified placement.");}return insertEvent(db,context,data);}
+export async function recordGoal(db:PrismaClient,context:TrackingContext,kind:'NEWSLETTER_SIGNUP'|'NEWSLETTER_CONFIRM'|'SPONSOR_REQUEST',entityId:string){if(!context)return;try{let path=context.path;if(kind==='NEWSLETTER_CONFIRM'){const source=await db.analyticsEvent.findUnique({where:{kind_entityId:{kind:'NEWSLETTER_SIGNUP',entityId}},select:{path:true}});if(!source)return;path=source.path;}await insertEvent(db,context,{kind,path,entityId});}catch{console.error('Optional analytics attribution failed; business operation remains saved.');}}
+export async function recordAffiliateClick(db:PrismaClient,request:Request,linkId:string,toolPath:string){const context=trackingContext(request);if(context)await insertEvent(db,context,{kind:'AFFILIATE_CLICK',path:publicPath(toolPath)??context.path,affiliateLinkId:linkId});}

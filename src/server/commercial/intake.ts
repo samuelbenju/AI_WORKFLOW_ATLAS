@@ -1,4 +1,5 @@
 import "server-only";
+import {recordGoal,type TrackingContext} from "@/server/growth/tracking";
 import {randomBytes} from "node:crypto";
 import {inquirySchema,type PackageDto} from "@/lib/commercial";
 import {getDatabase} from "@/server/db/client";
@@ -15,7 +16,7 @@ async function consumeLimit(key:string,maximum:number,seconds:number,db:PrismaCl
  "windowStarted"=CASE WHEN "CommercialRateLimit"."windowStarted"<CURRENT_TIMESTAMP-make_interval(secs=>${seconds}) THEN CURRENT_TIMESTAMP ELSE "CommercialRateLimit"."windowStarted" END RETURNING "attempts"`;
  if(!rows[0]||rows[0].attempts>maximum)throw new AccessError(429,"Too many inquiries. Please wait before trying again.");
 }
-export async function submitInquiry(input:unknown,db:PrismaClient=getDatabase()) {
+export async function submitInquiry(input:unknown,db:PrismaClient=getDatabase(),tracking:TrackingContext=null) {
  const data=inquirySchema.parse(input);verifyInquiryForm(data.submissionId,data.token);
  if(data.websiteConfirmation)throw new AccessError(422,"The inquiry could not be accepted.");
  const payload={packageId:data.packageId,companyName:data.companyName,contactName:data.contactName,email:data.email,websiteUrl:data.websiteUrl,message:data.message,consentVersion:data.consentVersion,requestedStartsAt:data.requestedStartsAt};
@@ -25,7 +26,7 @@ export async function submitInquiry(input:unknown,db:PrismaClient=getDatabase())
  await consumeLimit("inquiry:global",60,60,db);
  await db.commercialRateLimit.deleteMany({where:{windowStarted:{lt:new Date(Date.now()-86400000)}}});await consumeLimit(`inquiry:email:${data.email}`,3,900,db);
  for(let attempt=0;attempt<2;attempt++)try {
-  return await db.$transaction(async tx=>{
+  let attributionId:string|null=null;const result=await db.$transaction(async tx=>{
    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`inquiry:${digest}`}))`;
    const duplicate=await tx.commercialLead.findFirst({where:{payloadDigest:digest,createdAt:{gte:new Date(Date.now()-86400000)}},select:{reference:true}});
    if(duplicate?.reference)return {reference:duplicate.reference,received:true};
@@ -34,9 +35,10 @@ export async function submitInquiry(input:unknown,db:PrismaClient=getDatabase())
    if(product.updatedAt.toISOString()!==data.packageUpdatedAt)throw new AccessError(409,"Package details changed. Refresh to review the current terms.");
    const reference=`ATLAS-${randomBytes(10).toString("hex").toUpperCase()}`;
    const lead=await tx.commercialLead.create({data:{...payload,requestedStartsAt:data.requestedStartsAt?new Date(data.requestedStartsAt):null,submissionId:data.submissionId,payloadDigest:digest,reference,consentAt:new Date(),quotedAmountMinor:product.amountMinor,quotedCurrency:product.currency,quotedDurationDays:product.durationDays,quotedPackageName:product.name}});
+   attributionId=lead.id;
    await tx.auditLog.create({data:{action:"commercial.inquiry_received",entityType:"CommercialLead",entityId:lead.id,metadata:{packageId:product.id,consentVersion:data.consentVersion}}});
    return {reference,received:true};
-  },{isolationLevel:"Serializable",timeout:10000});
+  },{isolationLevel:"Serializable",timeout:10000});if(attributionId)await recordGoal(db,tracking,"SPONSOR_REQUEST",attributionId);return result;
  }catch(error){const code=(error as {code?:string}).code;if(code!=="P2034"&&code!=="P2002")throw error;const saved=await db.commercialLead.findFirst({where:{payloadDigest:digest,createdAt:{gte:new Date(Date.now()-86400000)}},select:{reference:true}});if(saved?.reference)return {reference:saved.reference,received:true};if(attempt===1)throw new AccessError(409,"The request changed while saving. Please try again.");}
  throw new AccessError(500,"The inquiry could not be saved.");
 }
