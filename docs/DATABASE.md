@@ -113,3 +113,7 @@ Para recuperación real, conservar el volumen y el backup, restaurar en una DB n
 ## Extensiones posteriores de persistencia
 
 Fase 7 añadió migración 11 (NewsletterConsent/NewsletterDelivery/NewsletterRateLimit) y Fase 8 añade 12–13 (PaymentAttempt/PaymentOrderHistory, snapshots/idempotencia, FK de intento/orden/proveedor y restricciones de cumplimiento Sandbox). Estado actual: 30 modelos/trece migraciones; se mantienen todas las anteriores. No se generan ventas o pagos en los seeds de desarrollo. Operación financiera y recuperación de estados inciertos en PAYMENTS.md; no se ha ejecutado un nuevo ensayo de restore PostgreSQL en Fase 8.
+
+## Cola de agentes — Fase 9
+
+Migración 14 extiende Agent/AgentTask/AgentExecution y añade AgentSchedule, AgentBudgetPeriod y AgentWorkerHeartbeat. Total actual 33 modelos/catorce migraciones. Claims/reservas/aprobaciones y recuperación usan transacciones y bloqueo PostgreSQL, sin sustituir la DB por memoria. No hay agentes/tareas de negocio sembrados en desarrollo; heartbeat de servicio real se identifica como BLOCKED sin clave IA. Ver AGENT_ENGINE.md.

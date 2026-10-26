@@ -692,3 +692,6 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px s
 .payment-orders { min-width:0; }
 .payment-orders summary, .payment-orders p, .payment-orders li { overflow-wrap:anywhere; }
 .payment-orders details { min-width:0; }
+
+.agent-record { min-width:0; overflow-wrap:anywhere; }
+.agent-record summary,.agent-record p,.agent-record li { overflow-wrap:anywhere; }
