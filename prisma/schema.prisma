@@ -148,6 +148,7 @@ model User {
   drafts        ContentDraft[]
   approvedLeads CommercialLead[]
   approvedAds   SponsorshipCampaign[]
+  paymentHistory PaymentOrderHistory[]
   newsletters   NewsletterCampaign[]
   approvedTasks AgentTask[]
   auditLogs     AuditLog[]
@@ -408,6 +409,13 @@ model PaymentOrder {
   expiresAt    DateTime?            @db.Timestamptz(3)
   createdAt    DateTime             @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime             @updatedAt @db.Timestamptz(3)
+  creationKey String? @unique @db.Uuid
+  priceVersion DateTime? @db.Timestamptz(3)
+  commercialAmountMinor BigInt?
+  commercialCurrency Currency?
+  fulfillmentStatus String @default("NOT_STARTED") @db.VarChar(30)
+  attempts PaymentAttempt[]
+  history PaymentOrderHistory[]
   transactions PaymentTransaction[]
   campaign     SponsorshipCampaign?
 
@@ -429,6 +437,8 @@ model PaymentTransaction {
   environment           PaymentEnvironment @default(SANDBOX)
   orderId               String             @db.Uuid
   order                 PaymentOrder       @relation(fields: [orderId, amountMinor, currency, environment], references: [id, amountMinor, currency, environment], onDelete: Restrict, onUpdate: Restrict)
+  attemptId             String?            @db.Uuid
+  attempt               PaymentAttempt?    @relation(fields: [attemptId, orderId, provider, environment], references: [id, orderId, provider, environment], onDelete: Restrict, onUpdate: Restrict, map: "PaymentTransaction_attempt_order_provider_fkey")
   confirmedAt           DateTime?          @db.Timestamptz(3)
   createdAt             DateTime           @default(now()) @db.Timestamptz(3)
   updatedAt             DateTime           @updatedAt @db.Timestamptz(3)
@@ -447,6 +457,10 @@ model PaymentEvent {
   providerEventId String              @db.VarChar(200)
   transactionId   String?             @db.Uuid
   transaction     PaymentTransaction? @relation(fields: [transactionId, provider, environment], references: [id, provider, environment], onDelete: Restrict, onUpdate: Restrict)
+  source          String              @default("LEGACY") @db.VarChar(30)
+  processingStatus String             @default("RECEIVED") @db.VarChar(30)
+  errorCode       String?             @db.VarChar(80)
+  summary         Json                @default("{}")
   eventType       String              @db.VarChar(120)
   payloadDigest   String              @db.Char(64)
   verifiedAt      DateTime?           @db.Timestamptz(3)
@@ -673,4 +687,37 @@ model NewsletterRateLimit {
   keyHash       String @id @db.Char(64)
   attempts      Int
   windowStarted DateTime @default(now()) @db.Timestamptz(3)
+}
+
+
+model PaymentAttempt {
+  id           String @id @default(uuid()) @db.Uuid
+  reference    String @unique @db.VarChar(100)
+  provider     String @db.VarChar(50)
+  environment  PaymentEnvironment @default(SANDBOX)
+  orderId      String @db.Uuid
+  amountMinor  BigInt
+  currency     Currency @default(COP)
+  order        PaymentOrder @relation(fields: [orderId, amountMinor, currency, environment], references: [id, amountMinor, currency, environment], onDelete: Restrict, onUpdate: Restrict)
+  status       String @default("PREPARED") @db.VarChar(30)
+  expiresAt    DateTime @db.Timestamptz(3)
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
+  transactions PaymentTransaction[]
+
+  @@unique([id, orderId, provider, environment])
+  @@index([orderId, createdAt])
+}
+
+model PaymentOrderHistory {
+  id        String @id @default(uuid()) @db.Uuid
+  orderId   String @db.Uuid
+  order     PaymentOrder @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  actorId   String? @db.Uuid
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action    String @db.VarChar(80)
+  details   Json @default("{}")
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([orderId, createdAt])
 }

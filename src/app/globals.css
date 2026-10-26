@@ -688,3 +688,7 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px s
 .newsletter-policy { max-width:800px; padding-top:32px; padding-bottom:64px; line-height:1.85; color:#b9bacb; }
 .newsletter-policy h2 { color:#f8fafc; font-size:1.8rem; margin-bottom:20px; }
 .newsletter-policy p+p { margin-top:16px; }
+
+.payment-orders { min-width:0; }
+.payment-orders summary, .payment-orders p, .payment-orders li { overflow-wrap:anywhere; }
+.payment-orders details { min-width:0; }

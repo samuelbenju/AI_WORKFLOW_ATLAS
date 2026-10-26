@@ -1,10 +1,10 @@
 # Progreso real
 
-Actualizado: 25 de octubre de 2026, zona America/Bogota.
+Actualizado: 26 de octubre de 2026 (UTC).
 
 ## Alcance autorizado
 
-La consolidación conserva Fases 1–6 en los commits locales `62d201bc33989464f25ebf7ba80b3656b95ef358` y `dfde5d718691f29b81e88d4508538ffd65f23d77`, sin push. La solicitud posterior autorizó Fase 7: implementación local verificada; prueba externa de Resend bloqueada por configuración/remitente/destinatario autorizado pendientes. El push sigue requiriendo aprobación expresa del propietario. Se usa el checkout existente y origin oficial `samuelbenju/AI_WORKFLOW_ATLAS`; no se reconstruyó la aplicación ni se inició Fase 8.
+Fases 1–7 publicadas con autorización expresa en `main` del repositorio oficial `samuelbenju/AI_WORKFLOW_ATLAS`, SHA `d1675d7a58129853ffa7e4d5ae6cf02c02afb298`, con historial preservado y sincronización comprobada tras el push. La solicitud actual autoriza únicamente Fase 8: infraestructura local de pagos Sandbox implementada, con revisión oficial/protocolo y pruebas externas bloqueadas por acceso y credenciales pendientes. Se conserva el checkout y los módulos anteriores. No se inició Fase 9 ni se habilitó producción. La solicitud posterior autoriza expresamente versionar Fase 8 en un único commit y publicarlo mediante push normal. Este cierre conserva los pendientes externos y no cambia código funcional.
 
 | Fase | Estado |
 | --- | --- |
@@ -15,7 +15,7 @@ La consolidación conserva Fases 1–6 en los commits locales `62d201bc33989464f
 | 5. Blog y SEO | Implementada y verificada; seis artículos preparados, sin publicar y pendientes de revisión humana. |
 | 6. Patrocinios y CRM | Implementada y verificada; precios reales e inicialización humana pendientes del propietario. |
 | 7. Newsletter | Implementada y verificada localmente; falta prueba real de Resend con configuración y destinatario autorizados. |
-| 8. Wompi Sandbox | No iniciada. |
+| 8. Wompi Sandbox | Infraestructura local probada y versionada en main; publicación autorizada. Revisión oficial y pago Sandbox externo pendientes por red/credenciales. |
 | 9. Infraestructura de agentes | No iniciada. |
 | 10. Agentes especializados | No iniciada. |
 | 11. Analítica y afiliados | No iniciada. |
@@ -166,3 +166,31 @@ Este respaldo Git conserva código, configuración pública, esquema, migracione
 Revisión de archivos legítimos sin patrones de credenciales reales ni identidad privada del operador detectados; `.env.local`, generados/reportes/dependencias excluidos. Se conserva íntegro el respaldo Git de Fases 1–6; la entrega incluye un segundo respaldo Git con Fase 7. GitHub continúa pendiente de aprobación de push, sin force push ni cambios a otros repositorios.
 
 Cierre Git: Fase 7 se conserva en un commit propio `feat: implement consent-based newsletter and authorized delivery` sobre main, posterior a los dos de consolidación. Fetch oficial comprobado: origin/main sigue `411621ab95c9ad10725a5c5cb74688c6ffc9e6ef`, ancestro del historial local. La respuesta de entrega registra el hash concreto y resultado de preparación de push; ningún push se autoriza por estas comprobaciones.
+
+
+## Ejecución 8/12 — órdenes y pagos Sandbox
+
+- Reutilizados PaymentOrder/PaymentTransaction/PaymentEvent y añadidos PaymentAttempt/PaymentOrderHistory: separación real de orden, intento, transacción, evento, campaña y cumplimiento. Referencias únicas, snapshots comercial/cobro, nonce idempotente, historial/fechas, FK compuestas y protección de condiciones financieras. Trece migraciones/30 modelos; migraciones 12–13 aplicadas sin editar las once anteriores. Historial actual sin pendientes/editadas/fallidas.
+- `/admin/payments` privado OWNER/ADMIN: empresa/paquete, creación de orden, búsqueda/estado/paginación, importes/monedas/ambientes, intentos, historial, transacciones, eventos/errores, preparación de checkout y conciliación. Cada API/servicio autoriza, mutaciones con Origin/CSRF, Zod y JSON acotado. No existe botón para marcar un pago como aprobado. Cuenta humana aún pendiente de contraseña elegida por CLI, sin credenciales fijas.
+- Precios consultados desde backend; no importes o ambiente del navegador. Moneda comercial y de cobro separadas. Wompi solo admite precio comercial explícito en COP; USD/EUR se rechaza sin conversión inventada. Paquetes sin precio o inactivos no generan órdenes. No se crearon precios o clientes ficticios en desarrollo.
+- PaymentProvider desacoplado y adaptador Wompi únicamente Sandbox. Hosted checkout firmado, referencias independientes, expiración, reuso del intento pendiente y bloqueo de reintento ciego. Retorno `/payments/return` público e informativo, noindex/no-store, sin mutación ni confianza en parámetros de confirmación y sin exponer órdenes.
+- Webhook con checksum/campos esenciales, entorno de prueba y consulta adicional al proveedor; reference no firmada del cuerpo no se usa para liquidar. Contraste ID/importe/moneda/referencia contra la orden, eventos idempotentes, locks/transacción atómica, estados terminales sin retrocesos, conciliación administrativa real por ID y fallos RETRYABLE. Aprobaciones tardías/múltiples quedan ON_HOLD; nunca se borran para ocultarlas.
+- Sandbox PAID queda SANDBOX_ONLY, sin ingreso real ni FULFILLED. Guards comerciales preservados: publicidad requiere aprobación/contrato/periodo/producto y pago PRODUCTION verificado. Ningún pago de prueba activa patrocinios, newsletter o anuncios reales.
+- Configuración por defecto disabled; no hay claves Wompi. Secretos de integridad/eventos solo servidor para hashing local, sin placeholders del proxy, valores en Git o frontend. No se utilizan instrumentos de tarjeta o recursos comerciales de pago. Desarrollo conserva cero órdenes, intentos, transacciones, eventos e historial financiero; pruebas solo en bases temporales propias.
+- Revisión de documentación oficial vigente **bloqueada**: petición a docs.wompi.co devolvió 403 del proxy. No se obtuvo una fuente oficial alternativa ni se presume verificado el contrato. El adaptador queda pendiente de contrastar checkout/expiración/checksum/shape/auth de consulta con documentación accesible antes de habilitarlo. Tampoco se ejecutó checkout/pago/webhook Sandbox externos por falta de credenciales y callback HTTPS. Pruebas locales con respuestas explícitas de fixture no equivalen a transacciones externas verificadas.
+- Guía `docs/PAYMENTS.md`, arquitectura, README, AGENTS, ejemplo de variables y referencia de DB actualizados. Borrador cloud guardado con arranque Fase 8, nombres de variables y dominios docs.wompi.co/sandbox.wompi.co/checkout.wompi.co, preservando configuración existente. `requires_publish=true`: revisar/guardar ajustes y publicar el entorno para activar snapshot/red; no aplicado ni probado en tarea nueva.
+
+Validación y resultados de cierre en BUILD_LOG.md. La aceptación externa permanece pendiente; Fase 9 no iniciada. Sin nuevas dependencias, reinstalación, cambios al lockfile, commit, push, deploy, correos, pagos reales o activación de campañas en esta fase.
+
+Cierre verificado: `npm run check` con **33 unitarias**, lint sin warnings y TypeScript; **53 pruebas PostgreSQL**, build y **86/86 E2E** en escritorio/móvil con `--workers=1`, cero fallidas/omitidas en la tanda final (2.6 min). Concurrencia financiera validada en PostgreSQL con creación/eventos simultáneos. La primera tanda 85/86 detectó desbordamiento de referencia a 320 px, corregido; la segunda 85/86 encontró conflicto P2034 en CRUD previo con dos workers, sin modificar ese módulo. Cierre aislado con un worker: 86/86. Capturas del panel inspeccionadas; secretos reales no detectados en archivos legítimos revisados y privados/generados ignorados.
+
+
+## 2026-10-26 — Versionado y publicación autorizada de Fase 8
+
+Inspeccionados los 31 archivos pendientes de esta fase y los 218 archivos legítimos del proyecto (212 de texto, 6 imágenes). No se detectaron claves reales, credenciales o identidad privada del operador. Los valores Wompi de tests son fixtures explícitas con transporte local falso; .env.example conserva placeholders y Sandbox deshabilitado. Privados, dependencias, cliente generado y reportes siguen ignorados.
+
+Se conserva el esquema, las trece migraciones (12–13 nuevas), pruebas y package-lock.json, que ya estaba versionado y permanece sin cambios. Ningún archivo funcional o test es posterior al build/E2E aprobados. No se repiten suites completas: se conserva la evidencia anterior de 33 unitarias, 53 PostgreSQL, 86 E2E con un worker, tipos/lint/build aprobados.
+
+Fetch y lectura directa del remoto oficial confirmaron main en `d1675d7a58129853ffa7e4d5ae6cf02c02afb298` antes de crear el commit exclusivo `feat: implement Wompi Sandbox payment infrastructure`. Se autoriza su publicación normal sobre ese padre, sin force push ni alterar historial anterior. El SHA resultante y la comprobación posterior de sincronización se entregan al cerrar la operación; no se necesitan commits adicionales para insertar el hash del propio commit en estos archivos.
+
+Continúan pendientes las credenciales Wompi Sandbox, callback/webhook HTTPS accesible, revisión de documentación oficial bloqueada por 403 y pruebas externas reales. Guardar código en GitHub no resuelve ni acredita esas integraciones. No se ejecutan pagos, no se habilita producción y no se inicia Fase 9.

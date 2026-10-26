@@ -1,0 +1,3 @@
+import Link from "next/link";
+export const metadata={title:"Sandbox checkout return",robots:{index:false,follow:false},referrer:"no-referrer" as const};
+export default function PaymentReturn(){return <div className="container directory-page"><header className="directory-heading"><p className="eyebrow">SANDBOX · NO REAL CHARGE</p><h1>Your checkout has returned.</h1><p>This page does not confirm payment. Wompi’s verified event or a server reconciliation must confirm the transaction. Advertising requires separate approval and Sandbox payments never activate real placements.</p></header><Link className="button button-outline" href="/sponsor">Back to sponsorships</Link></div>;}

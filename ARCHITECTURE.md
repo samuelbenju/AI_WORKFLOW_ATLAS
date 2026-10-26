@@ -2,7 +2,7 @@
 
 ## Estado y límites
 
-Fases 1–7 (integración externa de correo pendiente): portada, directorios públicos y administración conectados a PostgreSQL/Prisma, 28 modelos, once migraciones, conexión de servidor, repositorios y seeds. Existen búsqueda/filtros/paginación y fichas de herramientas/casos con relaciones. Blog y CMS con bloques/fuentes/revisión/publicación, SEO dinámico y control de indexación de preestreno. Login real con sesiones opacas y CRUD administrativo; inicialización de la cuenta humana pendiente de contraseña mediante CLI seguro. Hay captación, confirmación/baja, borradores y envío manual desacoplado; la entrega real de Resend está pendiente de configuración/prueba autorizada. No hay pagos ni agentes operativos. Patrocinios y CRM operativos para solicitudes, propuestas privadas y campañas condicionadas; entrega externa de correo/pagos/agentes siguen pendientes.
+Fases 1–8 locales (integraciones externas de correo/pagos pendientes): portada, directorios públicos y administración conectados a PostgreSQL/Prisma, 30 modelos, trece migraciones, conexión de servidor, repositorios y seeds. Existen búsqueda/filtros/paginación y fichas de herramientas/casos con relaciones. Blog y CMS con bloques/fuentes/revisión/publicación, SEO dinámico y control de indexación de preestreno. Login real con sesiones opacas y CRUD administrativo; inicialización de la cuenta humana pendiente de contraseña mediante CLI seguro. Hay captación, confirmación/baja, borradores y envío manual desacoplado; la entrega real de Resend está pendiente de configuración/prueba autorizada. Hay infraestructura de órdenes/Wompi Sandbox deshabilitada sin credenciales; no se verificaron pagos externos ni hay agentes operativos. Patrocinios y CRM operativos para solicitudes, propuestas privadas y campañas condicionadas; entrega externa de correo/pagos/agentes siguen pendientes.
 
 ## Componentes actuales
 
@@ -93,7 +93,7 @@ Controles actuales: escape de React, validación Zod de `SITE_URL`, headers nosn
 
 ### Pagos
 
-`PaymentProvider` expondrá creación de checkout, validación de eventos y consulta/conciliación. Orden y precio se obtienen en servidor, referencia única e importe COP en unidades mínimas. Adaptador Wompi Sandbox firma según documentación vigente. Webhook autenticado y eventos idempotentes actualizan transacciones en una transacción DB; retorno del navegador nunca confirma pago. Campaña requiere aprobación separada. No almacenar PAN/CVV. Producción deshabilitada hasta autorización.
+`PaymentProvider` implementa preparación de checkout, validación de eventos y consulta/conciliación exclusivamente Sandbox. Orden y precio se obtienen en servidor, referencia única e importe COP en unidades mínimas. Adaptador Wompi Sandbox implementado con pruebas locales; contraste con documentación oficial vigente bloqueado por 403 del proxy y pendiente. Webhook autenticado y eventos idempotentes actualizan transacciones en una transacción DB; retorno del navegador nunca confirma pago. Campaña requiere aprobación separada. No almacenar PAN/CVV. Producción deshabilitada hasta autorización.
 
 ### Correo
 
@@ -117,7 +117,7 @@ Logs con IDs de correlación, actor, entidad, transición y fecha; sin secretos,
 
 No hay servicios facturables configurados. Desarrollo Fase 1 es local; disponibilidad de créditos/planes gratuitos no se presupone. Objetivo futuro US$0–100/mes no autoriza gasto. Hosting, DB, dominio, email, tokens IA, worker y comisiones necesitan evaluación y límites antes de alta.
 
-Vercel o Node compatible será el destino previsto, aún no desplegado. Backup y restauración local de desarrollo se ensayaron en Fase 2; bases administradas no se han contratado. Antes de producción habrá RPO/RTO acordados, backups externos, prueba de restauración, monitorización y rollback. Un snapshot de cloud no sustituye backups PostgreSQL ni garantiza conservar el volumen Docker. La Fase 1 está publicada en `samuelbenju/AI_WORKFLOW_ATLAS`; Fases 2–6 y la CI ampliada siguen locales, sin push automático. La ejecución remota de CI no se ha comprobado.
+Vercel o Node compatible será el destino previsto, aún no desplegado. Backup y restauración local de desarrollo se ensayaron en Fase 2; bases administradas no se han contratado. Antes de producción habrá RPO/RTO acordados, backups externos, prueba de restauración, monitorización y rollback. Un snapshot de cloud no sustituye backups PostgreSQL ni garantiza conservar el volumen Docker. Las Fases 1–7 están publicadas en `samuelbenju/AI_WORKFLOW_ATLAS`, main `d1675d7a58129853ffa7e4d5ae6cf02c02afb298`, tras el push expresamente autorizado. Los cambios de Fase 8 permanecen locales, sin nuevo push automático. La ejecución remota de CI no se ha comprobado.
 
 ## Referencias oficiales consultadas
 
@@ -159,3 +159,14 @@ Guía operativa, controles y límites actuales en `docs/COMMERCIAL.md`. No se in
 - ADR-041: patrocinio Newsletter reutiliza validación comercial de pago PRODUCTION, aprobación/periodo/contrato y versión. Se etiqueta en plantilla y no se entrega en espacios web. Propuesta editorial solo desde artículos publicados/revisados crea DRAFT; prepara futura entrada de agente sin activarlo. No Fase 8.
 
 Guía de configuración, privacidad, envío, estados, límites, recuperación y pruebas en `docs/NEWSLETTER.md`. Las decisiones/secciones previas conservan su contexto histórico de Fase 6; la restricción de formato Newsletter queda sustituida por las guardias de Fase 7. API key, dominio/remitente y destinatario autorizado siguen pendientes para verificar entrega externa.
+
+
+### Decisiones de Fase 8
+
+- ADR-042: reutilizar orden/transacción/evento y añadir PaymentAttempt/PaymentOrderHistory. Snapshot comercial y cobro separados, idempotencia de creación, historia y cumplimiento independientes de campaña. Dos migraciones aditivas (12–13), FK compuestas de importes/intento/orden/proveedor y actor, conservación de filas anteriores y restricción de cumplimiento Sandbox.
+- ADR-043: hosted checkout evita instrumentos de pago en la aplicación. Adaptador PaymentProvider desacoplado, único Wompi Sandbox con destinos fijos, moneda COP, firmas y lookup con timeout. No hay procesador/URL/bandera de producción. El backend calcula precio; USD/EUR se rechaza sin conversión implícita. Falta revisar contratos con documentación oficial vigente, cuyo acceso fue denegado por el proxy.
+- ADR-044: webhook exige checksum con campos esenciales y consulta adicional al proveedor: campos no firmados como reference no se usan para liquidar. Evento idempotente, transición financiera atómica bajo locks; conflictos/unknown refs quedan visibles. Errores de consulta RETRYABLE, conciliación administrativa por ID/orden real y estados terminales sin retrocesos indebidos. Ningún retorno o botón marca un pago manualmente aprobado.
+- ADR-045: nonce de orden y referencia independiente por intento, reutilización segura de checkout pendiente y bloqueo de reintento ciego tras expiración. Aprobaciones múltiples/tardías ON_HOLD. Sandbox PAID implica SANDBOX_ONLY, nunca FULFILLED; los guards comerciales conservan exigencia PRODUCTION/aprobación/contrato y no cambian por esta implementación.
+- ADR-046: pruebas de protocolo/transporte son fixtures explícitas locales con PostgreSQL temporal. No se ejecutó un pago externo ni se afirma conformidad con documentación oficial inaccesible. Default disabled y bloqueo externo hasta disponer de acceso, credenciales y callback HTTPS. Fase 9 no iniciada.
+
+Guía de configuración, endpoints, contratos candidatos, límites de aceptación, idempotencia/recuperación y obligaciones pendientes en `docs/PAYMENTS.md`.
