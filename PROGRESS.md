@@ -4,7 +4,7 @@ Actualizado: 26 de octubre de 2026 (America/Bogota; métricas propias agregadas 
 
 ## Alcance autorizado
 
-Fases 1–10 publicadas con autorización expresa en `main` del repositorio oficial `samuelbenju/AI_WORKFLOW_ATLAS`, SHA remoto comprobado `1b468492d0d761f71706bf252ab25935ee3ce83d`. Fase 11 conservada en commit local `86c5323ba939d34d152b4f1c14e47f7022e2c895`, push pendiente de autorización. La solicitud vigente autoriza la **auditoría y preparación de Fase 12**, sobre este checkout, sin reconstrucción, despliegue, publicaciones comerciales, cobros reales, compras o llamadas de IA con gasto. Auditoría local ejecutada con correcciones y documentación; lanzamiento **bloqueado** por infraestructura/pruebas externas, administrador humano, legal/fiscal y proveedor de pagos de producción. Los cambios de Fase 12 permanecen locales, sin commit/push en esta ejecución. Las secciones históricas conservan su contexto; este resumen y el cierre de Fase 12 son el estado vigente.
+Fases 1–12 respaldadas en main del repositorio oficial, base publicada 70984e42d862d8c47e34531648f8c531698cb42e. La solicitud vigente autoriza preparar/publicar workflows y ejecutar primero comprobación de Neon staging y luego solo las 16 migraciones originales si todas las guardas pasan. Destino solicitado: cold-shadow-53495242 / atlas_staging, rol atlas_staging_owner, rama Neon production usada como staging. El acceso local a la API GitHub devuelve Forbidden: sin ejecución real Actions/Neon todavía. Se prepara infraestructura segura y guía Render, sin despliegue, servicios de pago, seeds, usuario humano o activación de agentes. Las secciones anteriores de intentos y respaldo conservan su contexto histórico; este resumen y el último apartado son el estado vigente.
 
 | Fase | Estado |
 | --- | --- |
@@ -18,7 +18,7 @@ Fases 1–10 publicadas con autorización expresa en `main` del repositorio ofic
 | 8. Wompi Sandbox | Infraestructura local probada y publicada en main; revisión oficial y pago Sandbox externo siguen pendientes. |
 | 9. Infraestructura de agentes | Motor/worker/scheduler locales verificados y versionados en main; publicación autorizada. OpenAI real pendiente de credenciales y presupuesto. |
 | 10. Agentes especializados | Publicada y sincronizada en GitHub mediante push normal autorizado. Modelos TEST_FIXTURE; OpenAI real pendiente de credenciales/consumo autorizados. |
-| 11. Analítica y afiliados | Implementada, verificada y versionada localmente; push pendiente de aprobación. Google/proveedores reales pendientes de configuración/pruebas externas. |
+| 11. Analítica y afiliados | Publicada; Google/proveedores reales pendientes de configuración/pruebas externas. |
 | 12. Auditoría y lanzamiento | Auditoría/correcciones/pruebas locales y preparación realizadas. Lanzamiento pendiente de los bloqueos de LAUNCH_CHECKLIST.md; no listo para producción comercial. |
 
 ## Implementación de Fase 1
@@ -292,3 +292,27 @@ Preparados CI serial sin despliegue, vercel.json sin migraciones/seed/cron, cone
 Informe de doce puntos: AUDIT_REPORT.md; tareas/responsables/evidencia pendientes: LAUNCH_CHECKLIST.md; operación/activación individual y manual de agentes/plan comercial: docs/PRODUCTION.md. Faltan revisión jurídica/fiscal Colombia, servicios/dominio/backup/monitor finales y credenciales/pruebas autorizadas Resend/Wompi/OpenAI/Google/socios. No declarar listo para producción ni habilitar costes o publicar por terminar esta auditoría.
 
 Estado final de Git: main conserva el commit local de Fase 11, uno delante/cero detrás del remoto comprobado; 50 archivos de Fase 12 pendientes (29 modificados/21 nuevos), sin staging, commit o push. Revisión final de 287 archivos sin secretos reales detectados y git diff --check correcto.
+
+## Neon staging — intento detenido, 26-10-2026 (America/Bogota)
+
+Autorizada integración exclusivamente PostgreSQL sobre el proyecto Neon existente cold-shadow-53495242 / org-purple-boat-02914113, rama indicada production, con intención staging aún no verificada. Base Git comprobada limpia en 70984e42d862d8c47e34531648f8c531698cb42e (Fase 12 ya publicada; los estados previos de respaldo conservan su contexto histórico).
+
+Backup privado de .env.local conservando bytes y modo 0600. Instalación global Neon falló ENOENT en /home/agent/.local/lib; fallback npx oficial funcionó, versión 8.11.4. Init con IDs/servicio postgres y --no-agent-setup se detuvo por ENOENT al crear /home/agent/.config/neon. Sin neon.ts, plan/deploy, acceso autenticado al proyecto, conexión SQL o migraciones aplicadas. No se modificaron conexiones, Prisma, esquema, lockfile o código funcional. No se afirma DB vacía, persistencia o integración Neon verificadas. Ningún servicio/coste externo habilitado, ninguna cuenta humana creada, sin commit/push.
+
+Se requiere intervención del propietario para directorio privado escribible y login de Neon en este entorno; ruta de recuperación --config-dir documentada, no ejecutada tras el bloqueo. Consultar docs/NEON_STAGING.md: secuencia de validación/migración y variables/roles/TLS para Railway, sin despliegue. Check/build/db:status y lecturas/escrituras contra Neon pendientes; las pruebas previas no se presentan como comprobación Neon.
+
+## Comprobación manual Neon desde Actions — preparada, 26-10-2026 (America/Bogota)
+
+Nueva solicitud sustituye la dependencia del CLI: propietario confirma atlas_staging/PostgreSQL 17.11 y secreto directo MIGRATION_DATABASE_URL en GitHub Actions. Preparado workflow independiente neon-staging-check.yml, exclusivamente workflow_dispatch para repositorio oficial/main, Node 24 y pg existente, contents:read, secreto solo en el paso de consulta, TLS validado y sesión read-only. Solo SELECT de base/versión/estado/conteo de tablas; sin migraciones, historial Prisma, seeds o escrituras, sin cambios de arquitectura/esquema/lockfile.
+
+Validación local aprobada: actionlint 1.7.12, YAML/estructura, node --check del heredoc y ocho fixtures simuladas sin red. No hay conexión real Neon verificada ni ejecución remota. Instrucciones Actions/Run workflow/main y límites en docs/NEON_STAGING.md; conservado el diagnóstico anterior y resultados de auditoría. Se prepara commit local de workflow/documentación, preservando los tres documentos locales pendientes anteriores; publicación sujeta a aprobación expresa. No servicios o gastos activados.
+
+## Activación Neon / preparación Render — 26-10-2026 (America/Bogota)
+
+Autorizados commits/push/workflows y migración condicionada por el adjunto. Workflows check/migrate exclusivamente manuales/main, concurrencia compartida y secreto solo en inspección/operación PG. Migración exige run de check exitoso del mismo SHA y proyecto identificado mediante GUC Neon o host de consola fijado independientemente en NEON_STAGING_EXPECTED_HOST. Bloquea destino, usuario, datos, objetos, historial o estructura inesperados. No cambia Prisma, esquema o SQL originales.
+
+Referencia local efímera: las 16 migraciones se aplican y segundo despliegue es idempotente; 55 tablas, 486 columnas, 72 FK, 230 restricciones, 182 índices y 75 valores enum. Guarda acepta estructura vacía de negocio completa, rechaza filas existentes, cambios de estructura y dominios inesperados; transacciones de pruebas revertidas y solo DB efímera propia eliminada. Check/lint/TypeScript + 50 unitarias aprobados y build/generación cliente correctos. No son pruebas ejecutadas en Neon ni una ejecución remota de Actions.
+
+Bloqueo: gh api devuelve Forbidden; la política no lista api.github.com. Se requiere acceso API permitido/autenticado con permisos Actions para poder iniciar/consultar ejecuciones. No se sortea el proxy o extraen secretos; no hay enlace de ejecución real ni 16 migraciones remotas verificadas, db:status Neon, datos o estructura remota observados. Cinco agentes/cinco calendarios locales deshabilitados, cero ejecuciones; flags globales seguros conservados.
+
+Guías actualizadas: docs/NEON_STAGING.md y docs/RENDER_STAGING.md (hosting elegido, sin desplegar). Ninguna rama/backup Neon creada sin poder verificar permisos/cuota/coste. Neon aún no se declara listo para Render: faltan evidencia real y rol runtime mínimo separado. Todas las autorizaciones de esta tarea permanecen sujetas a las guardas, sin gastos/servicios extra.

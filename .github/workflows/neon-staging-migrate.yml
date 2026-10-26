@@ -1,0 +1,91 @@
+name: Neon staging guarded migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      connection_run_id:
+        description: Successful read-only workflow run ID for this exact main commit
+        required: true
+        type: string
+      confirm_target:
+        description: Confirm the existing staging project and database
+        required: true
+        type: string
+        default: cold-shadow-53495242/atlas_staging
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: neon-staging-database
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    if: github.repository == 'samuelbenju/AI_WORKFLOW_ATLAS' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AGENTS_ENABLED: 'false'
+      AGENTS_MONTHLY_BUDGET_USD_MICROS: '0'
+      WOMPI_SANDBOX_ENABLED: 'false'
+      NEWSLETTER_MODE: disabled
+      ANALYTICS_ENABLED: 'false'
+      SEO_INDEXING_ENABLED: 'false'
+      LEGAL_REVIEW_CONFIRMED: 'false'
+      GA4_MODE: disabled
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - name: Check out the exact main commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Require successful read-only run from this exact commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CONNECTION_RUN_ID: ${{ inputs.connection_run_id }}
+          CONFIRM_TARGET: ${{ inputs.confirm_target }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          try {
+            const id = process.env.CONNECTION_RUN_ID;
+            if (!/^[1-9][0-9]{0,19}$/.test(id ?? '')
+              || process.env.CONFIRM_TARGET !== 'cold-shadow-53495242/atlas_staging') throw Error();
+            const base = 'https://api.github.com/repos/samuelbenju/AI_WORKFLOW_ATLAS/actions';
+            const headers = {Authorization: `Bearer ${process.env.GH_TOKEN}`, Accept: 'application/vnd.github+json'};
+            const response = await fetch(`${base}/runs/${id}`, {headers, signal: AbortSignal.timeout(15000)});
+            if (!response.ok) throw Error();
+            const run = await response.json();
+            const detail = await fetch(`${base}/workflows/${run.workflow_id}`, {headers, signal: AbortSignal.timeout(15000)});
+            if (!detail.ok) throw Error();
+            const workflow = await detail.json();
+            if (run.head_sha !== process.env.GITHUB_SHA || run.head_branch !== 'main'
+              || run.head_repository?.full_name !== 'samuelbenju/AI_WORKFLOW_ATLAS'
+              || run.event !== 'workflow_dispatch' || run.status !== 'completed'
+              || run.conclusion !== 'success' || workflow.path !== '.github/workflows/neon-staging-check.yml') throw Error();
+            console.log(`Verified successful read-only run ${id} for commit ${process.env.GITHUB_SHA}.`);
+          } catch {
+            console.error('Read-only run or target confirmation not verified. No database access performed.');
+            process.exitCode = 1;
+          }
+          NODE
+      - name: Install locked dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Validate Prisma, lint, TypeScript and unit tests before database writes
+        run: npm run check
+      - name: Generate Prisma client and build before database writes
+        run: npm run build
+      - name: Guard destination, use existing Prisma deploy, verify history and catalog
+        env:
+          MIGRATION_DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
+          NEON_STAGING_PROJECT_ID: cold-shadow-53495242
+          NEON_STAGING_EXPECTED_HOST: ${{ vars.NEON_STAGING_EXPECTED_HOST }}
+          NEON_STAGING_CONFIRMATION: ${{ inputs.confirm_target }}
+        run: node --import tsx scripts/neon-staging.ts apply

@@ -1,0 +1,44 @@
+name: Neon staging read-only check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neon-staging-database
+  cancel-in-progress: false
+
+jobs:
+  connection:
+    if: github.repository == 'samuelbenju/AI_WORKFLOW_ATLAS' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      AGENTS_ENABLED: 'false'
+      AGENTS_MONTHLY_BUDGET_USD_MICROS: '0'
+      WOMPI_SANDBOX_ENABLED: 'false'
+      NEWSLETTER_MODE: disabled
+      ANALYTICS_ENABLED: 'false'
+      SEO_INDEXING_ENABLED: 'false'
+      LEGAL_REVIEW_CONFIRMED: 'false'
+      GA4_MODE: disabled
+    steps:
+      - name: Check out the approved main branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install existing locked dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify direct PostgreSQL connection with strict TLS and read-only queries
+        env:
+          MIGRATION_DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
+          NEON_STAGING_PROJECT_ID: cold-shadow-53495242
+          NEON_STAGING_EXPECTED_HOST: ${{ vars.NEON_STAGING_EXPECTED_HOST }}
+        run: node --import tsx scripts/neon-staging.ts inspect

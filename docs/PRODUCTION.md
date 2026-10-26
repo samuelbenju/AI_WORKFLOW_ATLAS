@@ -2,6 +2,10 @@
 
 Estado 26-10-2026: preparado para revisión, sin despliegue o cuentas compradas. Ver [lista de lanzamiento](../LAUNCH_CHECKLIST.md) y [auditoría](../AUDIT_REPORT.md). No es una certificación de producción.
 
+## Hosting de staging elegido posteriormente
+
+El propietario eligió Render para el siguiente despliegue controlado. La guía vigente es [RENDER_STAGING.md](RENDER_STAGING.md); no se desplegó ni se compró un servicio. Neon staging necesita ejecución real de las guardas/migraciones y rol runtime mínimo antes de conectarlo. La configuración Vercel anterior se conserva; no se reescribe la arquitectura por preparar otro host.
+
 ## Topología y configuración
 
 Web Next.js en Node 24 (Vercel compatible sujeto a comprobación en destino), PostgreSQL 17 externo con TLS verify-full y worker Node/Docker separado. No ejecutar bucles de agentes dentro de funciones serverless. `vercel.json` solo declara framework/instalación/build, sin migración, seed, cron o despliegue. El checkout usa el repositorio oficial AI_WORKFLOW_ATLAS; CI solo prueba bases efímeras y no tiene permisos de publicación.
