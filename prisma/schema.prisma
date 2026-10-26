@@ -148,6 +148,7 @@ model User {
   drafts        ContentDraft[]
   approvedLeads CommercialLead[]
   approvedAds   SponsorshipCampaign[]
+  reviewedAgentProducts AgentWorkProduct[]
   paymentHistory PaymentOrderHistory[]
   newsletters   NewsletterCampaign[]
   approvedTasks AgentTask[]
@@ -258,6 +259,7 @@ model Article {
   reviewedAt      DateTime?             @db.Timestamptz(3)
   reviewedById    String?               @db.Uuid
   reviewedBy      User?                 @relation("ArticleReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  agentProducts AgentWorkProduct[]
   revisions       ContentDraft[]
   status          ContentStatus         @default(DRAFT)
   isDemo          Boolean               @default(false)
@@ -316,6 +318,7 @@ model SponsorshipPackage {
 }
 
 model CommercialLead {
+  agentProducts AgentWorkProduct[]
   reference    String?            @unique @db.VarChar(100)
   submissionId String?            @unique @db.Uuid
   payloadDigest String?           @db.Char(64)
@@ -546,6 +549,11 @@ model AgentTask {
   id               String           @id @default(uuid()) @db.Uuid
   agentId          String           @db.Uuid
   agent            Agent            @relation(fields: [agentId], references: [id], onDelete: Restrict)
+  parentTaskId     String?          @db.Uuid
+  parentTask       AgentTask?       @relation("AgentDelegation", fields:[parentTaskId], references:[id], onDelete:Restrict)
+  childTasks       AgentTask[]      @relation("AgentDelegation")
+  workProduct      AgentWorkProduct?
+  approvedInputHash String?        @db.Char(64)
   trigger          String           @default("MANUAL") @db.VarChar(20)
   approvedConfigHash String?        @db.Char(64)
   leaseToken       String?          @db.Uuid
@@ -570,6 +578,7 @@ model AgentTask {
   executions       AgentExecution[]
   drafts           ContentDraft[]
 
+  @@index([parentTaskId])
   @@index([status, scheduledAt, leaseExpiresAt])
   @@index([agentId, createdAt])
   @@index([approvedById])
@@ -746,6 +755,7 @@ model PaymentOrderHistory {
 
 
 model AgentSchedule {
+ automationKey String? @unique @db.VarChar(100)
  id String @id @default(uuid()) @db.Uuid
  agentId String @db.Uuid
  agent Agent @relation(fields:[agentId], references:[id], onDelete:Restrict)
@@ -767,4 +777,36 @@ model AgentWorkerHeartbeat {
  lastSeenAt DateTime @default(now()) @db.Timestamptz(3)
  status String @db.VarChar(30)
  errorCode String? @db.VarChar(100)
+}
+
+
+model AgentSource {
+ id String @id @default(uuid()) @db.Uuid
+ url String @unique @db.VarChar(2048)
+ title String @db.VarChar(200)
+ content String @db.Text
+ digest String @db.Char(64)
+ fetchedAt DateTime @db.Timestamptz(3)
+ provenance String @default("FETCHED") @db.VarChar(30)
+ products AgentWorkProduct[]
+}
+model AgentWorkProduct {
+ id String @id @default(uuid()) @db.Uuid
+ taskId String @unique @db.Uuid
+ task AgentTask @relation(fields:[taskId], references:[id], onDelete:Restrict)
+ kind String @db.VarChar(30)
+ body Json
+ evidence Json @default("[]")
+ sources AgentSource[]
+ status String @default("PENDING_REVIEW") @db.VarChar(30)
+ reviewedAt DateTime? @db.Timestamptz(3)
+ reviewedById String? @db.Uuid
+ reviewedBy User? @relation(fields:[reviewedById], references:[id], onDelete:Restrict)
+ reviewNote String? @db.VarChar(2000)
+ articleId String? @db.Uuid
+ article Article? @relation(fields:[articleId], references:[id], onDelete:Restrict)
+ leadId String? @db.Uuid
+ lead CommercialLead? @relation(fields:[leadId], references:[id], onDelete:Restrict)
+ createdAt DateTime @default(now()) @db.Timestamptz(3)
+ @@index([kind,status,createdAt])
 }

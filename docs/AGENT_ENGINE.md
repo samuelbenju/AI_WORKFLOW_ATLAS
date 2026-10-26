@@ -4,6 +4,10 @@ Motor local real: PostgreSQL persiste cola, aprobación, reservas, leases, estad
 
 **OpenAI está deshabilitado por falta de API key y habilitación/budget. No hubo ejecuciones reales del modelo.** Las pruebas de modelo usan proveedor `TEST_FIXTURE` en DB aislada y el adaptador usa transporte falso en su prueba de contrato. Los latidos del worker y materialización de propuestas sí se comprobaron mediante Docker/PostgreSQL reales, sin simular llamadas de IA.
 
+## Ampliación vigente de Fase 10
+
+El motor ahora admite cinco perfiles/herramientas empresariales, AgentSource/AgentWorkProduct y propuestas coordinadas. La migración actual es `20261026001500_business_agents`: 35 modelos/quince migraciones. Las descripciones del analista único y cifras de Fase 9 que siguen son históricas; sus controles de cola/consumo/recuperación siguen vigentes. Consultar [BUSINESS_AGENTS.md](BUSINESS_AGENTS.md) para herramientas, evidencia, revisión, CMS, propuestas y automatizaciones. La autorización actual cubre Fase 10, no Fase 11.
+
 ## Arranque y supervisión
 
 1. Checkout `/workspace/Quesito` existente, Node 24.19.0/npm 11.9.0, dependencias congeladas. No crear worktree ni reconstruir el proyecto. `db:generate`, `db:validate`, `db:deploy`, `db:status` aplican/verifican catorce migraciones; la última es `20261026001400_agent_engine`. Treinta y tres modelos, conservando los anteriores.

@@ -16,6 +16,7 @@
     "test": "tsx --test tests/unit/*.test.ts",
     "test:e2e": "node scripts/test-public.mjs",
     "check": "npm run db:validate && npm run lint && npm run typecheck && npm test",
+    "agents:team:init": "node --use-env-proxy --conditions=react-server --import tsx scripts/agent-team-init.ts",
     "agents:tick": "node --use-env-proxy --conditions=react-server --import tsx scripts/agent-worker.ts",
     "test:agent-service": "node scripts/test-agent-service.mjs",
     "agents:service": "node scripts/agent-service.mjs",

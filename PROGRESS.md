@@ -4,7 +4,7 @@ Actualizado: 26 de octubre de 2026 (UTC).
 
 ## Alcance autorizado
 
-Fases 1–8 publicadas con autorización expresa en `main` del repositorio oficial `samuelbenju/AI_WORKFLOW_ATLAS`, SHA `91754fab74d960cdde9b0ad6d78c9ed2e6dbfe91`. La solicitud actual autoriza exclusivamente Fase 9: motor de agentes, worker y programación locales. Cola/consumo/aprobaciones y Docker/PostgreSQL verificados; OpenAI externo deshabilitado por ausencia de clave y presupuesto autorizado. Se conserva el checkout y trabajo anterior. No se inició Fase 10 ni se autorizaron publicaciones, correos, pagos o compras de agentes. La solicitud posterior de cierre autoriza un commit exclusivo de Fase 9 y su publicación mediante push normal. No se cambia código funcional ni se activa consumo.
+Fases 1–9 publicadas con autorización expresa en `main` del repositorio oficial `samuelbenju/AI_WORKFLOW_ATLAS`, SHA `806e48bb502764f56a3f2282ed40e499eb5bcecc`. La solicitud actual autoriza exclusivamente Fase 10 sobre el motor existente: cinco agentes empresariales, herramientas, fuentes, borradores/propuestas y coordinación con aprobación humana. Implementación local; modelos probados solo mediante TEST_FIXTURE en PostgreSQL aislado. OpenAI real sigue deshabilitado por falta de credenciales y presupuesto autorizado. No se inició Fase 11 ni se autorizó gasto recurrente, publicación, contactos, contratos o pagos autónomos. La solicitud posterior de cierre autoriza un commit exclusivo de Fase 10; el push requiere aprobación expresa adicional y permanece pendiente. Las secciones históricas posteriores conservan su contexto; este resumen y la sección de Fase 10 indican el estado vigente.
 
 | Fase | Estado |
 | --- | --- |
@@ -17,7 +17,7 @@ Fases 1–8 publicadas con autorización expresa en `main` del repositorio ofici
 | 7. Newsletter | Implementada y verificada localmente; falta prueba real de Resend con configuración y destinatario autorizados. |
 | 8. Wompi Sandbox | Infraestructura local probada y publicada en main; revisión oficial y pago Sandbox externo siguen pendientes. |
 | 9. Infraestructura de agentes | Motor/worker/scheduler locales verificados y versionados en main; publicación autorizada. OpenAI real pendiente de credenciales y presupuesto. |
-| 10. Agentes especializados | No iniciada. |
+| 10. Agentes especializados | Implementada y versionada localmente sobre motor común; push pendiente de aprobación. Pruebas locales y modelos TEST_FIXTURE; OpenAI real pendiente de credenciales/consumo autorizados. |
 | 11. Analítica y afiliados | No iniciada. |
 | 12. Auditoría y lanzamiento | No iniciada. |
 
@@ -31,11 +31,15 @@ Documentos de control completos, versiones fijadas, lockfile y CI presentes. Ver
 
 ## Operación y límites
 
-Sin gastos, despliegue, push, emails, llamadas IA o cobros. PostgreSQL local está configurado y operativo; autenticación/panel implementados y probados con cuentas temporales. No hay administrador humano inicializado ni agentes operativos. No afirmar cumplimiento jurídico ni disponibilidad comercial. La CI remota no ha sido ejecutada. Los procesos web y contenedores requieren comprobación/reinicio tras restauración. ESLint 9 mantiene el aviso documentado de fin de soporte. El CLI nativo Prisma sigue bloqueado por red; el flujo verificado usa artefactos oficiales WASM, con versiones fijadas y sin desactivar integridad.
+Sin gastos, despliegue, push, emails, llamadas IA o cobros. PostgreSQL local está configurado y operativo; autenticación/panel implementados y probados con cuentas temporales. No hay administrador humano inicializado; los cinco perfiles empresariales y calendarios están deshabilitados, sin ejecuciones reales de IA. No afirmar cumplimiento jurídico ni disponibilidad comercial. La CI remota no ha sido ejecutada. Los procesos web y contenedores requieren comprobación/reinicio tras restauración. ESLint 9 mantiene el aviso documentado de fin de soporte. El CLI nativo Prisma sigue bloqueado por red; el flujo verificado usa artefactos oficiales WASM, con versiones fijadas y sin desactivar integridad.
 
 ## Siguiente actividad
 
-Finalizar la activación humana de Fase 4: el propietario ejecuta `npm run admin:init` en terminal interactiva y elige una contraseña sin eco. El correo ya está preparado solo en `.env.local` privado; no compartir contraseñas por chat. Revisar `docs/ADMIN.md`. La Fase 5 fue autorizada y agrega CMS/SEO; los borradores requieren revisión explícita. No iniciar Fase 7. GitHub conserva Fase 1. Fases 2–6 quedaron consolidadas localmente en 62d201bc33989464f25ebf7ba80b3656b95ef358; publicación remota pendiente de aprobación. No hay cambios funcionales nuevos durante la consolidación.
+Activación humana mediante `npm run admin:init` en terminal interactiva sin eco (correo preparado únicamente en configuración privada). Para una primera ejecución real: configurar de forma segura la credencial de OpenAI, verificar acceso/modelo/tarifas, fijar límites y aprobar una tarea concreta. No compartir secretos por chat ni activar costes recurrentes. Revisar `docs/BUSINESS_AGENTS.md`. Los pendientes externos de Resend y Wompi se mantienen. Fase 11 requiere otra solicitud expresa; Fase 10 conservada en commit local; push pendiente de aprobación del propietario.
+
+## Historial de conservación y fases anteriores
+
+Las secciones que siguen documentan comprobaciones pasadas; sus restricciones por fase y SHAs se refieren a esas ejecuciones. Estado actual: Fases 1–9 en GitHub, Fase 10 versionada localmente sin publicar.
 
 ## Conservación en Git
 
@@ -222,3 +226,25 @@ Conservados worker/daemon/helper Docker, esquema y catorce migraciones (14 nueva
 Fetch y ls-remote del repositorio oficial confirmaron main en `91754fab74d960cdde9b0ad6d78c9ed2e6dbfe91`. Este cierre guarda un único commit `feat: implement autonomous agent execution infrastructure` sobre ese padre y autoriza su push normal main→main, sin force push o reescritura del historial. El hash resultante y comprobación posterior de sincronización se entregan al cerrar la operación, sin crear un commit adicional para insertar su propio SHA.
 
 Worker conservado sin arrancarlo/reiniciarlo: consulta de solo lectura verificó latido reciente, estado BLOCKED, IA deshabilitada, presupuesto global cero, clave ausente, cero ejecuciones y programaciones de negocio. Ninguna llamada externa de IA, servicio facturable, tarea recurrente con costes o Fase 10 activados. OpenAI real sigue pendiente de credenciales, acceso al modelo, tarifas/límites revisados y presupuesto/primera tarea expresamente aprobados. La publicación de código no acredita esa integración ni activa el borrador del entorno.
+
+## Fase 10 — equipo empresarial
+
+Cinco agentes persistentes CEO/RESEARCHER/EDITOR/SEO/COMMERCIAL utilizan el motor común y sus reservas, cuotas, leases, reintentos, cancelación y auditoría. Herramientas exactas y contrato de resultado por rol; ninguna ejecución arbitraria de herramientas solicitadas por el modelo. Migración 15 aditiva aplicada, total 35 modelos/quince migraciones, historial/lockfile conservados. Fuentes con URL/fecha/digest/procedencia y validación de citas, investigación humana aprobada antes del Editor; artículos DRAFT noindex reales y actualización de borrador elegido/versionado con snapshot. SEO analiza metadatos y destinos internos; Comercial guarda clasificaciones/propuestas/respuestas privadas con precio actual y sugerencia separados. No crawler externo, feed de tendencias o métricas de buscadores inventados.
+
+CEO usa métricas DB, Sandbox separado de bruto confirmado PRODUCTION por moneda. Propone tareas pendientes de especialistas y recibe sus productos/estados; al terminar el ciclo se propone consolidación idempotente sin presupuesto/aprobación automática. Panel permite contexto, fuentes, revisión de productos, límites y calendarios. Los cinco perfiles y cinco automatizaciones se registraron realmente en desarrollo **deshabilitados**, tarifas/presupuestos cero; ninguna tarea/ejecución de negocio ni llamada OpenAI en desarrollo.
+
+Verificación local: 38 unitarias y 72 PostgreSQL aprobadas, lint/typecheck/build correctos. Docker worker actualizado con snapshot de Fase 10; heartbeat BLOCKED/PROVIDER_DISABLED, prueba aislada de servicio con programación/reinicio/idempotencia y cero llamadas IA aprobada. Navegador: 92 pruebas anteriores aprobadas y cuatro nuevas escritorio/móvil aprobadas en reejecución focal tras corregir fixtures/selección de pruebas; sin cambios funcionales posteriores al build. Evidencia e iteraciones en BUILD_LOG. TEST_FIXTURE no significa ejecución real del modelo; faltan credencial, tarifas/budget y primera llamada autorizados. No Fase 11.
+
+Arranque reproducible de Fase 10 guardado en `start_skill` del borrador cloud; se preservaron los demás campos. Confirmado saved/requires_publish: revisar/guardar en configuración y publicar el entorno para activarlo. No equivale a publicación GitHub ni prueba de restauración en otra tarea.
+
+## 2026-10-26 — Cierre y respaldo local de Fase 10
+
+Revisados los 29 archivos pendientes: cinco agentes con herramientas diferenciadas, coordinación CEO/especialistas/consolidación, fuentes/productos, CMS/CRM, migración 15, pruebas y documentación. Se conserva el motor común de Fase 9 con aprobación, permisos, reservas/cuotas, concurrencia, leases/fencing, cancelación, auditoría y recuperación conservadora. Sin borrados, cambios funcionales nuevos o alteración del lockfile y las catorce migraciones previas.
+
+Consulta de solo lectura a PostgreSQL: cinco perfiles y cinco automatizaciones deshabilitados, tarifas y presupuestos cero; cero tareas/ejecuciones de negocio, proveedor deshabilitado, clave ausente y heartbeat BLOCKED/PROVIDER_DISABLED. No se ejecutó tick ni se arrancó/reinició/habilitó un agente, programación o servicio en este cierre.
+
+Revisión de 246 archivos legítimos (240 texto/seis imágenes), sin secretos reales detectados. Privados/generados excluidos y .env.example con placeholders. Evidencia conservada: 38 unitarias, 72 PostgreSQL, 92 E2E anteriores y cuatro nuevas en reejecución focal, lint/typecheck/build y servicio Docker. Código funcional anterior al build, último resultado E2E passed; no se repiten suites porque solo se actualizan PROGRESS/BUILD_LOG durante el cierre.
+
+`ls-remote` y fetch del remoto oficial confirmaron main en `806e48bb502764f56a3f2282ed40e499eb5bcecc`, padre del commit local de Fase 10. Commit `feat: implement coordinated business agents`, hash comunicado en la entrega para no añadir otro commit solo con su propio identificador. Push normal main→main preparado, pendiente de aprobación expresa; sin force push ni cambios remotos publicados. Antes de publicar deberá revalidarse el remoto.
+
+OpenAI real sigue pendiente de credenciales, acceso al modelo, tarifas/límites revisados y presupuesto/primera tarea aprobados; TEST_FIXTURE no acredita ejecuciones reales. Bootstrap humano de administrador y pruebas externas de Resend/Wompi mantienen sus pendientes. Ningún gasto o Fase 11 activados.

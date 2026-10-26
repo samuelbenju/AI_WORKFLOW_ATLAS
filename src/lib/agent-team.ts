@@ -1,0 +1,24 @@
+import {z} from "zod";
+export const businessRoles=["CEO","RESEARCHER","EDITOR","SEO","COMMERCIAL"] as const;
+export type BusinessRole=typeof businessRoles[number];
+const base={summary:z.string().trim().min(1).max(3000),observations:z.array(z.string().trim().min(1).max(500)).max(8)};
+const line=z.string().trim().min(1).max(600),ids=z.array(z.uuid()).max(3);
+export const roleOutputs={
+ CEO:z.object({...base,priorities:z.array(line).max(8),risks:z.array(line).max(8),assignments:z.array(z.object({role:z.enum(["RESEARCHER","EDITOR","SEO","COMMERCIAL"]),reason:line}).strict()).max(4)}).strict(),
+ RESEARCHER:z.object({...base,findings:z.array(z.object({claim:line,state:z.enum(["HYPOTHESIS","SOURCE_BACKED"]),sourceIds:ids}).strict()).max(10),opportunities:z.array(line).max(8)}).strict(),
+ EDITOR:z.object({...base,article:z.object({title:z.string().trim().min(3).max(160),excerpt:z.string().trim().min(10).max(400),paragraphs:z.array(z.string().trim().min(10).max(1800)).min(2).max(8),metaDescription:z.string().trim().min(10).max(155),categorySuggestions:z.array(z.string().trim().min(1).max(100)).max(5),sourceIds:ids}).strict()}).strict(),
+ SEO:z.object({...base,recommendations:z.array(z.object({articleId:z.uuid(),problem:line,recommendation:line}).strict()).max(15)}).strict(),
+ COMMERCIAL:z.object({...base,assessments:z.array(z.object({leadId:z.uuid(),classification:z.enum(["FIT","NEEDS_DETAILS","NOT_FIT"]),reason:line}).strict()).max(10),proposals:z.array(z.object({leadId:z.uuid(),packageId:z.uuid(),text:z.string().trim().min(20).max(3000),suggestedPriceMinor:z.string().regex(/^\d{1,12}$/).nullable(),currency:z.enum(["COP","USD","EUR"]),priceRationale:line,responseDraft:z.string().trim().min(10).max(2000)}).strict()).max(3),sectors:z.array(line).max(8)}).strict(),
+};
+export const teamContextSchema=z.object({sourceIds:ids.default([]),researchProductId:z.uuid().nullable().default(null),articleId:z.uuid().nullable().default(null),articleVersion:z.iso.datetime().nullable().default(null),leadId:z.uuid().nullable().default(null),coordinationRootId:z.uuid().nullable().default(null)}).strict();
+export type TeamContext=z.infer<typeof teamContextSchema>;
+export const roleDefinitions={
+ CEO:{identifier:"team-ceo",name:"CEO · coordinación ejecutiva",tools:["business_metrics","team_reports","delegate_tasks"],instructions:"Analyze stored business metrics and distinguish production, Sandbox and missing data. Prioritize opportunities and risks. Propose at most one task for each specialist. You cannot authorize expenditure, contracts or publication."},
+ RESEARCHER:{identifier:"team-researcher",name:"Investigador · oportunidades y fuentes",tools:["catalog_opportunities","research_sources"],instructions:"Research editorial opportunities using the supplied catalog and curated source snapshots. Every source-backed claim needs source IDs. Separate hypotheses from supported claims. Fetching a source does not establish the truth of a claim. Do not invent trends or citations."},
+ EDITOR:{identifier:"team-editor",name:"Editor · borradores CMS",tools:["approved_research","editorial_context","cms_draft"],instructions:"Prepare a useful original tutorial grounded only in approved research and supplied source IDs. Propose categories and metadata. State limitations and uncertainty. Output creates or updates only an explicitly selected draft; no publication or review approval is authorized."},
+ SEO:{identifier:"team-seo",name:"SEO · auditoría técnica",tools:["seo_audit"],instructions:"Review supplied metadata and deterministic internal-link diagnostics. Report incomplete pages and propose concrete improvements. Do not invent search-engine metrics, ranking, traffic, or checks on external URLs that were not performed."},
+ COMMERCIAL:{identifier:"team-commercial",name:"Comercial · análisis y propuestas",tools:["commercial_snapshot","commercial_proposal"],instructions:"Classify only supplied leads and recommend available packages using server prices. Distinguish suggested prices from current configured prices and explain any difference. Prepare private proposal and response drafts, never send or mark contacted/won. No contracts, financial operations or audience metrics may be invented."},
+} as const;
+export const toolNames=["catalog_summary",...new Set(Object.values(roleDefinitions).flatMap(d=>[...d.tools]))] as const;
+export function teamRole(agent:{identifier:string;role:string}):BusinessRole|null{const role=businessRoles.find(r=>roleDefinitions[r].identifier===agent.identifier);return role&&agent.role===role?role:null;}
+export function roleToolsValid(agent:{identifier:string;role:string;allowedTools:string[]}){const role=teamRole(agent);const expected:readonly string[]=role?roleDefinitions[role].tools:["catalog_summary"];return [...agent.allowedTools].sort().join("|")===[...expected].sort().join("|");}
