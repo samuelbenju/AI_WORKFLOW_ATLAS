@@ -9,9 +9,11 @@ const nextConfig: NextConfig = {
     { source: "/login", headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0" }] }, {
       source: "/:path*",
       headers: [
+        ...(process.env.SITE_URL?.startsWith("https://")?[{key:"Strict-Transport-Security",value:"max-age=31536000"}]:[]),
         { key: "X-Content-Type-Options", value: "nosniff" },
         { key: "X-Frame-Options", value: "DENY" },
         { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        { key: "Content-Security-Policy", value: "base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'" },
         { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" }
       ]
     }];

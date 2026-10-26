@@ -1,6 +1,6 @@
 # AI Workflow Atlas
 
-Plataforma independiente sobre herramientas y flujos prácticos de IA. Nombre comercial provisional. Público en inglés, administración en español. **Entrega actual: Fases 1–10 y crecimiento local de Fase 11 (integraciones externas pendientes)**, portada y directorios de herramientas/casos conectados a PostgreSQL. Panel con login, roles, CRUD real, CMS editorial y CRM comercial; blog con fuentes/SEO y solicitudes desde /sponsor. Inicialización humana pendiente de contraseña por CLI; sin envíos, cobros ni agentes activos. Operación de la base en [docs/DATABASE.md](docs/DATABASE.md); rutas, filtros y demo explícita en [docs/PUBLIC_CATALOG.md](docs/PUBLIC_CATALOG.md).
+Plataforma independiente sobre herramientas y flujos prácticos de IA. Nombre comercial provisional. Público en inglés, administración en español. **Entrega actual: Fases 1–11 y auditoría/preparación local de Fase 12; no listo para producción comercial**, portada y directorios de herramientas/casos conectados a PostgreSQL. Panel con login, roles, CRUD real, CMS editorial y CRM comercial; blog con fuentes/SEO y solicitudes desde /sponsor. Inicialización humana pendiente de contraseña por CLI; sin envíos, cobros ni agentes activos. Operación de la base en [docs/DATABASE.md](docs/DATABASE.md); rutas, filtros y demo explícita en [docs/PUBLIC_CATALOG.md](docs/PUBLIC_CATALOG.md).
 
 Administración e inicialización segura en [docs/ADMIN.md](docs/ADMIN.md). Blog, CMS, fuentes y control de indexación en [docs/EDITORIAL.md](docs/EDITORIAL.md).
 
@@ -130,7 +130,7 @@ La configuración de CI de estas fases sigue local y su ejecución remota no est
 
 ## Continuar por fases
 
-Leer `AGENTS.md`, `PROGRESS.md` y la fase pertinente de `PLANS.md`. `PRODUCT_SPEC.md` conserva el alcance integral; `ARCHITECTURE.md` explica decisiones; `BUILD_LOG.md` registra pruebas y bloqueos. No iniciar una fase posterior automáticamente. La Fase 12 requiere una nueva solicitud expresa. El contenido inicial sigue sin aprobar/publicar; no se activa indexación automáticamente. Repositorio oficial: `samuelbenju/AI_WORKFLOW_ATLAS`; las Fases 1–10 están publicadas en GitHub y los avances de Fase 11 siguen locales.
+Leer `AGENTS.md`, `PROGRESS.md` y la fase pertinente de `PLANS.md`. `PRODUCT_SPEC.md` conserva el alcance integral; `ARCHITECTURE.md` explica decisiones; `BUILD_LOG.md` registra pruebas y bloqueos. No iniciar una fase posterior automáticamente. La Fase 12 está autorizada para auditar/preparar; desplegar o activar cobros/servicios requiere aprobación separada. El contenido inicial sigue sin aprobar/publicar; no se activa indexación automáticamente. Repositorio oficial: `samuelbenju/AI_WORKFLOW_ATLAS`; las Fases 1–10 están publicadas en GitHub y los avances de Fase 11 siguen locales.
 
 ## Newsletter (Fase 7)
 
@@ -156,4 +156,12 @@ Pruebas de generación con TEST_FIXTURE en PostgreSQL aislado, **sin ejecuciones
 
 `/admin/analytics` privado OWNER/ADMIN: tráfico consentido, contenido/atribución, newsletter/leads/campañas, pagos PRODUCTION confirmados, comisiones verificadas, gastos registrados y coste IA estimado, separados por fuente/moneda/periodo. Analítica propia deshabilitada por defecto (`ANALYTICS_ENABLED=false`), consentimiento versionado con DNT/GPC y retirada/borrado, sin IP/UA/queries/emails o SDK Google en navegador. GA4 Measurement Protocol y reportes GA4/Search Console preparados, sin credenciales/medición externa real; estados no configurados explícitos.
 
-Programas/enlaces de afiliados administrables, divulgación y `/go/[code]` controlado, clics solo consentidos. Conversiones/comisiones exclusivamente por webhook HMAC de un proveedor configurado que adopte el contrato; no socio/venta real verificados todavía. Gastos son registros, no pagos. Experimentos son propuestas, sin automatizar A/B o alegar causalidad. CEO consulta agregados e importaciones existentes bajo los mismos controles y sin claves de Google. Guía completa: [GROWTH.md](docs/GROWTH.md). No Fase 12 ni costes recurrentes activados.
+Programas/enlaces de afiliados administrables, divulgación y `/go/[code]` controlado, clics solo consentidos. Conversiones/comisiones exclusivamente por webhook HMAC de un proveedor configurado que adopte el contrato; no socio/venta real verificados todavía. Gastos son registros, no pagos. Experimentos son propuestas, sin automatizar A/B o alegar causalidad. CEO consulta agregados e importaciones existentes bajo los mismos controles y sin claves de Google. Guía completa: [GROWTH.md](docs/GROWTH.md). Fase 12 auditada sin activar costes recurrentes.
+
+## Auditoría y operación antes de lanzar
+
+Ver [informe integral](AUDIT_REPORT.md), [lista de lanzamiento](LAUNCH_CHECKLIST.md) y [runbook de producción](docs/PRODUCTION.md). Seis páginas `/privacy`, `/terms`, `/cookies`, `/advertising`, `/affiliates`, `/contact` son borradores noindex hasta identidad/fecha/revisión explícitas; contacto no reutiliza credenciales de administración. No existe proveedor de pago de producción, solo Sandbox, que nunca activa publicidad.
+
+`npm run launch:check` diagnostica configuración/DB sin publicar y termina con salida 2 pendiente de revisión humana. `npm run ops:maintenance` es dry-run; `-- --apply` requiere decisión operativa de retención. `/api/health` es liveness público; `/api/internal/readiness` exige bearer OPS_MONITOR_TOKEN privado y devuelve 200/503 según DB/worker/alertas. `MIGRATION_DATABASE_URL` es conexión operativa opcional solo de db:deploy/status; runtime conserva DATABASE_URL con rol mínimo/TLS. No hay migraciones, seeds, envíos o cron automáticos en CI/build. Variables nuevas en `.env.example`.
+
+Wompi externo, Resend, Google, partners, OpenAI y host productivo siguen sin prueba real; no se habilitaron. El worker local fue refrescado y probado sin IA para incorporar filtros actuales del CEO; no demuestra disponibilidad de un host externo. Fase 11 conserva su commit local pendiente de aprobación de push; cambios Fase 12 permanecen locales.

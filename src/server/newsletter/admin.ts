@@ -59,7 +59,7 @@ export async function sendNewsletterBatch(userId:string,id:string,input:unknown,
  if(row.status!=="APPROVED"||row.updatedAt.toISOString()!==data.expectedUpdatedAt||row._count.deliveries!==data.recipientCount)throw new AccessError(409,"Revisa de nuevo la campaña y su audiencia antes de autorizar el envío.");
  const config=emailConfiguration();if(!config.ready||config.mode!==row.preparedMode)throw new AccessError(503,"Proveedor no disponible o modo cambiado. No se envió ningún correo.");
  await audit(db,userId,"batch_authorized",id);
- const deliveries=await db.newsletterDelivery.findMany({where:{campaignId:id,status:{in:["QUEUED","BLOCKED"]}},select:{id:true},take:10,orderBy:{id:"asc"}});const results:Record<string,number>={};
+ const deliveries=await db.newsletterDelivery.findMany({where:{campaignId:id,status:{in:["QUEUED","BLOCKED"]}},select:{id:true},take:2,orderBy:{id:"asc"}});const results:Record<string,number>={};
  for(const delivery of deliveries){await authorizeActor(userId,"newsletter",db);const state=await dispatchDelivery(delivery.id,db);results[state]=(results[state]??0)+1;}
  const total=await db.newsletterDelivery.count({where:{campaignId:id}}),accepted=await db.newsletterDelivery.count({where:{campaignId:id,status:"ACCEPTED"}});
  if(total&&accepted===total)await db.newsletterCampaign.updateMany({where:{id,status:"APPROVED"},data:{status:"SENT",sentAt:new Date()}});

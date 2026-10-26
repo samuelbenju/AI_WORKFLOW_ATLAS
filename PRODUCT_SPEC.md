@@ -1,6 +1,6 @@
 # AI Workflow Atlas — especificación de producto
 
-Fuente: prompt maestro suministrado por el propietario el 25 de octubre de 2026. Esta especificación conserva el alcance completo; su implementación se divide en doce fases y necesita autorización por fase. La primera ejecución autoriza exclusivamente la Fase 1.
+Fuente: prompt maestro suministrado por el propietario el 25 de octubre de 2026. Esta especificación conserva el alcance completo; su implementación se divide en doce fases y necesita autorización por fase. La primera ejecución autorizó exclusivamente la Fase 1; las autorizaciones posteriores y el estado vigente están en PROGRESS.md. Fase 12 permite auditar/preparar, sin autorización de despliegue, cobros o publicación comercial.
 
 ## 1. Identidad y propósito
 

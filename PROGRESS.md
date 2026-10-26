@@ -4,7 +4,7 @@ Actualizado: 26 de octubre de 2026 (America/Bogota; métricas propias agregadas 
 
 ## Alcance autorizado
 
-Fases 1–10 publicadas con autorización expresa en `main` del repositorio oficial `samuelbenju/AI_WORKFLOW_ATLAS`, SHA `1b468492d0d761f71706bf252ab25935ee3ce83d`. La solicitud vigente autoriza exclusivamente Fase 11: medición, crecimiento, afiliados y agregados para CEO sobre el proyecto existente. La recuperación autoriza cerrar la verificación y crear un commit exclusivo de Fase 11; el push requiere aprobación expresa adicional. Analítica propia inicialmente deshabilitada y sujeta a consentimiento; Google y proveedores de afiliados sin credenciales/configuración real, sin métricas externas inventadas. No se autorizan gastos recurrentes, llamadas reales de IA, cuentas comerciales o cobros. No se inició Fase 12. Las secciones históricas posteriores conservan su contexto; el resumen y la sección de Fase 11 reflejan el estado actual.
+Fases 1–10 publicadas con autorización expresa en `main` del repositorio oficial `samuelbenju/AI_WORKFLOW_ATLAS`, SHA remoto comprobado `1b468492d0d761f71706bf252ab25935ee3ce83d`. Fase 11 conservada en commit local `86c5323ba939d34d152b4f1c14e47f7022e2c895`, push pendiente de autorización. La solicitud vigente autoriza la **auditoría y preparación de Fase 12**, sobre este checkout, sin reconstrucción, despliegue, publicaciones comerciales, cobros reales, compras o llamadas de IA con gasto. Auditoría local ejecutada con correcciones y documentación; lanzamiento **bloqueado** por infraestructura/pruebas externas, administrador humano, legal/fiscal y proveedor de pagos de producción. Los cambios de Fase 12 permanecen locales, sin commit/push en esta ejecución. Las secciones históricas conservan su contexto; este resumen y el cierre de Fase 12 son el estado vigente.
 
 | Fase | Estado |
 | --- | --- |
@@ -19,7 +19,7 @@ Fases 1–10 publicadas con autorización expresa en `main` del repositorio ofic
 | 9. Infraestructura de agentes | Motor/worker/scheduler locales verificados y versionados en main; publicación autorizada. OpenAI real pendiente de credenciales y presupuesto. |
 | 10. Agentes especializados | Publicada y sincronizada en GitHub mediante push normal autorizado. Modelos TEST_FIXTURE; OpenAI real pendiente de credenciales/consumo autorizados. |
 | 11. Analítica y afiliados | Implementada, verificada y versionada localmente; push pendiente de aprobación. Google/proveedores reales pendientes de configuración/pruebas externas. |
-| 12. Auditoría y lanzamiento | No iniciada. |
+| 12. Auditoría y lanzamiento | Auditoría/correcciones/pruebas locales y preparación realizadas. Lanzamiento pendiente de los bloqueos de LAUNCH_CHECKLIST.md; no listo para producción comercial. |
 
 ## Implementación de Fase 1
 
@@ -274,3 +274,21 @@ Consulta actual: cinco agentes y cinco automatizaciones deshabilitados, presupue
 El cierre conserva el worker sin reiniciarlo. Engine/team-tools de su snapshot coinciden; growth/metrics requiere refrescar el snapshot por el procedimiento documentado **antes de habilitarlo**, por los últimos filtros financieros. Los indicadores de la aplicación y el código actual del CEO están verificados; no se considera autorizada una ejecución real de modelo ni se activa un servicio para ocultar este pendiente de despliegue.
 
 Revisados 266 archivos legítimos (260 texto/seis imágenes) sin secretos reales detectados; alertas solo de placeholders, URLs construidas, CI y fixtures negativas. Privados/generados excluidos. Se conserva lockfile y quince SQL históricos, esquema/migración 16 y pruebas. Cierre en un único commit `feat: implement analytics and affiliate growth` sobre `1b468492d0d761f71706bf252ab25935ee3ce83d`. Hash y resultado de preparación remota en la entrega, sin commit adicional para su propio SHA. Remota oficial comprobada en ese padre; push normal main→main preparado para aprobación, sin force push o publicación automática. No Fase 12.
+
+## Auditoría y preparación de Fase 12 — 2026-10-26 UTC
+
+Se conservó íntegro el proyecto. Corregidos: revocación del aprobador de agentes antes/durante/al terminar I/O; contabilidad acotada ante uso fuera de límites; exclusión ON_HOLD de publicidad y agregados de ingresos/CEO; lote newsletter de dos entregas con maxDuration 60 s. Regresiones nuevas prueban cancelación/uso/reservas y el circuito comercial/agentes, sin proveedores reales. Nuevas políticas, privacidad, términos, cookies, publicidad, afiliados y contacto: borradores explícitos noindex, identidad solo por variables públicas revisadas. Rutas explícitas conservan HTTP 404; no se reutiliza correo privado.
+
+Instalación reproducible en directorio temporal con lock idéntico, audit npm cero vulnerabilidades; check final (Prisma/lint/tipos + **45/45 unitarias**), **87/87 PostgreSQL**, build y **108/108 E2E** Chromium escritorio/móvil en ejecución final completa. Primera E2E de esta fase detectó regresión de ruta genérica legal (cuatro fallos), corregida y repetida por el cambio de routing; no se ocultaron con retries. Axe y 320 px sin infracciones detectadas en páginas probadas, no certificación integral de accesibilidad.
+
+Circuito comercial probado localmente: contenido → paquete → solicitud → PostgreSQL/CRM → orden → webhook Sandbox firmado/consultado por transporte fixture → transacción idempotente. Sandbox **no** aprueba/activa anuncio; evidencia PRODUCTION separada, ficticia en DB temporal, prueba revisión/activación/entrega y retirada por ON_HOLD. Falta transacción externa Sandbox y proveedor de producción: no hay cobro/venta real ni comprobación pública comercial.
+
+Circuito de agentes: schedule vencido → propuesta única presupuesto cero → aprobación → CEO/herramientas limitadas → TEST_FIXTURE → producto/revisión/reporte/auditoría. Worker local propio refrescado después de comprobar cero RUNNING; engine/team-tools/growth coinciden con código actual. `test:agent-service` confirma heartbeat, persistencia, recuperación tras restart y ausencia de duplicación/llamadas IA en DB aislada. Desarrollo conserva cinco agentes/cinco automatizaciones deshabilitados, cero ejecuciones, presupuesto global cero y sin clave. Tracking propio, Resend, Google y Wompi siguen deshabilitados/no configurados.
+
+Backup `.cache/backups/atlas-dev-1792995193734.dump` privado 0600 y restauración a DB temporal con conteos iguales; no demuestra backups/PITR de producción. Historial 16 migraciones vigente, SQL/esquema/lockfile sin cambios; diagnóstico respeta el intento rolled-back histórico resuelto, sin editar registro/checksum. Mantenimiento dry-run cero sesiones antiguas, sin borrar datos de negocio.
+
+Preparados CI serial sin despliegue, vercel.json sin migraciones/seed/cron, conexión migradora opcional separada, readiness privado con alertas sin envíos, chequeo de lanzamiento read-only, retención explícita/dry-run y runbook de incidentes/rollback. `launch:check` devuelve salida 2 BLOCKED_PENDING_RELEASE_REVIEW: falta origen público HTTPS/no-demo, legal, TLS/rol mínimo, monitor, administrador/contenido revisado y evidencia manual. Claves locales de firma existen, no son credenciales externas.
+
+Informe de doce puntos: AUDIT_REPORT.md; tareas/responsables/evidencia pendientes: LAUNCH_CHECKLIST.md; operación/activación individual y manual de agentes/plan comercial: docs/PRODUCTION.md. Faltan revisión jurídica/fiscal Colombia, servicios/dominio/backup/monitor finales y credenciales/pruebas autorizadas Resend/Wompi/OpenAI/Google/socios. No declarar listo para producción ni habilitar costes o publicar por terminar esta auditoría.
+
+Estado final de Git: main conserva el commit local de Fase 11, uno delante/cero detrás del remoto comprobado; 50 archivos de Fase 12 pendientes (29 modificados/21 nuevos), sin staging, commit o push. Revisión final de 287 archivos sin secretos reales detectados y git diff --check correcto.

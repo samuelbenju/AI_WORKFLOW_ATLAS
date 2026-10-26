@@ -1,0 +1,3 @@
+import {monitorAuthorized,readiness} from '@/server/ops/readiness';
+const headers={'Cache-Control':'private, no-store','X-Robots-Tag':'noindex, nofollow'};
+export async function GET(request:Request){if(!monitorAuthorized(request))return Response.json({error:'Unauthorized'},{status:401,headers});let timer:ReturnType<typeof setTimeout>|undefined;try{const result=await Promise.race([readiness(),new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(Error('timeout')),4000);})]);return Response.json(result,{status:result.ok?200:503,headers});}catch{return Response.json({ok:false,database:false,error:'READINESS_UNAVAILABLE'},{status:503,headers});}finally{if(timer)clearTimeout(timer);}}

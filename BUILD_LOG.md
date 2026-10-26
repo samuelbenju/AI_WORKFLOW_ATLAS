@@ -554,3 +554,66 @@ Seguridad/conservación: revisados 266 archivos legítimos (260 texto/seis imág
 Documentación: AGENTS/ARCHITECTURE/README/PROGRESS, esta evidencia y docs/GROWTH.md contienen contratos, configuración, fórmulas, límites/privacidad/retención y pendientes reales. Cierre de 44 archivos en commit exclusivo `feat: implement analytics and affiliate growth`; SHA en la entrega sin commit adicional para insertarse a sí mismo. Remoto oficial main verificado en `1b468492d0d761f71706bf252ab25935ee3ce83d`, padre local. Push normal main→main preparado mediante dry-run y pendiente de aprobación expresa antes de publicar; sin force push ni cambios a otros repositorios.
 
 Pendientes externos: propiedad/credenciales Google y comprobación autorizada real, socios que adopten/configuren el webhook y evidencia real, administrador humano por CLI y OpenAI con clave/modelo/tarifas/budget/tarea aprobados. Todos siguen deshabilitados sin configuración válida. Snapshot del worker requiere refresco antes de habilitación. No servicios de pago/cuentas/llamadas reales de IA/gastos recurrentes o Fase 12 activados.
+
+## 2026-10-26 UTC — Fase 12: auditoría integral y preparación, sin lanzamiento
+
+### Alcance y conservación
+
+Solicitud expresa de ejecución 12/12 sobre `/workspace/Quesito`, sin reconstruir/reinicializar o eliminar archivos funcionales. Leídos controles AGENTS/PRODUCT_SPEC/ARCHITECTURE/PLANS/PROGRESS/BUILD_LOG/README y guías de dominio. Aplicada habilidad `cloud-environment:cloud-environment-runtime` ya anunciada: estado observado running/current, sin bindings de proveedor, proxy/CA y daemon local conservados. No delegación, despliegue, servicios comprados, correos externos, IA real, cobros o publicaciones comerciales. Cuenta humana no inicializada.
+
+Git inicial limpio con Fase 11 en `86c5323ba939d34d152b4f1c14e47f7022e2c895` sobre `1b468492d0d761f71706bf252ab25935ee3ce83d`; la remota oficial main sigue en ese padre, comprobada con ls-remote. Fase 11 pendiente de aprobación de push; esta auditoría no creó commit/push de Fase 12. Conservadas fases previas, 45 modelos y 16 migraciones; sin cambios del esquema, SQL aplicado o package-lock.json.
+
+### Hallazgos corregidos
+
+- Motor: falta de revalidación del aprobador después del claim; se consulta antes de dispatch, durante polling y antes de persistir. Revocación cancela el resultado, registra APPROVER_REVOKED y conserva consumo observado.
+- Motor: uso reportado fuera de reserva/límites podía desbordar contadores SQL o contabilidad. Se valida safe integer/tokens/coste contra límites; USAGE_OUT_OF_BOUNDS falla con reserva acotada incierta, tokens no confiables cero, lease cerrado y sin producto persistido. No es garantía de factura del proveedor: requiere conciliación y techo externo.
+- Comercial: ON_HOLD ahora excluye orden de condiciones de campaña, entrega pública, crecimiento y agregado anterior del CEO. Conserva requisito PRODUCTION firmado/confirmado y aprobación/contrato/fechas; Sandbox nunca activa anuncios.
+- Newsletter: diez timeouts secuenciales podían exceder duración de función; lote de dos por autorización humana, maxDuration 60 s en handlers de newsletter/agentes/analítica. No envíos/cron automáticos.
+- Preparación: CSP básica base/object/frame/form, HSTS solo con SITE_URL HTTPS, seis páginas legales explícitas con estado de revisión e identidad pública, readiness con bearer privado, gates de lanzamiento y CLI de retención dry-run. CSP no usa nonces/script-src; no se declara defensa integral de XSS.
+- Nueva ruta genérica legal causó HTTP 200 en URLs inexistentes por streaming. Primera E2E: 104 aprobadas/cuatro fallidas (404 y política desconocida en dos dispositivos). Corregida con seis rutas explícitas; segunda ejecución completa **108/108**. Sin retries que oculten el fallo.
+- Chequeo inicial de lanzamiento contó como activa una fila histórica rolled-back resuelta (migración 8). Se filtran intentos revertidos, exigiendo exactamente una aplicación activa/terminada y checksum coincidente por SQL; prueba rechaza duplicados, editados e incompletos. No se borró/modificó el historial, ni un checksum.
+- Primer lint detectó Link interno en signup y const de fixture, corregidos. No requerían cambios de dependencias.
+
+### Instalación y dependencias
+
+Runtime conservado Node 24.19.0/npm 11.9.0. Instalación aislada con copia de package/lock en `/tmp/atlas-phase12-repro-1pn5w1bb`, sin reemplazar node_modules del checkout. Primer npm ci falló ENOENT por caché heredada `/home/agent/.npm` no escribible; se corrigió solo el destino de caché:
+
+`npm ci --ignore-scripts --no-audit --no-fund --cache /tmp/atlas-phase12-npm-cache`
+
+Salida 0, lock idéntico byte por byte al del repositorio. SHA-256 del lock: `d8a014b9e76545fd21dd3bf5f2bc77a036fa5ab8d8cba404c50a7e3f692e25af`. `npm ls --all --omit=optional`: salida 0. `npm audit --json`: salida 0, info/low/moderate/high/critical/total = 0. Sin nuevas dependencias o actualizaciones; versiones/peers fijados. ESLint 9 fuera de soporte, aviso de pg concurrent query para futura versión 9 y advertencia WASM experimental se registran como pendientes de compatibilidad, no fallos ocultos. No cambios de sudo/permisos globales, proxy, CA o integridad Prisma.
+
+### Comprobaciones finales ejecutadas
+
+| Comando / prueba | Resultado |
+| --- | --- |
+| `npm run check` | Salida 0; validación oficial WASM, ESLint cero warnings/errores, generación de cliente, Next typegen, TypeScript estricto y **45/45 unitarias**. |
+| `npm run test:db` | Salida 0; **87/87** PostgreSQL real en DB temporal, migraciones desde cero/segundo deploy idempotente, seed/integridad/constraints/roles, contenido/CRM/newsletter/webhooks/agentes/growth y cinco pruebas nuevas de auditoría. DB temporal eliminada por su runner. |
+| `npm run build` | Salida 0; build Next de producción, seis rutas legales y readiness incluidos. No migración/seed/provider externo en build. |
+| `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e -- --workers=1` | Ejecución final completa **108/108**, desktop + mobile, sin reintentos; navegación/404/DB error/loading, búsqueda/filtros/paginación, auth/CRUD/CMS, CRM/newsletter/pagos/agents/growth, políticas/noindex/headers, teclado/320 px/axe. |
+| `npm run db:status` | Salida 0, historial actual sin SQL editado, pendiente o fallo no resuelto. 16 migraciones activas; intento rolled-back histórico conservado. |
+| `npm run agents:service -- restart` | Solo contenedor local propio; antes: cero RUNNING, cinco perfiles/calendarios deshabilitados, sin key o presupuesto. Refresca snapshot obsoleto de Fase 11 y las correcciones actuales. |
+| `npm run test:agent-service` | Salida 0; DB/contenedor temporal, heartbeat persistente, propuesta debida, restart/recovery y sin duplicar; **cero AgentExecution/llamadas IA**. |
+| Comparación de snapshot | engine.ts, team-tools.ts y growth/metrics.ts idénticos entre checkout y worker. Heartbeat local fresco BLOCKED/PROVIDER_DISABLED esperado. |
+| `npm run db:backup` | Salida 0; `.cache/backups/atlas-dev-1792995193734.dump`, privado 0600 y excluido de Git. |
+| `npm run db:restore-check -- .cache/backups/atlas-dev-1792995193734.dump` | Salida 0; restauración a DB temporal aislada, conteos de todas las tablas iguales a desarrollo; solo su DB de ensayo eliminada. No backup/PITR productivo externo verificado. |
+| `npm run ops:maintenance` | Salida 0, DRY_RUN, cero sesiones analíticas antiguas, lote máximo 1000. No se ejecutó --apply ni borrado de negocio. |
+| `npm run launch:check` | Salida **2 esperada**, BLOCKED_PENDING_RELEASE_REVIEW. Historial/firma local/newsletter key/no-capture correctos; resto de puertas/evidencia productiva pendientes. No despliegue ni falso verde. |
+| `git diff --check` | Sin errores de whitespace. |
+
+Pruebas reales de DB y navegador, **no** de proveedor de IA/pagos/email/Google. Respuestas TEST_FIXTURE y eventos de contrato local se identifican explícitamente como pruebas; no transacciones, ingresos o tráfico comercial real. Capturas mobile/contact y homepage inspeccionadas visualmente además de comprobación automatizada; demos y borrador legal visibles. Otros navegadores/dispositivos, carga representativa y prueba HTTPS del dominio final pendientes.
+
+### Circuitos integrados
+
+Nuevo `zzzzz-launch.test.ts`: artículo publicado fixture → paquete del servidor → solicitud consentida → PostgreSQL → lead/empresa/WON → orden → checkout Sandbox → evento checksum/consulta provider fixture → una transacción tras dos recepciones. La campaña Sandbox no pasa aprobación/entrega. Una orden **separada, PRODUCTION ficticia** con evidencia en DB temporal prueba revisión/aprobación/activación/slot durante periodo y retirada inmediata por ON_HOLD. No se promovió un pago Sandbox o vendió un anuncio real. Falta proveedor de cobros productivo y transacción Sandbox externa.
+
+Tarea programada → propuesta única presupuesto cero → aprobación con límite humano → CEO/snapshot/analytics_summary → TEST_FIXTURE → producto PENDING_REVIEW → aprobación/report/audit persistentes. Pruebas anteriores preservadas cubren los cinco especialistas, delegación, citas/procedencia, borrador CMS, permisos de herramientas, rechazo malicioso, límites, reintentos, fencing y cancelación. Dos nuevas regresiones prueban revocación durante el proveedor y uso MAX_SAFE_INTEGER fuera de límites; lectura de readiness verifica token/worker ausente/orden retenida sin emitir alertas externas.
+
+### Seguridad, documentación y bloqueos
+
+Revisión de archivos versionables (281 texto/seis imágenes; 287 total), búsqueda de claves/Pem/tokens/URLs/email privado y coincidencia con bindings privados configurados: **cero secretos reales detectados**. Ocho coincidencias de URL revisadas: placeholders en .env.example, credenciales efímeras CI, fixtures explícitas y URL construida del helper local; sin valores privados guardados. Ningún email humano privado incluido. `.env.local` 0600, backups/caché/generados/reportes/node_modules ignorados. No se afirma una certificación absoluta de seguridad por este escaneo.
+
+README/ARCHITECTURE/PLANS/PROGRESS/BUILD_LOG/PRODUCT_SPEC/AGENTS/.env.example y guías afectadas actualizados. Nuevos AUDIT_REPORT.md (doce puntos), LAUNCH_CHECKLIST.md (puertas/evidencia/responsables pendientes) y docs/PRODUCTION.md (operación, migraciones, backup, rollback, incidentes, límites y plan comercial). CI serial por DB compartida y vercel.json preparados, sin despliegue o crons; no se ejecutó CI remota. MIGRATION_DATABASE_URL solo operativa; runtime requiere rol mínimo propio. Las políticas son borradores noindex, revisión real/identidad/contacto/fecha pendientes; no cumplimiento jurídico declarado.
+
+Estado desarrollo final: cinco agentes/cinco automatizaciones deshabilitados, cero RUNNING/AgentExecution, AGENTS_ENABLED false/presupuesto global cero/sin key, tracking false, Resend/Google/Wompi no configurados o deshabilitados. Readiness local DB sana/sin leases vencidas/emails UNKNOWN antiguos/órdenes productivas retenidas, pero no equivale a salud del destino o proveedores. No web/DB productivos, cuenta humana, dominio/certificado, backup externo, monitor/alertas reales o habilitación comercial verificados. Faltan credenciales y pruebas autorizadas Resend, Wompi Sandbox, OpenAI, Google y socios, revisión oficial Wompi vigente, revisión jurídica/fiscal Colombia e internacional. **Solo proveedor Sandbox implementado: falta proveedor productivo para cobrar/entregar publicidad real.** Lanzamiento comercial no listo y sin autorización de despliegue/publicación/gasto. Repositorio y cambios locales conservados para revisión/respaldo posterior.
+
+Cierre Git de la auditoría: `main`, HEAD `86c5323ba939d34d152b4f1c14e47f7022e2c895`; remota oficial observada `1b468492d0d761f71706bf252ab25935ee3ce83d`, cero commits detrás/uno delante. **50 archivos pendientes de Fase 12 (29 modificados, 21 nuevos)**, sin staging/commit/push. Revisión final de 287 archivos y diff sin whitespace confirma conservación del lockfile, esquema e historial SQL y ausencia de coincidencias de secretos privados. No se declara GitHub sincronizado con estos cambios locales.

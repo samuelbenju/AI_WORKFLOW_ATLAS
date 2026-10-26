@@ -2,7 +2,7 @@
 
 ## Estado y activación
 
-`/admin/analytics` es privado, solo OWNER/ADMIN. Métricas consultadas en PostgreSQL, fuentes externas diferenciadas, sin llenar vacíos con demos. La implementación usa fetch/crypto nativos y el stack existente, sin nuevas dependencias. Migración 16 aditiva, `20261026001600_growth_analytics`, total 45 modelos/dieciséis migraciones; conserva el historial, lockfile y datos anteriores. No Fase 12.
+`/admin/analytics` es privado, solo OWNER/ADMIN. Métricas consultadas en PostgreSQL, fuentes externas diferenciadas, sin llenar vacíos con demos. La implementación usa fetch/crypto nativos y el stack existente, sin nuevas dependencias. Migración 16 aditiva, `20261026001600_growth_analytics`, total 45 modelos/dieciséis migraciones; conserva el historial, lockfile y datos anteriores. La auditoría de Fase 12 está documentada en ../AUDIT_REPORT.md; sin activación de servicios.
 
 `ANALYTICS_ENABLED=false` por defecto. La infraestructura local se prueba en DB temporales con medición habilitada explícitamente; desarrollo queda sin medición activa. Habilitar la captación requiere configurar el flag y origen exacto `ANALYTICS_ORIGIN` (HTTPS salvo loopback), y **cada navegador debe aceptar**. Abrir el panel no llama a Google/OpenAI, contrata servicios o activa cron. Las cinco automatizaciones empresariales conservan su estado deshabilitado y presupuesto cero. La cuenta humana requiere bootstrap interactivo de administrador si aún falta.
 

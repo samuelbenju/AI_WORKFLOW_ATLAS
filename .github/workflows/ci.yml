@@ -10,7 +10,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     env:
       NEXT_TELEMETRY_DISABLED: "1"
       # Disposable CI service credentials; never used for a deployed database.
@@ -44,7 +44,7 @@ jobs:
       - run: npm run test:db
       - run: npm run build
       - run: npx --no-install playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - run: npm run test:e2e -- --workers=1
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

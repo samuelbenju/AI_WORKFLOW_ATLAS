@@ -75,11 +75,11 @@ async function main() {
       process.stdout.write(result.stdout ?? "");
     });
   } else if (action === "deploy") {
-    const result = await deployMigrations(process.env.DATABASE_URL);
+    const result = await deployMigrations(process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL);
     console.log("Applied migrations:", result.appliedMigrationNames.length ? result.appliedMigrationNames.join(", ") : "none (already current)");
   } else if (action === "status") {
-    if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required.");
-    await withSchemaEngine(process.env.DATABASE_URL, async (engine) => {
+    if (!(process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL)) throw new Error("A migration database URL is required.");
+    await withSchemaEngine(process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL, async (engine) => {
       const history = await engine.diagnoseMigrationHistory({ migrationsList: await readMigrations(), optInToShadowDatabase: false, filters });
       if (!history.hasMigrationsTable || history.history || history.editedMigrationNames.length || history.failedMigrationNames.length) throw new Error("Database migration history is not current.");
       console.log("Migration history is current; no edited or failed migrations.");
