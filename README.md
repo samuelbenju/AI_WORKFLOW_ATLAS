@@ -1,6 +1,8 @@
 # AI Workflow Atlas
 
-Plataforma independiente sobre herramientas y flujos prácticos de IA. Nombre comercial provisional. Público en inglés, administración en español. **Entrega actual: Fases 1–11 y auditoría/preparación local de Fase 12; no listo para producción comercial**, portada y directorios de herramientas/casos conectados a PostgreSQL. Panel con login, roles, CRUD real, CMS editorial y CRM comercial; blog con fuentes/SEO y solicitudes desde /sponsor. Inicialización humana pendiente de contraseña por CLI; sin envíos, cobros ni agentes activos. Operación de la base en [docs/DATABASE.md](docs/DATABASE.md); rutas, filtros y demo explícita en [docs/PUBLIC_CATALOG.md](docs/PUBLIC_CATALOG.md).
+Plataforma independiente sobre herramientas y flujos prácticos de IA. Nombre comercial provisional. Público en inglés, administración en español. **Fases 1–12 respaldadas; Fase 13 prepara catálogo real/importación y activación humana. No listo para producción comercial.** El propietario confirma portada funcional en Render Free y Neon staging con las 16 migraciones aplicadas; no se presenta esa confirmación como una verificación remota de esta sesión. Panel con login, roles, CRUD, CMS editorial y CRM; sin activar correo, pagos o agentes. Operación PostgreSQL en [docs/DATABASE.md](docs/DATABASE.md); catálogo en [docs/PUBLIC_CATALOG.md](docs/PUBLIC_CATALOG.md).
+
+Biblioteca inicial: 65 herramientas con fuentes oficiales, 30 guías y seis borradores editoriales. **Preparada y probada en DB temporal; su importación en Neon y visibilidad remota requieren evidencia de Actions/Render.** Procedimiento repetible, secreto de catálogo independiente y bootstrap OWNER desde Windows: [docs/CATALOG_OPERATIONS.md](docs/CATALOG_OPERATIONS.md). Estado verificable de esta entrega: [docs/PHASE13_REPORT.md](docs/PHASE13_REPORT.md). No usar los seeds demo para poblar staging.
 
 Administración e inicialización segura en [docs/ADMIN.md](docs/ADMIN.md). Blog, CMS, fuentes y control de indexación en [docs/EDITORIAL.md](docs/EDITORIAL.md).
 
@@ -64,6 +66,8 @@ npm run check        # lint sin warnings + tipos Next/TS + tests unitarios
 npm run test:db      # DB temporal propia: migraciones y pruebas reales
 npm run build        # build real de producción; no ejecuta ESLint por sí mismo
 npm run test:e2e     # inicia y detiene su propio servidor de producción en 3100
+npm run catalog:validate    # valida biblioteca/evidencia sin conexión a Neon
+npm run test:catalog-import # DB/roles temporales propios, necesita build y Chromium
 ```
 
 `check` también valida el esquema. `typecheck` y `build` generan automáticamente el cliente Prisma sin necesitar conexión. `db:validate`, `db:generate`, `db:deploy` y `db:status` usan módulos oficiales WASM fijados, debido al bloqueo 403 del motor nativo de Prisma; no se desactivan checksums/TLS. La instalación con `--ignore-scripts` evita los hooks que intentan descargar ese binario. Limitaciones de esas APIs internas y del CLI nativo documentadas en `docs/DATABASE.md`.

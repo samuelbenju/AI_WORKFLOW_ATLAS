@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "reviewedAt": "2026-10-26T20:47:59.566Z",
+  "rejected": [
+    {
+      "name": "Flowise",
+      "repository": "FlowiseAI/Flowise",
+      "reason": "Official repository is archived; current successor and maintained distribution require further review.",
+      "sourceUrl": "https://raw.githubusercontent.com/FlowiseAI/Flowise/main/README.md",
+      "checkedAt": "2026-10-26T20:38:56.285Z"
+    },
+    {
+      "name": "Semantic Kernel",
+      "repository": "microsoft/semantic-kernel",
+      "reason": "Primary README identifies Microsoft Agent Framework as the successor; avoid a duplicate legacy recommendation.",
+      "sourceUrl": "https://raw.githubusercontent.com/microsoft/semantic-kernel/main/README.md",
+      "checkedAt": "2026-10-26T20:39:01.055Z"
+    },
+    {
+      "name": "Continue",
+      "repository": "continuedev/continue",
+      "reason": "Primary README explicitly says the repository is no longer maintained and is read-only.",
+      "sourceUrl": "https://raw.githubusercontent.com/continuedev/continue/main/README.md",
+      "checkedAt": "2026-10-26T20:39:03.547Z"
+    },
+    {
+      "name": "Roo Code",
+      "repository": "RooCodeInc/Roo-Code",
+      "reason": "Official repository is archived; do not recommend as a currently maintained product.",
+      "sourceUrl": "https://raw.githubusercontent.com/RooCodeInc/Roo-Code/main/README.md",
+      "checkedAt": "2026-10-26T20:39:04.606Z"
+    },
+    {
+      "name": "Gemini CLI",
+      "repository": "google-gemini/gemini-cli",
+      "reason": "Primary README documents transition to Antigravity CLI and limitations with current models; review the successor separately.",
+      "sourceUrl": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/README.md",
+      "checkedAt": "2026-10-26T20:39:05.667Z"
+    }
+  ],
+  "coverageNotes": [
+    "Source distribution links were verified on official GitHub repositories; no SaaS uptime, prices, subscription plans or hands-on results are claimed.",
+    "Coverage favors tools with accessible primary evidence. HR, ecommerce, CRM, paid assistants and other underserved categories remain research gaps, not empty published categories.",
+    "The 200-tool aspiration was not a publication quota. Five candidates were excluded following current primary-source checks."
+  ]
+}

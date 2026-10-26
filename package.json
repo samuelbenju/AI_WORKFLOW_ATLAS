@@ -38,7 +38,10 @@
     "commercial:secret": "node scripts/commercial-secret.mjs",
     "db:seed:commercial": "node --conditions=react-server --import tsx prisma/seed-commercial.ts",
     "launch:check": "node --conditions=react-server --import tsx scripts/launch-check.ts",
-    "ops:maintenance": "node --conditions=react-server --import tsx scripts/maintenance.ts"
+    "ops:maintenance": "node --conditions=react-server --import tsx scripts/maintenance.ts",
+    "catalog:validate": "node --conditions=react-server --import tsx scripts/catalog-import.ts validate",
+    "catalog:research": "node --use-env-proxy scripts/catalog-research.mjs",
+    "test:catalog-import": "node scripts/test-catalog-import.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",

@@ -1,0 +1,90 @@
+name: Catalog import into Neon staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Run dry-run first; apply requires its successful run ID
+        required: true
+        type: choice
+        options: [dry-run, apply]
+        default: dry-run
+      dry_run_id:
+        description: Successful dry-run run ID from this exact main commit (apply only)
+        required: false
+        type: string
+      confirm_target:
+        description: Confirm the existing staging project and database
+        required: true
+        type: string
+        default: cold-shadow-53495242/atlas_staging
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: neon-staging-database
+  cancel-in-progress: false
+
+jobs:
+  catalog:
+    if: github.repository == 'samuelbenju/AI_WORKFLOW_ATLAS' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      AGENTS_ENABLED: 'false'
+      AGENTS_MONTHLY_BUDGET_USD_MICROS: '0'
+      WOMPI_SANDBOX_ENABLED: 'false'
+      NEWSLETTER_MODE: disabled
+      ANALYTICS_ENABLED: 'false'
+      GA4_MODE: disabled
+      SEO_INDEXING_ENABLED: 'false'
+      LEGAL_REVIEW_CONFIRMED: 'false'
+      OPS_EXPECT_WORKER: 'false'
+      CATALOG_DEMO_MODE: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Check dry-run workflow provenance before any secret binding
+        if: inputs.mode == 'apply'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CATALOG_DRY_RUN_ID: ${{ inputs.dry_run_id }}
+        run: node scripts/catalog-approved-run.mjs
+      - name: Retrieve the approved dry-run artifact
+        if: inputs.mode == 'apply'
+        uses: actions/download-artifact@v4
+        with:
+          name: catalog-plan
+          path: .cache/catalog-approved
+          github-token: ${{ github.token }}
+          repository: samuelbenju/AI_WORKFLOW_ATLAS
+          run-id: ${{ inputs.dry_run_id }}
+      - name: Install exactly the locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Generate the existing Prisma client
+        run: npm run db:generate
+      - name: Validate reviewed content without database access
+        run: npm run catalog:validate
+      - name: Guard staging, inspect history and import only reviewed catalog records
+        env:
+          CATALOG_DATABASE_URL: ${{ secrets.CATALOG_DATABASE_URL }}
+          NEON_STAGING_EXPECTED_HOST: ${{ vars.NEON_STAGING_EXPECTED_HOST }}
+          CATALOG_CONFIRM_TARGET: ${{ inputs.confirm_target }}
+          CATALOG_IMPORT_MODE: ${{ inputs.mode }}
+        run: node --conditions=react-server --import tsx scripts/catalog-import.ts "$CATALOG_IMPORT_MODE"
+      - name: Preserve the non-sensitive plan or import report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog-plan
+          path: .cache/catalog-report/plan.json
+          if-no-files-found: warn
+          retention-days: 7

@@ -26,6 +26,10 @@ Cada fase requiere solicitud expresa. La Fase 1 es la única autorizada en la pr
 - Mantener `PROGRESS.md` como estado resumido y `BUILD_LOG.md` como evidencia de comandos y resultados.
 - Pruebas y costes de integraciones necesitan límites y autorización específica de operaciones externas; el presupuesto orientativo no es autorización de gasto.
 
+## Fase 13 autorizada posteriormente — operación y catálogo
+
+La solicitud adjunta autoriza investigación, implementación, pruebas, commits/push normales y publicación de contenido revisado exclusivamente en atlas_staging. Se añaden catálogo/evidencia, importación manual guardada y bootstrap seguro desde Windows, reutilizando modelos/servicios existentes. No es una reconstrucción o reapertura de las doce fases. Meta inicial comprobable: 65 herramientas, 30 guías, seis artículos DRAFT; 200 herramientas sigue aspiracional. La fase permanece **incompleta operativamente** hasta importar de verdad en Neon, verificar Render y completar el login humano. Alcance, resultados y bloqueos: docs/PHASE13_REPORT.md. Servicios con coste, tracking, indexación y automatizaciones continúan deshabilitados.
+
 ## Estado de cierre de Fase 12 — 26-10-2026
 
 Solicitud 12/12 autorizada y ejecutada sobre el proyecto existente. Auditoría, correcciones acotadas, pruebas locales y preparación operativa/legal documentadas en AUDIT_REPORT.md y LAUNCH_CHECKLIST.md. No se marca completado el lanzamiento: credenciales/pruebas externas, host/DB/backup/monitor finales, administrador humano, revisión jurídica/fiscal y proveedor de pagos de producción siguen pendientes. No se autoriza despliegue, cobro, publicación comercial o recurrencia con costes por terminar estas fases.

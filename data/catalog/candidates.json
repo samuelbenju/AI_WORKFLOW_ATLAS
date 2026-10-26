@@ -1,0 +1,565 @@
+{
+  "version": 1,
+  "candidates": [
+    {
+      "name": "Ollama",
+      "repository": "ollama/ollama",
+      "category": "local-models",
+      "summary": "Run and manage supported language models through a local runtime.",
+      "description": "Developers can download supported models, run conversations and expose a local model API. Model compatibility, memory and response quality depend on the selected model and hardware.",
+      "evidenceTerm": "ollama"
+    },
+    {
+      "name": "llama.cpp",
+      "repository": "ggml-org/llama.cpp",
+      "category": "local-models",
+      "summary": "Run language-model inference with a portable C and C++ implementation.",
+      "description": "The project provides command-line inference and a server for supported model formats. It suits developers evaluating local deployment; model conversion, context limits and hardware support need checking for each model.",
+      "evidenceTerm": "llama"
+    },
+    {
+      "name": "vLLM",
+      "repository": "vllm-project/vllm",
+      "category": "developer-platforms",
+      "summary": "Serve supported language models using an inference engine built for throughput.",
+      "description": "Infrastructure teams can deploy a model-serving API and tune batching and execution for supported accelerators. This is serving infrastructure rather than a hosted assistant; operation requires compatible models, hardware and capacity planning.",
+      "evidenceTerm": "vllm"
+    },
+    {
+      "name": "Transformers",
+      "repository": "huggingface/transformers",
+      "category": "developer-platforms",
+      "summary": "Load and use supported pretrained models through a Python library.",
+      "description": "Developers can work with text, vision and audio architectures using task-specific model interfaces. Individual checkpoints have different licenses, resource requirements and reliability; the library does not make every model suitable for every task.",
+      "evidenceTerm": "transformers"
+    },
+    {
+      "name": "Diffusers",
+      "repository": "huggingface/diffusers",
+      "category": "image-generation",
+      "summary": "Build supported diffusion-model pipelines for image and other media generation.",
+      "description": "The library provides pipelines, schedulers and model components for developers working with diffusion models. Check checkpoint licenses, available memory and safety requirements before generating or distributing media.",
+      "evidenceTerm": "diffusers"
+    },
+    {
+      "name": "Open WebUI",
+      "repository": "open-webui/open-webui",
+      "category": "assistants",
+      "summary": "Use a self-hosted interface to interact with configured language models.",
+      "description": "Teams can configure model backends and a web interface for conversations and document-oriented workflows. It does not supply model capacity by itself; authentication, document permissions and connected-provider costs require operator review.",
+      "evidenceTerm": "webui"
+    },
+    {
+      "name": "AnythingLLM",
+      "repository": "Mintplex-Labs/anything-llm",
+      "category": "knowledge-management",
+      "summary": "Organize document-backed conversations in a configurable AI workspace.",
+      "description": "The application combines workspaces, document ingestion and model connections for knowledge workflows. Retrieval can miss evidence; confirm access controls and cite the original document rather than treating an answer as verified fact.",
+      "evidenceTerm": "anything"
+    },
+    {
+      "name": "Dify",
+      "repository": "langgenius/dify",
+      "category": "automation",
+      "summary": "Design and operate applications and workflows around configured language models.",
+      "description": "Builders can combine model calls, knowledge retrieval and workflow steps in an application platform. Deployment, credentials, provider charges and human approval for external actions remain the operator's responsibility.",
+      "evidenceTerm": "dify"
+    },
+    {
+      "name": "Flowise",
+      "repository": "FlowiseAI/Flowise",
+      "category": "automation",
+      "summary": "Assemble language-model workflows with a visual building interface.",
+      "description": "Developers can configure connected components and model-backed flows for application prototypes and services. A working diagram still needs access control, failure handling and review of external services before use.",
+      "evidenceTerm": "flowise"
+    },
+    {
+      "name": "n8n",
+      "repository": "n8n-io/n8n",
+      "category": "automation",
+      "summary": "Connect application steps and AI components in inspectable automation workflows.",
+      "description": "Operators can build trigger-driven workflows, inspect executions and integrate configured services. Connector access, execution costs and the project license must be reviewed; keep approvals before messages, payments or irreversible actions.",
+      "evidenceTerm": "n8n"
+    },
+    {
+      "name": "Activepieces",
+      "repository": "activepieces/activepieces",
+      "category": "automation",
+      "summary": "Build workflow automations from application connectors and AI-enabled steps.",
+      "description": "Teams can assemble event-driven flows and configured actions in a visual automation environment. Connector support varies, and credentials and unintended side effects need testing in a separate environment.",
+      "evidenceTerm": "activepieces"
+    },
+    {
+      "name": "LangChain",
+      "repository": "langchain-ai/langchain",
+      "category": "developer-platforms",
+      "summary": "Compose model-powered applications using reusable integration components.",
+      "description": "Developers can connect models, retrieval and application logic using the framework and its integrations. Integrations have independent dependencies and costs; applications still need explicit permissions, evaluation and error handling.",
+      "evidenceTerm": "langchain"
+    },
+    {
+      "name": "LlamaIndex",
+      "repository": "run-llama/llama_index",
+      "category": "knowledge-management",
+      "summary": "Build retrieval and agent workflows around application data.",
+      "description": "Developers can ingest approved data, connect indexes and construct model-backed retrieval workflows. Indexing is not a guarantee of complete evidence, and source permissions must be preserved when answers are delivered.",
+      "evidenceTerm": "llamaindex"
+    },
+    {
+      "name": "LangGraph",
+      "repository": "langchain-ai/langgraph",
+      "category": "agents",
+      "summary": "Define stateful agent workflows with explicit execution structure.",
+      "description": "Developers can model steps, state and control flow for agent applications. Persistence and human checkpoints require appropriate configuration; a graph is not permission to run tools or spend money autonomously.",
+      "evidenceTerm": "langgraph"
+    },
+    {
+      "name": "CrewAI",
+      "repository": "crewAIInc/crewAI",
+      "category": "agents",
+      "summary": "Coordinate role-based agents and workflows in a Python framework.",
+      "description": "Builders can define agents, tasks and flows that use configured model providers and tools. Tool outputs remain untrusted; set budgets, scoped credentials and approval gates before any external action.",
+      "evidenceTerm": "crewai"
+    },
+    {
+      "name": "Smolagents",
+      "repository": "huggingface/smolagents",
+      "category": "agents",
+      "summary": "Build compact agents that work with explicitly configured tools.",
+      "description": "The library offers agent abstractions and integrations for model-backed tasks. Some execution modes can run generated code; choose a suitable sandbox and never provide arbitrary filesystem or secret access.",
+      "evidenceTerm": "smolagents"
+    },
+    {
+      "name": "Semantic Kernel",
+      "repository": "microsoft/semantic-kernel",
+      "category": "agents",
+      "summary": "Integrate models and application functions through an agent-oriented SDK.",
+      "description": "Developers can expose selected application capabilities and compose model-backed workflows. Function access must remain bounded by application authorization; model output cannot be trusted to grant itself new permissions.",
+      "evidenceTerm": "kernel"
+    },
+    {
+      "name": "Mastra",
+      "repository": "mastra-ai/mastra",
+      "category": "agents",
+      "summary": "Develop TypeScript agents, workflows and model-backed application features.",
+      "description": "TypeScript teams can define agents and orchestrated steps within an application framework. Review persistence, evaluation, deployment and provider requirements before exposing a workflow to users.",
+      "evidenceTerm": "mastra"
+    },
+    {
+      "name": "Agent Development Kit",
+      "repository": "google/adk-python",
+      "category": "agents",
+      "summary": "Develop and orchestrate agents with a Python agent toolkit.",
+      "description": "Builders can define agent behavior and connect approved tools within the toolkit. Provider setup and deployment are separate concerns; test tool restrictions and retain human approval for sensitive actions.",
+      "evidenceTerm": "agent"
+    },
+    {
+      "name": "OpenAI Agents SDK",
+      "repository": "openai/openai-agents-python",
+      "category": "agents",
+      "summary": "Build Python agent workflows with tools, handoffs and tracing support.",
+      "description": "Developers can define agents and controlled execution paths using the SDK. Connected model APIs can incur charges; redact sensitive traces and authorize tool operations outside model instructions.",
+      "evidenceTerm": "agents"
+    },
+    {
+      "name": "Aider",
+      "repository": "Aider-AI/aider",
+      "category": "coding",
+      "summary": "Work on a codebase with an AI coding assistant in the terminal.",
+      "description": "Developers can discuss changes and apply model-proposed edits in a repository-oriented workflow. Review every diff, run tests and protect credentials; model-provider usage and tool compatibility must be checked separately.",
+      "evidenceTerm": "aider"
+    },
+    {
+      "name": "Continue",
+      "repository": "continuedev/continue",
+      "category": "coding",
+      "summary": "Configure AI-assisted development workflows around your code and chosen models.",
+      "description": "The project provides developer-assistance tooling with configurable model and context connections. Repository access and any automated edit require review; provider features and supported surfaces can change.",
+      "evidenceTerm": "continue"
+    },
+    {
+      "name": "Cline",
+      "repository": "cline/cline",
+      "category": "coding",
+      "summary": "Use an editor-based coding agent with reviewable proposed actions.",
+      "description": "Developers can ask the extension to inspect a project and propose code and tool actions. Review requested permissions and changes, isolate untrusted projects and account for the configured model provider.",
+      "evidenceTerm": "cline"
+    },
+    {
+      "name": "Roo Code",
+      "repository": "RooCodeInc/Roo-Code",
+      "category": "coding",
+      "summary": "Use configurable coding-agent modes inside a development editor.",
+      "description": "The extension organizes model-assisted development around selected modes and tools. It can propose consequential operations, so keep approval controls and inspect commands and diffs before execution.",
+      "evidenceTerm": "roo"
+    },
+    {
+      "name": "OpenHands",
+      "repository": "OpenHands/OpenHands",
+      "category": "coding",
+      "summary": "Run a software-development agent in a controlled development environment.",
+      "description": "The platform supports agent-driven code tasks and development workflows. Treat generated changes and repository instructions as untrusted; sandbox execution and require tests and human review before merging.",
+      "evidenceTerm": "openhands"
+    },
+    {
+      "name": "Gemini CLI",
+      "repository": "google-gemini/gemini-cli",
+      "category": "coding",
+      "summary": "Interact with a coding-oriented AI assistant from the command line.",
+      "description": "Developers can supply approved project context and use configured terminal-assistant capabilities. Authentication, provider limits and command approvals need review; do not expose secrets or permit arbitrary unattended execution.",
+      "evidenceTerm": "gemini"
+    },
+    {
+      "name": "Codex CLI",
+      "repository": "openai/codex",
+      "category": "coding",
+      "summary": "Work with a coding agent from a local terminal workflow.",
+      "description": "The command-line project supports model-assisted code work in a repository. Review sandbox and approval settings, keep credentials out of prompts and validate generated changes; access and usage conditions depend on the configured service.",
+      "evidenceTerm": "codex"
+    },
+    {
+      "name": "Goose",
+      "repository": "block/goose",
+      "category": "coding",
+      "summary": "Use a configurable developer agent with explicitly connected extensions.",
+      "description": "Developers can connect a model and selected tools to help with local engineering tasks. Extensions can expose powerful capabilities, so inspect permissions and isolate projects before accepting generated actions.",
+      "evidenceTerm": "goose"
+    },
+    {
+      "name": "Tabby",
+      "repository": "TabbyML/tabby",
+      "category": "coding",
+      "summary": "Self-host a coding assistant backed by supported models.",
+      "description": "Teams can operate coding-assistance infrastructure under their own deployment controls. Hardware, model licensing, editor compatibility and repository-data policies need evaluation before rollout.",
+      "evidenceTerm": "tabby"
+    },
+    {
+      "name": "ComfyUI",
+      "repository": "Comfy-Org/ComfyUI",
+      "category": "image-generation",
+      "summary": "Assemble node-based generative-media workflows.",
+      "description": "Creators and developers can connect supported model components in a visual graph. Custom nodes execute third-party code; audit them and check model licenses, memory requirements and media rights before use.",
+      "evidenceTerm": "comfy"
+    },
+    {
+      "name": "Stable Diffusion WebUI",
+      "repository": "AUTOMATIC1111/stable-diffusion-webui",
+      "category": "image-generation",
+      "summary": "Use a browser interface for supported Stable Diffusion workflows.",
+      "description": "The application exposes image-generation controls and extensible processing workflows. Check supported checkpoints and hardware, review extensions before installation and verify rights to input images and outputs.",
+      "evidenceTerm": "diffusion"
+    },
+    {
+      "name": "Invoke",
+      "repository": "invoke-ai/InvokeAI",
+      "category": "image-generation",
+      "summary": "Develop image-generation workflows in a creative application.",
+      "description": "Creators can configure supported models and work through visual generation and editing tools. Output quality depends on the model and inputs; evaluate licensing, resource needs and rights before production use.",
+      "evidenceTerm": "invoke"
+    },
+    {
+      "name": "FLUX",
+      "repository": "black-forest-labs/flux",
+      "category": "image-generation",
+      "summary": "Explore official inference code for FLUX image-generation models.",
+      "description": "Developers can inspect and run supported model inference following the project instructions. This repository is not a universal hosted plan; individual weights have distinct licenses and substantial hardware requirements.",
+      "evidenceTerm": "flux"
+    },
+    {
+      "name": "Hunyuan3D",
+      "repository": "Tencent-Hunyuan/Hunyuan3D-2",
+      "category": "three-dimensional",
+      "summary": "Explore model-based generation of 3D assets through official project code.",
+      "description": "Developers and technical artists can experiment with supported 3D generation pipelines. Validate geometry and texture quality in downstream tools; model licenses and accelerator requirements must be checked for the chosen release.",
+      "evidenceTerm": "hunyuan"
+    },
+    {
+      "name": "TRELLIS",
+      "repository": "microsoft/TRELLIS",
+      "category": "three-dimensional",
+      "summary": "Experiment with structured 3D generation using research model pipelines.",
+      "description": "Technical users can inspect official inference workflows for producing 3D representations. Research outputs require validation for topology, scale and downstream compatibility; hardware and model terms vary.",
+      "evidenceTerm": "trellis"
+    },
+    {
+      "name": "Whisper",
+      "repository": "openai/whisper",
+      "category": "transcription",
+      "summary": "Transcribe supported speech recordings with a speech-recognition model.",
+      "description": "Developers can convert authorized audio into text using official inference tools. Accuracy varies by language, noise and speaker; names and timestamps require review, and recording consent must be handled independently.",
+      "evidenceTerm": "whisper"
+    },
+    {
+      "name": "Faster Whisper",
+      "repository": "SYSTRAN/faster-whisper",
+      "category": "transcription",
+      "summary": "Run Whisper transcription through a CTranslate2-based implementation.",
+      "description": "Developers can use a different inference implementation for speech transcription. Benchmark on representative audio rather than assuming speed or accuracy improvements; model settings, hardware and language affect results.",
+      "evidenceTerm": "whisper"
+    },
+    {
+      "name": "WhisperX",
+      "repository": "m-bain/whisperX",
+      "category": "transcription",
+      "summary": "Build transcription workflows with word alignment and optional speaker labeling.",
+      "description": "The project combines speech recognition with alignment and supported diarization components. Optional models may need separate access or terms; speaker labels and word timing should be checked before reliance.",
+      "evidenceTerm": "whisper"
+    },
+    {
+      "name": "OpenVoice",
+      "repository": "myshell-ai/OpenVoice",
+      "category": "voice",
+      "summary": "Experiment with supported voice-cloning and speech-generation workflows.",
+      "description": "Developers can inspect reference-voice and speech-generation pipelines from the official project. Use only voices with explicit consent and appropriate rights; avoid impersonation and verify model terms and deployment requirements.",
+      "evidenceTerm": "openvoice"
+    },
+    {
+      "name": "Kokoro",
+      "repository": "hexgrad/kokoro",
+      "category": "voice",
+      "summary": "Use a text-to-speech model through its official inference project.",
+      "description": "Developers can synthesize speech with supported voices and model configurations. Language coverage and voice suitability vary; review license conditions and disclose generated speech where appropriate.",
+      "evidenceTerm": "kokoro"
+    },
+    {
+      "name": "Fish Speech",
+      "repository": "fishaudio/fish-speech",
+      "category": "voice",
+      "summary": "Explore official neural speech-generation tooling.",
+      "description": "Audio developers can inspect the project's supported speech models and inference path. Model versions and access requirements differ; obtain voice consent and review current terms before distributing generated audio.",
+      "evidenceTerm": "fish"
+    },
+    {
+      "name": "AudioCraft",
+      "repository": "facebookresearch/audiocraft",
+      "category": "music-audio",
+      "summary": "Experiment with model-based audio and music generation in Python.",
+      "description": "Researchers can work with the official audio-generation library and supported model families. Code and weight licenses can differ; review rights and resource requirements rather than assuming generated music is cleared for commercial use.",
+      "evidenceTerm": "audiocraft"
+    },
+    {
+      "name": "ACE-Step",
+      "repository": "ACE-Step/ACE-Step",
+      "category": "music-audio",
+      "summary": "Explore a model-based music-generation workflow through official code.",
+      "description": "Musicians and developers can inspect the project's generation tools and model setup. Creative quality, hardware needs and rights depend on inputs and model terms; listen critically and check distribution permissions.",
+      "evidenceTerm": "step"
+    },
+    {
+      "name": "Wan",
+      "repository": "Wan-Video/Wan2.2",
+      "category": "video-generation",
+      "summary": "Explore official video-generation models and inference workflows.",
+      "description": "Technical creators can configure supported video-model pipelines and inputs. Generation requires suitable accelerators and careful review of output consistency, likeness rights and model-specific licenses.",
+      "evidenceTerm": "wan"
+    },
+    {
+      "name": "LTX-Video",
+      "repository": "Lightricks/LTX-Video",
+      "category": "video-generation",
+      "summary": "Experiment with official model pipelines for generative video.",
+      "description": "Developers can follow the project's supported video-inference workflow. Hardware, model version and output controls vary; generated frames need review for artifacts and unauthorized use of people or copyrighted material.",
+      "evidenceTerm": "ltx"
+    },
+    {
+      "name": "Open-Sora",
+      "repository": "hpcaitech/Open-Sora",
+      "category": "video-generation",
+      "summary": "Explore open research infrastructure for video-generation models.",
+      "description": "Researchers can inspect video-model training and inference components. It is a technical project rather than a guaranteed turnkey video service; data rights, accelerator needs and supported releases require review.",
+      "evidenceTerm": "sora"
+    },
+    {
+      "name": "GPT Researcher",
+      "repository": "assafelovic/gpt-researcher",
+      "category": "research",
+      "summary": "Prepare model-assisted research reports from configured sources and tools.",
+      "description": "Researchers can structure a question and collect candidate evidence through a research application. Read every cited source yourself; generated reports can omit evidence or misinterpret sources, and connected APIs may charge for use.",
+      "evidenceTerm": "research"
+    },
+    {
+      "name": "Perplexica",
+      "repository": "ItzCrazyKns/Perplexica",
+      "category": "research",
+      "summary": "Explore a self-hosted AI-assisted search and research application.",
+      "description": "Users can configure model and search backends to develop source-oriented answers. Search-provider setup and model access are separate; cited links must be opened and checked before claims are accepted.",
+      "evidenceTerm": "perplexica"
+    },
+    {
+      "name": "STORM",
+      "repository": "stanford-oval/storm",
+      "category": "research",
+      "summary": "Explore research-backed workflows for drafting source-oriented long-form content.",
+      "description": "Researchers can inspect a system that gathers perspectives and organizes evidence for article drafting. A generated article still requires source checks, originality review and an accountable editor before publication.",
+      "evidenceTerm": "storm"
+    },
+    {
+      "name": "RAGFlow",
+      "repository": "infiniflow/ragflow",
+      "category": "knowledge-management",
+      "summary": "Build document-centered retrieval and agent workflows.",
+      "description": "Teams can ingest approved documents and configure retrieval-based applications. Parsing and retrieval are imperfect; validate extraction, document permissions and answer provenance before using outputs in decisions.",
+      "evidenceTerm": "ragflow"
+    },
+    {
+      "name": "PrivateGPT",
+      "repository": "zylon-ai/private-gpt",
+      "category": "knowledge-management",
+      "summary": "Explore document question-answering with configurable private deployment.",
+      "description": "Developers can assemble ingestion and retrieval workflows around an approved model configuration. The project name alone does not certify privacy; verify network paths, storage permissions and every connected provider.",
+      "evidenceTerm": "private"
+    },
+    {
+      "name": "Docling",
+      "repository": "docling-project/docling",
+      "category": "documents",
+      "summary": "Convert supported documents into structured representations for downstream workflows.",
+      "description": "Developers can parse documents and export structured content for search or model input. Complex layouts, tables and scans need inspection; extraction output should be compared against the original document before analysis.",
+      "evidenceTerm": "docling"
+    },
+    {
+      "name": "Marker",
+      "repository": "datalab-to/marker",
+      "category": "documents",
+      "summary": "Convert supported documents into Markdown and structured output.",
+      "description": "Teams can build document-extraction steps for a retrieval or review pipeline. Layout and OCR errors remain possible; verify tables, page references, dependency terms and any optional model-backed services.",
+      "evidenceTerm": "marker"
+    },
+    {
+      "name": "MinerU",
+      "repository": "opendatalab/MinerU",
+      "category": "documents",
+      "summary": "Extract structured content from complex documents using document-processing models.",
+      "description": "Developers can inspect parsing workflows for text, layout and other supported elements. Document quality and language affect extraction; validate representative pages and check local or external execution settings.",
+      "evidenceTerm": "miner"
+    },
+    {
+      "name": "PandasAI",
+      "repository": "sinaptik-ai/pandas-ai",
+      "category": "data-analysis",
+      "summary": "Explore natural-language interfaces to analysis of configured datasets.",
+      "description": "Analysts can ask bounded questions over approved tabular data through a model-backed application interface. Generated analysis or code can be wrong; use a sandbox, inspect transformations and verify results with direct calculations.",
+      "evidenceTerm": "pandas"
+    },
+    {
+      "name": "Jupyter AI",
+      "repository": "jupyterlab/jupyter-ai",
+      "category": "data-analysis",
+      "summary": "Bring configured generative-model assistance into Jupyter workflows.",
+      "description": "Notebook users can connect supported model providers to assist with code and text tasks. Notebooks may contain sensitive data and executable code; review context, provider policy and every generated cell before running it.",
+      "evidenceTerm": "jupyter"
+    },
+    {
+      "name": "LIDA",
+      "repository": "microsoft/lida",
+      "category": "data-analysis",
+      "summary": "Explore model-assisted visualization and data-analysis workflows.",
+      "description": "Analysts can investigate data summaries and generated visualization specifications through the project tools. Charts and generated code require validation for accurate units, missing data and misleading visual choices.",
+      "evidenceTerm": "lida"
+    },
+    {
+      "name": "MindsDB",
+      "repository": "mindsdb/mindsdb",
+      "category": "data-analysis",
+      "summary": "Connect data sources and AI components through a developer-oriented data platform.",
+      "description": "Teams can configure integrations and model-backed querying for selected data workflows. Review connector permissions, query behavior and provider requirements; generated conclusions must be reconciled with source data.",
+      "evidenceTerm": "mindsdb"
+    },
+    {
+      "name": "Presenton",
+      "repository": "presenton/presenton",
+      "category": "presentations",
+      "summary": "Explore a self-hosted workflow for generating presentation drafts.",
+      "description": "Authors can configure a presentation-generation application and review the resulting slides. Generated layouts and factual content need editing, source checks and brand review; model and media backends may have separate usage costs.",
+      "evidenceTerm": "presenton"
+    },
+    {
+      "name": "Browser Use",
+      "repository": "browser-use/browser-use",
+      "category": "automation",
+      "summary": "Build browser-agent workflows using configured models and browser tools.",
+      "description": "Developers can automate a bounded browser task through the project's agent interfaces. Browser content can contain malicious instructions; isolate sessions and require approval before purchases, messages or account changes.",
+      "evidenceTerm": "browser"
+    },
+    {
+      "name": "LibreTranslate",
+      "repository": "LibreTranslate/LibreTranslate",
+      "category": "translation",
+      "summary": "Operate a self-hosted machine-translation API using supported language models.",
+      "description": "Developers can expose translation capabilities through an API deployment. Language coverage and accuracy depend on installed models; human review is essential for legal, medical or customer-facing material.",
+      "evidenceTerm": "translate"
+    },
+    {
+      "name": "Khoj",
+      "repository": "khoj-ai/khoj",
+      "category": "knowledge-management",
+      "summary": "Explore a personal assistant connected to approved knowledge sources.",
+      "description": "Users can configure an assistant to work with their documents and selected information tools. Confirm privacy and network behavior for the chosen setup; answers should remain traceable to original evidence.",
+      "evidenceTerm": "khoj"
+    },
+    {
+      "name": "Onyx",
+      "repository": "onyx-dot-app/onyx",
+      "category": "knowledge-management",
+      "summary": "Search and work with enterprise knowledge through a configured AI workspace.",
+      "description": "Teams can connect supported information sources and build retrieval-oriented assistant workflows. Connector permissions and freshness must be tested; access to a search index must not bypass source-document authorization.",
+      "evidenceTerm": "onyx"
+    },
+    {
+      "name": "DeepChem",
+      "repository": "deepchem/deepchem",
+      "category": "scientific-research",
+      "summary": "Develop machine-learning workflows for scientific datasets.",
+      "description": "Researchers can inspect tools for featurization, datasets and model development in scientific applications. Results depend on data quality, split design and applicability; benchmark independently and never treat a model prediction as experimental validation.",
+      "evidenceTerm": "deepchem"
+    },
+    {
+      "name": "Microsoft Agent Framework",
+      "repository": "microsoft/agent-framework",
+      "category": "agents",
+      "summary": "Build agent applications and orchestration with a Microsoft-supported framework.",
+      "description": "Developers can configure model-backed agents and coordinated workflows using the successor identified by the Semantic Kernel project. Provider access, deployment and tool authorization remain separate responsibilities; enforce budgets and approval gates.",
+      "evidenceTerm": "framework"
+    },
+    {
+      "name": "Karakeep",
+      "repository": "karakeep-app/karakeep",
+      "category": "knowledge-management",
+      "summary": "Collect and organize bookmarks with optional AI-assisted enrichment.",
+      "description": "Users can maintain a searchable collection of saved resources and configure enrichment features. Review model connections and access permissions before saving private links; generated labels or summaries can be inaccurate.",
+      "evidenceTerm": "karakeep"
+    },
+    {
+      "name": "LangExtract",
+      "repository": "google/langextract",
+      "category": "documents",
+      "summary": "Extract structured information from text using configured language models.",
+      "description": "Developers can define an extraction task and examine structured results grounded in source text. Validate schemas and source spans on representative inputs; provider charges, context limits and extraction errors need explicit handling.",
+      "evidenceTerm": "extract"
+    },
+    {
+      "name": "PaddleOCR",
+      "repository": "PaddlePaddle/PaddleOCR",
+      "category": "documents",
+      "summary": "Extract text and supported document structure through OCR pipelines.",
+      "description": "Developers can configure document-recognition models for scanned or digital inputs. Accuracy depends on layout, language and image quality; compare outputs to source pages before feeding them into an automated process.",
+      "evidenceTerm": "ocr"
+    },
+    {
+      "name": "Ultralytics YOLO",
+      "repository": "ultralytics/ultralytics",
+      "category": "computer-vision",
+      "summary": "Develop object-detection and supported computer-vision workflows.",
+      "description": "Developers can train or run supported vision models on appropriate datasets. Evaluate accuracy and bias on the actual task, review deployment and license terms and avoid using detections as a substitute for accountable human decisions.",
+      "evidenceTerm": "yolo"
+    },
+    {
+      "name": "SAM 2",
+      "repository": "facebookresearch/sam2",
+      "category": "computer-vision",
+      "summary": "Explore promptable segmentation of images and video with official model code.",
+      "description": "Researchers can use supported interfaces to separate objects in visual inputs. Check installation and accelerator requirements, inspect masks and respect rights and privacy when processing recordings or images.",
+      "evidenceTerm": "segment"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+import type pg from 'pg';
+
+// Shared by the guarded CLI and real isolated PostgreSQL regression tests.
+export async function assertCatalogPrivileges(client: pg.Client) {
+    const { rows: [privileges] } = await client.query(`SELECT
+      EXISTS(SELECT 1 FROM pg_tables WHERE schemaname='public' AND tablename NOT IN ('Tool','Category','Tag','UseCase','Article','AuditLog','_CategoryToTool','_TagToTool','_CategoryToUseCase','_TagToUseCase','_ToolToUseCase','_ArticleToCategory','_ArticleToTag','_ArticleToTool') AND (has_table_privilege(current_user,format('%I.%I',schemaname,tablename),'INSERT') OR has_table_privilege(current_user,format('%I.%I',schemaname,tablename),'UPDATE') OR has_table_privilege(current_user,format('%I.%I',schemaname,tablename),'DELETE'))) AS outside_writes,
+      EXISTS(SELECT 1 FROM pg_tables WHERE schemaname='public' AND (has_table_privilege(current_user,format('%I.%I',schemaname,tablename),'UPDATE') OR has_table_privilege(current_user,format('%I.%I',schemaname,tablename),'DELETE') OR has_table_privilege(current_user,format('%I.%I',schemaname,tablename),'TRUNCATE') OR has_table_privilege(current_user,format('%I.%I',schemaname,tablename),'TRIGGER') OR has_table_privilege(current_user,format('%I.%I',schemaname,tablename),'REFERENCES'))) AS mutating_privileges,
+      EXISTS(SELECT 1 FROM pg_tables WHERE schemaname='public' AND tablename NOT IN ('Tool','Category','Tag','UseCase','Article','_CategoryToTool','_TagToTool','_CategoryToUseCase','_TagToUseCase','_ToolToUseCase','_ArticleToCategory','_ArticleToTag','_ArticleToTool') AND has_table_privilege(current_user,format('%I.%I',schemaname,tablename),'SELECT')) AS outside_reads,
+      EXISTS(SELECT 1 FROM pg_tables WHERE schemaname='public' AND tablename IN ('Tool','Category','Tag','UseCase','Article','_CategoryToTool','_TagToTool','_CategoryToUseCase','_TagToUseCase','_ToolToUseCase','_ArticleToCategory','_ArticleToTag','_ArticleToTool') AND (NOT has_table_privilege(current_user,format('%I.%I',schemaname,tablename),'SELECT') OR NOT has_table_privilege(current_user,format('%I.%I',schemaname,tablename),'INSERT'))) AS missing_catalog_privileges`);
+    const { rows: [audit] } = await client.query(`SELECT has_table_privilege(current_user,'public."AuditLog"','INSERT') AND has_column_privilege(current_user,'public."AuditLog"','id','SELECT') AS permitted`);
+    if (privileges.outside_writes || privileges.mutating_privileges || privileges.outside_reads || privileges.missing_catalog_privileges || !audit.permitted) throw Error('IMPORT_PRIVILEGES_REJECTED');
+}

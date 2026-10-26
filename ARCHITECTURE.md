@@ -2,6 +2,8 @@
 
 ## Estado y límites
 
+Actualización Fase 13: base e7a3bbb y stack intactos. El propietario confirma Render Free/Neon staging funcionando; la verificación de red de esta sesión sigue bloqueada. Catálogo versionado con evidencia → Zod y contratos existentes → plan read-only → workflow manual del mismo SHA → lotes Prisma hacia los mismos modelos y auditoría. Sin nuevo esquema, ORM, tabla o endpoint. La cuenta humana se prepara mediante el CLI existente con guardas staging y wrapper PowerShell privado. Ver [docs/CATALOG_OPERATIONS.md](docs/CATALOG_OPERATIONS.md) y [docs/PHASE13_REPORT.md](docs/PHASE13_REPORT.md). El texto posterior conserva la evolución de las fases originales.
+
 Fases 1–11 locales y auditoría de Fase 12 (correo/pagos/modelo y producción pendientes): portada, directorios públicos y administración conectados a PostgreSQL/Prisma, 45 modelos, dieciséis migraciones, conexión de servidor, repositorios y seeds. Existen búsqueda/filtros/paginación y fichas de herramientas/casos con relaciones. Blog y CMS con bloques/fuentes/revisión/publicación, SEO dinámico y control de indexación de preestreno. Login real con sesiones opacas y CRUD administrativo; inicialización de la cuenta humana pendiente de contraseña mediante CLI seguro. Hay captación, confirmación/baja, borradores y envío manual desacoplado; la entrega real de Resend está pendiente de configuración/prueba autorizada. Hay infraestructura de órdenes/Wompi Sandbox deshabilitada sin credenciales; no se verificaron pagos externos. Existe motor/worker/scheduler común con cinco agentes empresariales, evidencia y productos persistentes verificados localmente, con OpenAI deshabilitado por falta de clave; sin ejecuciones reales de IA. Patrocinios y CRM operativos para solicitudes, propuestas privadas y campañas condicionadas; entrega externa de correo/pagos/agentes siguen pendientes.
 
 ## Componentes actuales
@@ -48,7 +50,7 @@ La UI pública consulta contenido y admite solicitudes comerciales mediante un P
 - `src/components/`: presentación reusable. No consultas Prisma ni permisos en componentes de cliente.
 - `src/lib/config/`: validación de configuración. `site.ts` marcado `server-only`; no exponer secretos con `NEXT_PUBLIC_`.
 - En futuras fases, `src/server/<dominio>/` contendrá servicios, validación, repositorios y adaptadores usados por Route Handlers/Server Actions. Crear módulos solo cuando tengan código real.
-- `prisma/`: schema, diez migraciones y seeds de desarrollo/editorial/comercial; `src/generated/prisma` se genera y no se versiona. No usar `db push` como sustituto de migraciones.
+- `prisma/`: schema, dieciséis migraciones y seeds de desarrollo/editorial/comercial; `src/generated/prisma` se genera y no se versiona. No usar `db push` como sustituto de migraciones.
 - `tests/`: contratos de configuración y comportamiento real HTTP/navegador; no depender de servicios ficticios.
 
 ## Persistencia y seguridad futuras

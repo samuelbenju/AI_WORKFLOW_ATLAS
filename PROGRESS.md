@@ -4,7 +4,7 @@ Actualizado: 26 de octubre de 2026 (America/Bogota; métricas propias agregadas 
 
 ## Alcance autorizado
 
-Fases 1–12 respaldadas; base de esta intervención 843710e53e16c440ff52e6386bb44ba1066529b0. El propietario confirma Render Live y Neon atlas_staging con 16 migraciones/55 tablas, usando atlas_staging_app; reporta error del catálogo. La solicitud vigente autoriza diagnosticar/corregir y publicar mediante push normal una corrección validada, sin tocar esquema, migraciones, owner runtime, datos Neon o servicios externos. Demostrado localmente que el catálogo vacío funciona con rol read-only y que el catch ocultaba códigos útiles. Se corrige la observabilidad y el límite de inicialización, con readiness privado profundo. Causa real de Render y conducta de la versión desplegada siguen pendientes de acceso a logs/códigos y HTTP público; este entorno no puede acceder al dominio. No se declara resuelto el incidente remoto. Las secciones históricas conservan el estado de cada intervención; este resumen y el último apartado son los vigentes.
+Fases 1–12 respaldadas; base de Fase 13 e7a3bbbfa70d8e48d8db0e29ec8f84f36102bd4d, igual a main remota al comenzar. El propietario confirma que la portada Render Free funciona visualmente con Neon atlas_staging, 16 migraciones/55 tablas y atlas_staging_app. Esta confirmación posterior no demuestra aquí la causa del incidente histórico. El adjunto autoriza investigación, desarrollo, pruebas, commits/push normales y carga de contenido revisado en staging. Preparados y probados 65 tools, 30 guías, seis artículos DRAFT, 20 categorías/24 etiquetas e importador manual guardado. **Ninguna fila importada en Neon por esta sesión; catálogo público remoto y login humano no verificados.** API Actions y dominio Render inaccesibles desde este entorno; terminar trabajo independiente y publicar preparación autorizada. Sin nuevos servicios, esquema, migraciones o activación comercial/IA. Ver docs/PHASE13_REPORT.md. Las secciones históricas conservan el estado de cada intervención; este resumen y el último apartado son los vigentes.
 
 | Fase | Estado |
 | --- | --- |
@@ -20,6 +20,7 @@ Fases 1–12 respaldadas; base de esta intervención 843710e53e16c440ff52e6386bb
 | 10. Agentes especializados | Publicada y sincronizada en GitHub mediante push normal autorizado. Modelos TEST_FIXTURE; OpenAI real pendiente de credenciales/consumo autorizados. |
 | 11. Analítica y afiliados | Publicada; Google/proveedores reales pendientes de configuración/pruebas externas. |
 | 12. Auditoría y lanzamiento | Auditoría/correcciones/pruebas locales y preparación realizadas. Lanzamiento pendiente de los bloqueos de LAUNCH_CHECKLIST.md; no listo para producción comercial. |
+| 13. Activación y catálogo real | Implementación, investigación y pruebas locales completadas; importación Neon, cuenta humana y verificación Render pendientes de acceso/operación privada. No marcar completa operativamente. |
 
 ## Implementación de Fase 1
 
@@ -31,15 +32,15 @@ Documentos de control completos, versiones fijadas, lockfile y CI presentes. Ver
 
 ## Operación y límites
 
-Sin gastos, despliegue, push, emails, llamadas IA o cobros. PostgreSQL local está configurado y operativo; autenticación/panel implementados y probados con cuentas temporales. No hay administrador humano inicializado; los cinco perfiles empresariales y calendarios están deshabilitados, sin ejecuciones reales de IA. No afirmar cumplimiento jurídico ni disponibilidad comercial. La CI remota no ha sido ejecutada. Los procesos web y contenedores requieren comprobación/reinicio tras restauración. ESLint 9 mantiene el aviso documentado de fin de soporte. El CLI nativo Prisma sigue bloqueado por red; el flujo verificado usa artefactos oficiales WASM, con versiones fijadas y sin desactivar integridad.
+Sin compras, correos, llamadas IA o cobros. Render Free fue desplegado por el propietario y las publicaciones Git están autorizadas; esta sesión no verifica su estado Live. PostgreSQL local operativo, auth/panel probados con cuentas temporales. Lectura local: cinco perfiles y cinco calendarios, todos deshabilitados, cero ejecuciones; .env.local intacto y flags ausentes conservan los valores seguros por defecto. No se alteran cuentas humanas o credenciales. No afirmar cumplimiento jurídico ni disponibilidad comercial. Resultado CI/Actions remoto no observado; no confundir pruebas locales con éxito GitHub. ESLint 9 mantiene el aviso de soporte; Prisma WASM sigue fijado sin desactivar TLS o checksums.
 
 ## Siguiente actividad
 
-Activación humana mediante `npm run admin:init` en terminal interactiva sin eco (correo preparado únicamente en configuración privada). Para una primera ejecución real: configurar de forma segura la credencial de OpenAI, verificar acceso/modelo/tarifas, fijar límites y aprobar una tarea concreta. No compartir secretos por chat ni activar costes recurrentes. Revisar `docs/BUSINESS_AGENTS.md`. Los pendientes externos de Resend y Wompi se mantienen. Fase 11 autorizada e implementada localmente; Fase 12 requiere otra solicitud expresa. Fase 10 publicada en GitHub; Fase 11 conservada en commit local; push pendiente de aprobación expresa.
+Configurar privadamente la credencial nueva de catálogo y ejecutar el workflow manual dry-run → apply del mismo SHA, conservando informes. Inicializar OWNER desde el equipo privado Windows/Node 24 mediante scripts/admin-staging.ps1 y contraseña elegida sin eco; comprobar login/logout en Render. Verificar las fichas publicadas y el SHA Live. Instrucciones exactas en docs/CATALOG_OPERATIONS.md. OpenAI, pagos, newsletter, tracking e indexación permanecen deshabilitados; no se solicita activarlos para resolver esta fase.
 
 ## Historial de conservación y fases anteriores
 
-Las secciones que siguen documentan comprobaciones pasadas; sus restricciones por fase y SHAs se refieren a esas ejecuciones. Estado actual: Fases 1–10 en GitHub, Fase 11 local sin publicar.
+Las secciones que siguen documentan comprobaciones pasadas; sus restricciones por fase y SHAs se refieren a esas ejecuciones. El estado vigente está en el resumen anterior y en el último apartado.
 
 ## Conservación en Git
 
@@ -330,3 +331,9 @@ Defectos comprobados corregidos: readCatalog eliminaba todo código original; ge
 Verificación local: 54/54 unitarias, 87/87 PostgreSQL, 4/4 regresiones de runtime (solo lectura, configuración inválida, permiso de unión, HTTP/Chromium/readiness privado), 108/108 E2E escritorio/móvil, lint/tipos/build/generación correctos. Todos los datos/roles/DDL de test son efímeros y aislados, nunca Neon staging; perfil/DB de prueba propios retirados por helper. No servicios/IA/email/pagos o seeds de staging activados.
 
 Runbook y verificación de Render: docs/RENDER_CATALOG_DIAGNOSTICS.md. Falta confirmar en Render el SHA nuevo desplegado, observar stage/codes o readiness privado y verificar las tres páginas públicas. Se solicitó habilitar acceso al dominio desde este entorno; no se pidió una URL privada/token/password en chat. No se asegura autenticación/TLS/grants reales porque no hay logs/variables Render accesibles. Publicación de la corrección de observabilidad validada autorizada por la solicitud; cierre remoto del incidente pendiente.
+
+## Fase 13 — resultado de esta ejecución
+
+Investigadas 70 candidatas y aprobadas 65 fichas con evidencia oficial fechada y hashes; cinco excluidas por mantenimiento/transición. Preparadas 30 guías, seis artículos DRAFT, 20 categorías y 24 etiquetas. Importación sin ediciones masivas, dry-run/artefacto/fingerprint, lotes atómicos y credencial de catálogo mínima; bootstrap Windows privado mediante el CLI existente. `check` (61 unitarias), build, 87 integración, nueve tests nuevos de catálogo y 108 E2E aprobados. Workflows validados con actionlint; sin secretos reales, .env.local y las 16 migraciones/lockfile intactos.
+
+**Ejecutado en Neon: ninguna importación de esta sesión. Verificado en Render: ninguna nueva ficha.** API GitHub Forbidden y dominio Render inaccesible desde aquí; no se utiliza MIGRATION_DATABASE_URL para sortearlo. SQL de rol NOLOGIN, configuración del secreto y ejecuciones manuales preparados. Falta elección privada de contraseña OWNER y verificación Live. Ver docs/PHASE13_REPORT.md para distinción implementado/preparado/local/pendiente y docs/CATALOG_OPERATIONS.md para continuar sin reconstruir. La publicación Git de esta preparación está autorizada; el SHA final y su sincronización se confirman con el resultado real del push.

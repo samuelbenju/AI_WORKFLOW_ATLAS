@@ -1,6 +1,6 @@
-# Render + Neon staging — preparación, sin despliegue
+# Render + Neon staging — operación y preparación
 
-26-10-2026 (America/Bogota). Hosting elegido por el propietario: Render. No se creó servicio, cuenta, worker, cron o recurso de pago. Esta guía no afirma que Neon ya esté migrado: consultar el resultado real en docs/NEON_STAGING.md y BUILD_LOG.md.
+26-10-2026 (America/Bogota). El propietario confirma que Render Free está desplegado, Neon tiene las 16 migraciones/55 tablas y la portada se ve correctamente. Esta sesión no accede al dominio ni a los logs privados: esa información se distingue de las pruebas locales. Se conserva la infraestructura elegida; no se crea servicio, worker, cron o recurso de pago adicional. Para catálogo real y OWNER desde Windows: [CATALOG_OPERATIONS.md](CATALOG_OPERATIONS.md). Los apartados históricos de Neon documentan bloqueos anteriores, no niegan la posterior confirmación del propietario.
 
 ## Versión y comandos previstos
 

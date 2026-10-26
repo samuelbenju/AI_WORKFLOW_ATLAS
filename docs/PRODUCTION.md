@@ -4,7 +4,7 @@ Estado 26-10-2026: preparado para revisión, sin despliegue o cuentas compradas.
 
 ## Hosting de staging elegido posteriormente
 
-El propietario eligió Render para el siguiente despliegue controlado. La guía vigente es [RENDER_STAGING.md](RENDER_STAGING.md); no se desplegó ni se compró un servicio. Neon staging necesita ejecución real de las guardas/migraciones y rol runtime mínimo antes de conectarlo. La configuración Vercel anterior se conserva; no se reescribe la arquitectura por preparar otro host.
+El propietario confirma Render Free desplegado y portada funcional, con Neon staging migrado y rol runtime mínimo. Guía vigente: [RENDER_STAGING.md](RENDER_STAGING.md). Fase 13 conserva esos proveedores sin nueva infraestructura: [CATALOG_OPERATIONS.md](CATALOG_OPERATIONS.md). Su catálogo aún requiere importación comprobada por Actions y verificación pública; este entorno no accede a esos servicios. La configuración Vercel anterior es histórica y no propone sustituir Render.
 
 ## Topología y configuración
 

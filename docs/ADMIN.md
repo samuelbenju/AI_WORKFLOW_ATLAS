@@ -4,7 +4,7 @@ Panel privado en español: `/admin`; acceso en `/login`. PostgreSQL es obligator
 
 ## Primer propietario y recuperación
 
-Desde el checkout, con las diez migraciones aplicadas y `DATABASE_URL` privada:
+Desde el checkout, con las dieciséis migraciones aplicadas y `DATABASE_URL` privada:
 
 ```bash
 npm run db:status
@@ -16,6 +16,8 @@ npm run admin:init
 El comando exige una terminal interactiva, pide la contraseña dos veces **sin eco** y exige entre 14 y 128 caracteres. Guarda únicamente un hash scrypt con sal aleatoria en PostgreSQL. No escribe la contraseña en archivos, variables persistentes, logs o documentación; no debe compartirse por chat. El correo elegido por el propietario de este entorno está preparado solo en configuración privada. **La cuenta humana aún requiere que su propietario elija la contraseña ejecutando este comando.**
 
 La inicialización toma un bloqueo transaccional PostgreSQL y rechaza un segundo bootstrap si ya existe un OWNER/ADMIN activo con credenciales. No expone un endpoint web de inicialización. Quien puede ejecutar el comando con permisos de escritura de DB ya es un operador privilegiado: proteger acceso al servidor y a esa credencial.
+
+Para Render Free + Neon staging sin shell SSH, usar el checkout privado Windows/Node 24 del propietario y `scripts/admin-staging.ps1`. Ejecuta el mismo `admin:init -- --staging`, con comprobación previa de destino, TLS y rol runtime limitado; contraseña elegida localmente sin eco. Procedimiento exacto y restricciones en [CATALOG_OPERATIONS.md](CATALOG_OPERATIONS.md#primer-owner-desde-windows). Esta entrega prepara y prueba los servicios; no crea la cuenta humana ni verifica un login remoto sin su intervención privada.
 
 Para cambiar una contraseña o recuperar acceso sin correo transaccional:
 

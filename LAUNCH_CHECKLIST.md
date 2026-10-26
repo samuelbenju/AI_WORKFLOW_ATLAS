@@ -2,11 +2,13 @@
 
 Auditoría local: 26-10-2026 UTC. **NO AUTORIZADO PARA PRODUCCIÓN COMERCIAL.** Esta lista no ejecuta, compra ni publica nada. Evidencia: [AUDIT_REPORT.md](AUDIT_REPORT.md), [BUILD_LOG.md](BUILD_LOG.md). Operación: [docs/PRODUCTION.md](docs/PRODUCTION.md). El propietario debe asignar responsables y registrar fecha/evidencia de cada pendiente; pasar pruebas locales no sustituye esas decisiones.
 
+Actualización 26-10-2026 (America/Bogota): Fases 1–12 respaldadas y Render Free + Neon staging confirmados por el propietario. Fase 13 añade contenido real y un workflow de importación manual autorizado; **sin importación Neon o comprobación Render de esta ejecución todavía**. Ver [docs/PHASE13_REPORT.md](docs/PHASE13_REPORT.md) y [docs/CATALOG_OPERATIONS.md](docs/CATALOG_OPERATIONS.md). Esto no autoriza lanzamiento comercial, pagos, envíos, indexación o gasto de agentes.
+
 ## Puertas obligatorias de salida
 
 - [x] Mantener checkout e historial oficial; fases previas, 45 modelos, 16 migraciones y lockfile conservados.
 - [x] Auditar auth/roles/CSRF, formularios, webhooks, idempotencia, herramientas y cuotas; corregir regresiones de Fase 12 y añadir pruebas.
-- [ ] Registrar aprobación humana de la versión exacta y autorización separada del despliegue. Fase 11 tiene commit local pendiente de aprobación de push; Fase 12 sigue en cambios locales.
+- [x] Respaldo de las doce fases autorizado y realizado en main; posteriores cambios de staging autorizados por sus solicitudes. Conservar SHA y comprobar el despliegue exacto; esto no es aprobación de lanzamiento comercial.
 - [ ] Revisión independiente de seguridad y configuración del entorno de destino. npm audit sin hallazgos no certifica ausencia de vulnerabilidades.
 - [ ] Inicializar administrador humano con `npm run admin:init` interactivo; contraseña propia, sin fixture ni fichero de contraseñas. Revisar roles y recuperación.
 - [ ] Contratar/configurar PostgreSQL de producción por decisión del propietario, TLS verify-full y CA confiable; rol runtime sin superusuario/CREATEDB/CREATEROLE, permisos mínimos. Credencial migradora separada y conexión directa compatible.

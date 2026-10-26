@@ -45,6 +45,8 @@ jobs:
       - run: npm run build
       - run: npx --no-install playwright install --with-deps chromium
       - run: node scripts/test-public-runtime.mjs
+      - run: npm run catalog:validate
+      - run: npm run test:catalog-import
       - run: npm run test:e2e -- --workers=1
       - uses: actions/upload-artifact@v4
         if: failure()
