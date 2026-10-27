@@ -27,8 +27,9 @@ test("blog queries reject ambiguous inputs and preserve escaped pagination filte
 });
 test("indexing requires explicit release configuration and always protects private paths",()=>{
   assert.equal(indexingEnabled({}),false);
-  const env={SEO_INDEXING_ENABLED:"true",SITE_URL:"https://atlas.example",CATALOG_DEMO_MODE:"false"};assert.equal(indexingEnabled(env),true);
+  const env={SEO_INDEXING_ENABLED:"true",SITE_URL:"https://atlas.example",CATALOG_DEMO_MODE:"false",PUBLIC_LAUNCH_CONFIRMED:"true",LEGAL_REVIEW_CONFIRMED:"true",PUBLIC_OPERATOR_NAME:"Isolated operator",PUBLIC_OPERATOR_ADDRESS:"Fixture address",PUBLIC_CONTACT_EMAIL:"legal@fixture.invalid",LEGAL_EFFECTIVE_DATE:"2020-01-01"};assert.equal(indexingEnabled(env),true);
   for(const change of [{SEO_INDEXING_ENABLED:"false"},{SITE_URL:"http://localhost:3000"},{SITE_URL:undefined},{CATALOG_DEMO_MODE:"true"}])assert.equal(indexingEnabled({...env,...change}),false);
+  for(const change of [{LEGAL_REVIEW_CONFIRMED:"false"},{PUBLIC_LAUNCH_CONFIRMED:"false"},{PUBLIC_OPERATOR_NAME:""},{LEGAL_EFFECTIVE_DATE:"2099-01-01"}])assert.equal(indexingEnabled({...env,...change}),false);
   for(const path of ["/login","/admin","/admin/articles","/api/admin/articles"])assert.equal(privatePath(path),true);
   assert.equal(privatePath("/blog/article"),false);
 });

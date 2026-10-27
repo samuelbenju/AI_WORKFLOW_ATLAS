@@ -1,5 +1,7 @@
 # Operación y preparación de producción
 
+Actualización 27-10-2026: guía vigente [PUBLIC_LAUNCH.md](PUBLIC_LAUNCH.md). Render/Neon existentes se conservan; 16 migraciones staging ya exitosas, **no repetir db:deploy en ese destino**. Los pasos genéricos posteriores son para cambios futuros revisados, no una orden de reinicialización. Lanzamiento/indexación y AdSense siguen bloqueados por evidencia remota, revisión legal y aprobación/configuración de Google.
+
 Estado 26-10-2026: preparado para revisión, sin despliegue o cuentas compradas. Ver [lista de lanzamiento](../LAUNCH_CHECKLIST.md) y [auditoría](../AUDIT_REPORT.md). No es una certificación de producción.
 
 ## Hosting de staging elegido posteriormente

@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+.breadcrumbs { margin: 1rem 0 1.5rem; color: var(--text-muted, #a6a8bb); font-size: .85rem; }
+.breadcrumbs ol { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0; list-style: none; }
+.breadcrumbs li { overflow-wrap: anywhere; }
+.breadcrumbs li + li::before { content: "/"; margin-right: .5rem; opacity: .5; }
+.breadcrumbs a:hover { text-decoration: underline; }
+.advertising-placement { margin: 3rem 0; min-height: 300px; padding: .75rem 0; border-block: 1px solid #303242; }
+.advertising-label { display: block; margin-bottom: .75rem; color: #a6a8bb; font-size: .75rem; text-align: center; }
+.advertising-placement .adsbygoogle { min-height: 250px; width: 100%; }
+
 @theme inline {
   --color-background: #09090f;
   --color-surface: #151522;

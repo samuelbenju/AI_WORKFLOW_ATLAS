@@ -1,5 +1,7 @@
 # Medición, crecimiento y afiliados — Fase 11
 
+Actualización 27-10-2026: AdSense opcional y apagado preparado en [PUBLIC_LAUNCH.md](PUBLIC_LAUNCH.md), con CMP publicitaria separada de este consentimiento de analítica. Su API de informes se consulta manualmente con OAuth readonly y autorización/CSRF, sin llamadas al abrir el panel. Estimaciones oficiales puntuales separadas de ingresos confirmados; no se guardan bajo proveedor GA4/GSC ni se altera el esquema. Sin cuenta o credenciales reales verificadas.
+
 ## Estado y activación
 
 `/admin/analytics` es privado, solo OWNER/ADMIN. Métricas consultadas en PostgreSQL, fuentes externas diferenciadas, sin llenar vacíos con demos. La implementación usa fetch/crypto nativos y el stack existente, sin nuevas dependencias. Migración 16 aditiva, `20261026001600_growth_analytics`, total 45 modelos/dieciséis migraciones; conserva el historial, lockfile y datos anteriores. La auditoría de Fase 12 está documentada en ../AUDIT_REPORT.md; sin activación de servicios.

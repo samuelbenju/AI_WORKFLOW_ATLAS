@@ -1,5 +1,7 @@
 # AI Workflow Atlas
 
+Actualización de lanzamiento (27-10-2026): SEO, AdSense apagado, adaptador CMP, ads.txt condicionado e informes externos separados preparados sobre la aplicación existente. **Catálogo Neon, OWNER, SHA Live, revisión legal, GSC y aprobación Google requieren evidencia real; no se declara lanzamiento.** Procedimiento actual: [docs/PUBLIC_LAUNCH.md](docs/PUBLIC_LAUNCH.md); [calendario editorial propuesto](docs/EDITORIAL_CALENDAR.md). No repetir las 16 migraciones de staging ni usar seeds demo.
+
 Plataforma independiente sobre herramientas y flujos prácticos de IA. Nombre comercial provisional. Público en inglés, administración en español. **Fases 1–12 respaldadas; Fase 13 prepara catálogo real/importación y activación humana. No listo para producción comercial.** El propietario confirma portada funcional en Render Free y Neon staging con las 16 migraciones aplicadas; no se presenta esa confirmación como una verificación remota de esta sesión. Panel con login, roles, CRUD, CMS editorial y CRM; sin activar correo, pagos o agentes. Operación PostgreSQL en [docs/DATABASE.md](docs/DATABASE.md); catálogo en [docs/PUBLIC_CATALOG.md](docs/PUBLIC_CATALOG.md).
 
 Biblioteca inicial: 65 herramientas con fuentes oficiales, 30 guías y seis borradores editoriales. **Preparada y probada en DB temporal; su importación en Neon y visibilidad remota requieren evidencia de Actions/Render.** Procedimiento repetible, secreto de catálogo independiente y bootstrap OWNER desde Windows: [docs/CATALOG_OPERATIONS.md](docs/CATALOG_OPERATIONS.md). Estado verificable de esta entrega: [docs/PHASE13_REPORT.md](docs/PHASE13_REPORT.md). No usar los seeds demo para poblar staging.
@@ -50,7 +52,7 @@ No es necesario reinstalar si `node_modules` ya corresponde al lockfile. La inst
 | `DATABASE_URL` | Para persistencia | URL PostgreSQL privada; CLI/scripts cargan `.env.local`/`.env` sin reemplazar variables inyectadas. No imprimir el valor. |
 | `TEST_DATABASE_URL` | Para `test:db` | Conexión dedicada `_test`, rol con CREATEDB para pruebas aisladas. |
 | `DEV_POSTGRES_PASSWORD` | Solo Docker local | Generada por `db:local` y conservada en `.env.local`, nunca en Git. |
-| `SEO_INDEXING_ENABLED` | No, false por defecto | Habilitar solo tras revisión de lanzamiento, con HTTPS/SITE_URL explícito y demo desactivada; privados siempre noindex. |
+| `SEO_INDEXING_ENABLED` | No, false por defecto | Exige PUBLIC_LAUNCH_CONFIRMED, configuración legal revisada, HTTPS/SITE_URL explícito y demo desactivada; privados siempre noindex. |
 | `SPONSOR_FORM_SECRET` | Para formulario comercial | Firma privada de 32 bytes/64 hex. Generar localmente con commercial:secret o inyectar de forma segura; no versionar. |
 | `SPONSOR_ORIGIN` | Opcional | Origen exacto del navegador público; usa SITE_URL/localhost:3000. |
 | `ADMIN_ORIGIN` | Opcional; debe coincidir con el navegador | Origen exacto para mutaciones. Usa SITE_URL por defecto; HTTPS fuera de loopback. |
@@ -130,7 +132,7 @@ Destino previsto: Vercel o servicio Node compatible con Next.js. En etapa de bui
 
 Los procesos y volúmenes Docker no deben darse por conservados tras snapshots: reiniciar/verificar según instrucciones guardadas del entorno. El snapshot no sustituye backups PostgreSQL. `npm run db:backup` y `npm run db:restore-check -- RUTA` permiten ensayar recuperación local en otra DB sin sobrescribir desarrollo; ver guía de base de datos. Costes, dominio, DB administrada, correo, Wompi Sandbox, IA y scheduler requieren configuración por fase; el objetivo US$0–100/mes no autoriza gasto.
 
-La configuración de CI de estas fases sigue local y su ejecución remota no está verificada. Usa permisos de lectura, instalación congelada, servicio PostgreSQL temporal, migraciones, seed, tests de persistencia, checks, build y Chromium. Las credenciales fijas de ese servicio son exclusivamente fixtures de CI, nunca de una DB desplegada. Ninguna acción del pipeline despliega o cobra. La Fase 1 sí está publicada en el repositorio oficial.
+La CI de la base `4bbcfe9` está aprobada y observada en GitHub (run 40448939535); comprobar la CI propia del nuevo SHA antes de desplegar. Usa permisos de lectura, instalación congelada, servicio PostgreSQL temporal, migraciones, seed, tests de persistencia, checks, build y Chromium. Las credenciales fijas de ese servicio son exclusivamente fixtures de CI, nunca de una DB desplegada. Ninguna acción del pipeline despliega o cobra. Las fases 1–12 y el catálogo preparado de Fase 13 están respaldados en el repositorio oficial. Publicar código no demuestra importación o visibilidad remota.
 
 ## Continuar por fases
 

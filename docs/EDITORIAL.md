@@ -31,7 +31,7 @@ Los bloques/formularios y referencias están acotados; no hay fetch automático 
 
 `SITE_URL` fija el origen canónico sin confiar en Host del visitante. Canonical y OG/Twitter de páginas públicas se generan con datos persistidos. Artículos incluyen BlogPosting y BreadcrumbList, y el listado CollectionPage/ItemList con los resultados realmente visibles. Sin ratings, ventas o resultados enriquecidos garantizados.
 
-`SEO_INDEXING_ENABLED=false` por defecto. Activarlo requiere **las tres condiciones**: flag explícito true, SITE_URL HTTPS con host no loopback y CATALOG_DEMO_MODE distinto de true. Este entorno permanece en preestreno, sin activar indexación ni lanzar un dominio.
+`SEO_INDEXING_ENABLED=false` por defecto. Activarlo requiere flag explícito true, PUBLIC_LAUNCH_CONFIRMED=true tras comprobar el catálogo/sitio reales, configuración legal completa con LEGAL_REVIEW_CONFIRMED=true por revisión humana, SITE_URL HTTPS con host no loopback y CATALOG_DEMO_MODE distinto de true. Este entorno permanece en preestreno, sin activar indexación ni lanzar un dominio.
 
 | Situación | Comportamiento |
 | --- | --- |
@@ -74,3 +74,5 @@ Se consultó además el README de Google Workspace Samples como contexto. Un pri
 `npm run check`, `npm run test:db`, `npm run build` y `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e`. Los wrappers siguen creando/eliminando solo su DB temporal, ahora con las siete migraciones y el seed editorial. Fixtures públicos de E2E son exclusivamente datos de prueba en esa DB; no publican el contenido inicial de desarrollo ni inicializan la cuenta humana.
 
 Persisten las limitaciones de infraestructura/hardening anteriores de DATABASE/ADMIN. La contraseña humana sigue pendiente del ingreso seguro mediante `npm run admin:init`; no se pide por chat. No se desplegó, publicó en GitHub, activó indexación ni comenzó Fase 6.
+
+Preparación posterior: breadcrumbs/HTTP 404 y verificación GSC en [PUBLIC_LAUNCH.md](PUBLIC_LAUNCH.md). AdSense no altera revisión/publicación de los seis borradores; su consentimiento/ubicaciones son independientes de analítica y requieren sus aprobaciones.

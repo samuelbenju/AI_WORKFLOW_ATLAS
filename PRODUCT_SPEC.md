@@ -18,6 +18,8 @@ El valor editorial debe ser práctico, con fuentes, instrucciones y limitaciones
 
 Fuentes de ingresos progresivas:
 
+- Publicidad automatizada Google AdSense, únicamente tras aprobación real de cuenta/sitio, CMP certificada y revisión de ubicaciones. Gratuita para visitantes, sin ingresos garantizados o tráfico artificial.
+
 - Patrocinios de portada: **Homepage Featured Sponsor**.
 - Newsletter: **Newsletter Sponsorship**.
 - Posición destacada: **Featured Tool Listing**.

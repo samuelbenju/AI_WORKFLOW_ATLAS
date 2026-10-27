@@ -77,6 +77,19 @@ export async function queryWorkflows(query: CatalogQuery, mode = catalogMode(), 
 }
 
 const validSlug = (slug: string) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) && slug.length <= 150;
+// Minimal existence check before Next streams a loading boundary. No private
+// fields, relationships or replacement content are returned to Proxy.
+export async function catalogEntryExists(kind: "tools" | "use-cases" | "blog", slug: string, db?: PrismaClient) {
+  if (!validSlug(slug)) return false;
+  const stage = kind === "tools" ? "catalog.tool" : kind === "use-cases" ? "catalog.use-case" : "catalog.home";
+  return readCatalog(stage, async client => {
+    const select = { id: true } as const;
+    const entry = kind === "tools" ? await client.tool.findFirst({ where: { slug, ...visibility(catalogMode()) }, select })
+      : kind === "use-cases" ? await client.useCase.findFirst({ where: { slug, ...visibility(catalogMode()) }, select })
+      : await client.article.findFirst({ where: { slug, ...publishedArticleWhere() }, select });
+    return entry !== null;
+  }, db);
+}
 export const toolBySlug = cache(async (slug: string) => {
   if (!validSlug(slug)) return null;
   return readCatalog("catalog.tool",(db) => db.tool.findFirst({ where: { slug, ...visibility(catalogMode()) },

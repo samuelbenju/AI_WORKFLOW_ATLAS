@@ -1,5 +1,17 @@
 # Lista de lanzamiento — AI Workflow Atlas
 
+Actualización 27-10-2026: [procedimiento vigente de publicación, GSC y AdSense](docs/PUBLIC_LAUNCH.md). No se declara lanzamiento ni catálogo importado. Las 16 migraciones de **este Neon staging ya están aplicadas**; no repetirlas. CI remota de la base 4bbcfe9 aprobada. Los pendientes históricos que siguen requieren evidencia del destino real, no reinstalar infraestructura.
+
+- [ ] Catálogo aplicado mediante dry-run/apply del mismo SHA y plan sin conflictos, con conteos reales y ediciones humanas conservadas.
+- [ ] OWNER humano privado si falta; SHA Live/rutas y acceso anónimo público comprobados.
+- [ ] Resolver disponibilidad/robots del Render Free y validar rastreo real antes de indexar. No pings artificiales.
+- [ ] Textos legales y datos públicos aprobados por persona competente; solo entonces LEGAL_REVIEW_CONFIRMED=true.
+- [ ] PUBLIC_LAUNCH_CONFIRMED y SEO_INDEXING_ENABLED tras revisar catálogo, HTTPS, canonical y permisos.
+- [ ] Propiedad GSC verificada y sitemap real enviado, seis DRAFT excluidos.
+- [ ] Cuenta/sitio AdSense aprobados, publisher real, CMP certificada vigente publicada y probada en regiones requeridas.
+- [ ] Ubicaciones/Auto Ads revisados en Google; flags ADSENSE_* siguen false hasta esas decisiones.
+- [ ] Informes externos reales, si se autorizan, separados de pagos/liquidaciones y métricas propias; no ingresos garantizados.
+
 Auditoría local: 26-10-2026 UTC. **NO AUTORIZADO PARA PRODUCCIÓN COMERCIAL.** Esta lista no ejecuta, compra ni publica nada. Evidencia: [AUDIT_REPORT.md](AUDIT_REPORT.md), [BUILD_LOG.md](BUILD_LOG.md). Operación: [docs/PRODUCTION.md](docs/PRODUCTION.md). El propietario debe asignar responsables y registrar fecha/evidencia de cada pendiente; pasar pruebas locales no sustituye esas decisiones.
 
 Actualización 26-10-2026 (America/Bogota): Fases 1–12 respaldadas y Render Free + Neon staging confirmados por el propietario. Fase 13 añade contenido real y un workflow de importación manual autorizado; **sin importación Neon o comprobación Render de esta ejecución todavía**. Ver [docs/PHASE13_REPORT.md](docs/PHASE13_REPORT.md) y [docs/CATALOG_OPERATIONS.md](docs/CATALOG_OPERATIONS.md). Esto no autoriza lanzamiento comercial, pagos, envíos, indexación o gasto de agentes.
@@ -13,7 +25,7 @@ Actualización 26-10-2026 (America/Bogota): Fases 1–12 respaldadas y Render Fr
 - [ ] Inicializar administrador humano con `npm run admin:init` interactivo; contraseña propia, sin fixture ni fichero de contraseñas. Revisar roles y recuperación.
 - [ ] Contratar/configurar PostgreSQL de producción por decisión del propietario, TLS verify-full y CA confiable; rol runtime sin superusuario/CREATEDB/CREATEROLE, permisos mínimos. Credencial migradora separada y conexión directa compatible.
 - [ ] Backup privado cifrado externo/PITR, retención y responsables acordados; ensayo de restauración en destino con conteos e integridad. Definir RPO/RTO y acceso de emergencia.
-- [ ] Ejecutar migraciones **una vez, manualmente**, con backup previo y hashes verificados; no seed demo, reset o db push. Comprobar DB/schema/versión de aplicación al terminar.
+- [x] Neon staging: 16 migraciones aplicadas; SUCCESS remoto observado y conteos 55 tablas/72 FK aportados por propietario. No reejecutarlas. Cualquier cambio futuro requiere backup, revisión y nueva migración autorizada, nunca reset, db push o seed demo.
 - [ ] Configurar Vercel u otro runtime Node 24 compatible, pool de conexiones y límites; comprobar build en destino, caché privada, cookies Secure y exclusión de secretos del bundle/logs.
 - [ ] Dominio/nombre/marca aprobados, DNS/HTTPS y renovaciones comprobados, SITE_URL/orígenes coherentes; prueba de HSTS y headers sobre el dominio real. No activar preload/includeSubDomains indiscriminadamente.
 - [ ] Identidad legal, dirección comercial y canal público verificado; seis políticas revisadas, fecha aprobada. Solo entonces `LEGAL_REVIEW_CONFIRMED=true`; no usar email privado de administración como contacto automático.
@@ -54,7 +66,7 @@ Actualización 26-10-2026 (America/Bogota): Fases 1–12 respaldadas y Render Fr
 ## Operación y publicación
 
 - [x] CI y vercel.json preparados sin despliegues, crons o migraciones automáticos.
-- [ ] Revisar branch protection, required checks, revisiones y secret scanning en GitHub; ejecutar CI remota y conservar evidencia (no ejecutada desde aquí).
+- [ ] Revisar branch protection, required checks, revisiones y secret scanning. CI remota base 4bbcfe9 SUCCESS observada; comprobar la CI específica de cada nueva versión.
 - [ ] Configurar monitor externo autenticado a `/api/internal/readiness`, token local fuerte y OPS_EXPECT_WORKER según infraestructura; cadencia, responsables y canal de alertas autorizados. La aplicación devuelve alertas, no las envía automáticamente.
 - [ ] Pruebas del host: recuperación de DB/worker, caída del proveedor, carga/pooling, logs redactados/retención, restauración y rollback de versión compatible.
 - [ ] Ejecutar todas las comprobaciones finales en staging privado, registrar SHA, migraciones, backups y checklist firmado.

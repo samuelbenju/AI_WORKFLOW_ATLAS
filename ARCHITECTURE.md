@@ -1,5 +1,7 @@
 # Arquitectura
 
+Actualización 27-10-2026: [lanzamiento público/AdSense](docs/PUBLIC_LAUNCH.md) añade controles sin modificar esquema, 16 migraciones, lockfile, ORM o infraestructura. Las secciones por fase posteriores conservan su contexto histórico; la activación remota actual sigue pendiente de acceso/evidencia, aunque la CI de la base y migraciones Neon tienen SUCCESS remoto observado.
+
 ## Estado y límites
 
 Actualización Fase 13: base e7a3bbb y stack intactos. El propietario confirma Render Free/Neon staging funcionando; la verificación de red de esta sesión sigue bloqueada. Catálogo versionado con evidencia → Zod y contratos existentes → plan read-only → workflow manual del mismo SHA → lotes Prisma hacia los mismos modelos y auditoría. Sin nuevo esquema, ORM, tabla o endpoint. La cuenta humana se prepara mediante el CLI existente con guardas staging y wrapper PowerShell privado. Ver [docs/CATALOG_OPERATIONS.md](docs/CATALOG_OPERATIONS.md) y [docs/PHASE13_REPORT.md](docs/PHASE13_REPORT.md). El texto posterior conserva la evolución de las fases originales.
@@ -215,3 +217,13 @@ Configuración, contrato de eventos/afiliados, privacidad, cálculos y límites 
 - ADR-070: retención operativa en CLI dry-run por defecto, aplicación explícita acotada a analítica/sesiones/buckets y auditoría; nada de borrado automático de negocio. Backup/restore locales no sustituyen cifrado/custodia/PITR en destino. Worker local refrescado con cinco perfiles/calendarios deshabilitados; supervisor remoto no verificado.
 
 Estructura añadida: `/privacy`, `/terms`, `/cookies`, `/advertising`, `/affiliates`, `/contact`, `server/ops/readiness`, `/api/internal/readiness`, `scripts/launch-check.ts` y `scripts/maintenance.ts`. **45 modelos/16 migraciones; sin cambios de esquema o lockfile en esta fase.** Lista de lanzamiento, límites y operación: LAUNCH_CHECKLIST.md, AUDIT_REPORT.md y docs/PRODUCTION.md.
+
+
+## Decisiones de preparación del lanzamiento público — 27-10-2026
+
+- ADR-071: SEO exige la declaración humana PUBLIC_LAUNCH_CONFIRMED y configuración legal completa/revisada, además del flag SEO/HTTPS/no-demo. No se infiere aprobación jurídica o catálogo real de un build. GSC HTML-tag con valor público suministrado por el propietario; verificación de propiedad e indexación dependen de Google.
+- ADR-072: AdSense modular en componentes de servidor/cliente existentes. Un SDK deduplicado, apagado por defecto, publisher y slots reales, aprobación de sitio/ubicaciones y CMP certificada declaradas antes de permitirlo. Google Privacy & messaging es el único adaptador inicial; TCF estricto mundial y DNT/GPC/opt-out prevalecen. No sustituir el consentimiento con el banner de analítica. Navegación tras cargar SDK usa documentos nuevos porque desmontar React no descarga JavaScript. Auto Ads requiere configuración/revisión en Google; modo manual no puede anular una cuenta remota con Auto Ads encendido.
+- ADR-073: informes opcionales Management API v2 de solo lectura, dominio exacto de SITE_URL, consulta manual protegida/autorizada de nuevo al cerrar I/O, decimales sin float, estimaciones/calendario/moneda/fuente explícitos. Auditoría sin introducir importes en libros financieros o snapshots GA4/GSC; no nuevas tablas. Sin credencial no hay consulta o ceros inventados.
+- ADR-074: loading enviaba HTTP 200 antes de notFound incluso resolviendo metadata. Proxy Node realiza SELECT de identidad pública por slug antes de transmitir respuesta, reutiliza singleton/visibilidad y reescribe faltantes a la vista 404 existente. DB falla con diagnóstico sanitizado; no devuelve ausencia artificial. Se conserva streaming de rutas válidas; medir consulta adicional/pool/latencia en destino. Breadcrumbs visibles/JSON-LD y Organization/WebSite representan la marca/contenido, sin ratings/precios inventados.
+
+No publicación/indexación/anuncios/servicios activados desde este entorno. No credenciales humanas, cuenta Google o patrocinadores inventados. Capacidades y verificación real separadas en docs/PUBLIC_LAUNCH.md.

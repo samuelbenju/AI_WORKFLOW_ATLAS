@@ -33,3 +33,8 @@ La solicitud adjunta autoriza investigación, implementación, pruebas, commits/
 ## Estado de cierre de Fase 12 — 26-10-2026
 
 Solicitud 12/12 autorizada y ejecutada sobre el proyecto existente. Auditoría, correcciones acotadas, pruebas locales y preparación operativa/legal documentadas en AUDIT_REPORT.md y LAUNCH_CHECKLIST.md. No se marca completado el lanzamiento: credenciales/pruebas externas, host/DB/backup/monitor finales, administrador humano, revisión jurídica/fiscal y proveedor de pagos de producción siguen pendientes. No se autoriza despliegue, cobro, publicación comercial o recurrencia con costes por terminar estas fases.
+
+
+## Lanzamiento público autorizado posteriormente — 27-10-2026
+
+Sobre Fase 13 existente: completar activación remota cuando se disponga de acceso; preparar Google/GSC/AdSense, consentimiento certificado y control de indexación, validar y conservar infraestructura. No repetir migraciones, publicar DRAFT, asumir revisión legal, fabricar ingresos o activar agentes/pagos/correo. Alcance y evidencias diferenciadas en docs/PUBLIC_LAUNCH.md; no es una fase nueva que reinicie las doce anteriores.

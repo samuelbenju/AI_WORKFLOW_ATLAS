@@ -22,7 +22,7 @@ async function main(){
    }finally{await owner.end();}
    const runtime=new URL(url);runtime.username=role;runtime.password=password;
    await new Promise((resolve,reject)=>{
-    const child=spawn(process.execPath,['--conditions=react-server','--import','tsx','--test','--test-concurrency=1','tests/integration/runtime-catalog.test.ts'],{stdio:'inherit',env:{...process.env,DATABASE_URL:runtime.toString(),ATLAS_RUNTIME_TEST_OWNER_URL:url,ATLAS_RUNTIME_TEST_ROLE:role,ATLAS_RUNTIME_TEST_PASSWORD:password,CATALOG_DEMO_MODE:'false',AGENTS_ENABLED:'false',AGENTS_MONTHLY_BUDGET_USD_MICROS:'0',WOMPI_SANDBOX_ENABLED:'false',NEWSLETTER_MODE:'disabled',ANALYTICS_ENABLED:'false',SEO_INDEXING_ENABLED:'false',LEGAL_REVIEW_CONFIRMED:'false'}});
+    const child=spawn(process.execPath,['--conditions=react-server','--import','tsx','--test','--test-concurrency=1','tests/integration/runtime-catalog.test.ts'],{stdio:'inherit',env:{...process.env, ADSENSE_ENABLED: "false", ADSENSE_SITE_APPROVED: "false", ADSENSE_CONSENT_READY: "false",DATABASE_URL:runtime.toString(),ATLAS_RUNTIME_TEST_OWNER_URL:url,ATLAS_RUNTIME_TEST_ROLE:role,ATLAS_RUNTIME_TEST_PASSWORD:password,CATALOG_DEMO_MODE:'false',AGENTS_ENABLED:'false',AGENTS_MONTHLY_BUDGET_USD_MICROS:'0',WOMPI_SANDBOX_ENABLED:'false',NEWSLETTER_MODE:'disabled',ANALYTICS_ENABLED:'false',SEO_INDEXING_ENABLED:'false',LEGAL_REVIEW_CONFIRMED:'false'}});
     child.once('error',reject);child.once('exit',code=>code===0?resolve():reject(Error('Runtime catalog regression failed')));
    });
   });

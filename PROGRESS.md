@@ -1,5 +1,11 @@
 # Progreso real
 
+## Estado vigente — preparación de lanzamiento, 27-10-2026
+
+Base main `4bbcfe9f198c2bef8c4e6182a4be356700253661`, CI 40448939535 SUCCESS observado; conexión/migraciones Neon ya exitosas, no reejecutadas. Biblioteca 65/30/20/24/seis DRAFT intacta. Catálogo remoto, rol/secreto, OWNER y Render Live sin nueva evidencia: API Forbidden y sin sesiones privadas autorizadas. Esto no confirma que falten ni que el sitio esté caído.
+
+Se preparan SEO/breadcrumbs/404 reales, verificación GSC, AdSense deduplicado y apagado con puertas de aprobación/CMP, ads.txt real condicionado y consulta manual de estimaciones oficiales separada del dinero confirmado. No se activa indexación/publicidad/legal ni servicios. [Estado operativo y procedimiento](docs/PUBLIC_LAUNCH.md), [calendario propuesto sin publicar](docs/EDITORIAL_CALENDAR.md). Pruebas y límites de esta continuación se registran al final de BUILD_LOG.md. El historial siguiente no sustituye este estado vigente.
+
 Actualizado: 26 de octubre de 2026 (America/Bogota; métricas propias agregadas en UTC).
 
 ## Alcance autorizado

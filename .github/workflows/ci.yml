@@ -13,6 +13,11 @@ jobs:
     timeout-minutes: 25
     env:
       NEXT_TELEMETRY_DISABLED: "1"
+      ADSENSE_ENABLED: "false"
+      ADSENSE_SITE_APPROVED: "false"
+      ADSENSE_CONSENT_READY: "false"
+      ADSENSE_PLACEMENTS_REVIEWED: "false"
+      PUBLIC_LAUNCH_CONFIRMED: "false"
       # Disposable CI service credentials; never used for a deployed database.
       DATABASE_URL: postgresql://atlas:ci_only@127.0.0.1:5432/atlas_test
       TEST_DATABASE_URL: postgresql://atlas:ci_only@127.0.0.1:5432/atlas_test

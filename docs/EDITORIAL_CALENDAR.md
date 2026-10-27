@@ -1,0 +1,24 @@
+# Calendario editorial propuesto
+
+27-10-2026. Propuesta relativa al lanzamiento verificado, no calendario activo ni publicaciones programadas. No se crean artículos adicionales o cambios SQL. Los seis borradores existentes siguen DRAFT; cada propuesta requiere fuentes actuales, autor/revisor, revisión CMS y publicación humana. Primero comprobar importación y URLs públicas; no enlazar una ficha solo porque existe en JSON.
+
+| Semana desde lanzamiento | Propuesta original | Guía/ficha existente para enlazar cuando sea pública | Fuente oficial de partida y verificación necesaria |
+| --- | --- | --- | --- |
+| 1 | Designing a small-business automation with a human approval gate | `/use-cases/design-a-workflow-with-a-human-approval-gate`, `/tools/n8n` | [n8n](https://github.com/n8n-io/n8n). Documentar decisiones/datos mínimos; no prometer integraciones ejecutadas. |
+| 1 | A private-document checklist before adding AI search | `/use-cases/build-a-private-document-question-checklist`, `/tools/anythingllm` | [AnythingLLM](https://github.com/Mintplex-Labs/anything-llm). Revisar permisos, retención y fuentes; sin subir datos de clientes. |
+| 2 | Preparing a document collection with traceable extraction | `/use-cases/prepare-a-document-collection-for-retrieval`, `/tools/docling` | [Docling](https://github.com/docling-project/docling). Explicar límites de formato y comprobación manual; no inventar precisión OCR. |
+| 2 | A support knowledge workflow that stops before sending | `/use-cases/sketch-a-model-backed-support-knowledge-workflow`, `/tools/dify` | [Dify](https://github.com/langgenius/dify). Separar propuesta, revisión y contacto autorizado; no afirmar conectores WhatsApp/email no comprobados. |
+| 3 | From spreadsheet questions to a verifiable data-analysis plan | `/use-cases/explore-a-dataset-with-verifiable-natural-language-questions`, `/tools/pandasai` | [PandasAI](https://github.com/sinaptik-ai/pandas-ai). Dataset sintético identificado; resultados y código comprobables antes de publicar, nunca datos personales. |
+| 3 | Reviewing a bounded AI coding change before merge | `/use-cases/use-a-terminal-coding-agent-for-a-bounded-refactor`, `/tools/codex-cli` | [Codex](https://github.com/openai/codex). No ejecutar API de pago para redactar; si se hace tutorial práctico futuro exige entorno/budget/aprobación. |
+| 4 | Model an agent task with explicit approval and failure states | `/use-cases/model-an-agent-task-as-explicit-states`, `/tools/langgraph` | [LangGraph](https://github.com/langchain-ai/langgraph). Distinguir patrón conceptual de prueba práctica, observar límites y cancelación. |
+| 4 | Comparing local-model answers without a fabricated leaderboard | `/use-cases/compare-local-model-answers-on-a-small-evaluation-set`, `/tools/ollama` | [Ollama](https://github.com/ollama/ollama). Definir un conjunto pequeño y criterios antes de ensayar; no rankings/precios/rendimientos no medidos. |
+
+Estas fuentes ya figuran en la evidencia editorial original; su disponibilidad histórica no prueba todas las afirmaciones del nuevo artículo. Guardar fecha/URL/hash y alcance tras releerlas antes de revisión. No duplicar la guía con texto de relleno: cada artículo debe aportar una decisión, checklist o ejemplo comprobable distinto. Reutilizar categorías/tags reales y enlaces pertinentes en ambos sentidos; no crear cientos de landings de filtros indexables.
+
+Marketing/ventas/correo: empezar por solicitudes entrantes y aprobaciones; ampliar cobertura solo con documentación oficial del proveedor y permisos de datos reales. No inferir integración con Gmail/Sheets/WhatsApp desde un framework genérico. Afiliación exige convenio real y divulgación; un enlace oficial no se sustituye automáticamente.
+
+Revisión semanal, sin cron: disponibilidad/errores, cobertura GSC una vez verificada, vistas consentidas si se habilitan legítimamente, calidad/fuentes y enlaces rotos. Sin muestra suficiente no etiquetar contenido como fracaso. No activar newsletter hasta dominio/proveedor/doble opt-in y envío de prueba autorizados. No publicar o enviar desde el agente editor.
+
+## Búsqueda futura sin bloquear lanzamiento
+
+Con 65 fichas/30 guías, conservar la búsqueda PostgreSQL actual rápida y gratuita. Primero observar consultas solo mediante un mecanismo aprobado que evite PII; no activar almacenamiento de términos por esta propuesta. Evaluar tokenización, sinónimos editoriales y relevancia con un corpus pequeño etiquetado, sin servicios externos. Full-text `tsvector`/GIN o trigramas requieren diseño/medición y, si corresponde, migración futura expresamente autorizada; no modificar ahora las 16 migraciones. Una búsqueda híbrida con embeddings/LLM solo después de presupuesto, API key autorizada, límites y evidencia de mejora. No activar IA para recomendar enlaces del catálogo.
