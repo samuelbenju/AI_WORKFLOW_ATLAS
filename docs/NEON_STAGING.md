@@ -1,12 +1,16 @@
 # Neon PostgreSQL de staging — comprobación manual y antecedentes
 
-## Activación completa autorizada — estado vigente
+## Estado operativo confirmado — no repetir migraciones
 
-El adjunto del propietario autoriza commits/push normales y workflows manuales; permite únicamente las 16 migraciones originales en cold-shadow-53495242/atlas_staging si pasan todas las guardas. Los procedimientos anteriores de solo preparar un commit o de login CLI se conservan como antecedentes y no son el flujo vigente.
+Comprobación 26-10-2026, America/Bogota (27-10 UTC). Las páginas públicas de GitHub muestran **SUCCESS** en las ejecuciones reales de [conexión 40372875357](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/40372875357) y [migración 40373255135](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/40373255135), ambas sobre 843710e53e16c440ff52e6386bb44ba1066529b0. El propietario aporta el resultado SQL **16/16 migraciones, 55 tablas, 72 FK, dbStatus PASS, COMPLETE**. Es evidencia remota satisfactoria: no se vuelve a presentar su aplicación como pendiente y no se repite db:deploy, db push, reset o seed. No se inició otra sesión SQL en Neon desde este executor.
 
-**Bloqueo actual:** `gh api repos/samuelbenju/AI_WORKFLOW_ATLAS` devuelve `Forbidden`. La política del entorno no incluye api.github.com y no hay observación de acceso API listo. Git HTTPS y la API de Actions son capacidades distintas: poder hacer push no demuestra poder dispatch/consultar runs. No se han ejecutado workflows remotos ni migraciones Neon en esta sesión. No se ofrece un enlace de run inventado. Se necesita acceso permitido y autenticado a api.github.com con permisos de ejecutar/consultar Actions; no hace falta volver a compartir MIGRATION_DATABASE_URL.
+También se observó [CI 40402836767](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/40402836767) **SUCCESS** para b5319e2ba2d7c8beb94adb4700468dabd2753e69. La API autenticada sigue devolviendo Forbidden, pero la lectura normal de páginas públicas de GitHub sí está permitida. No confundir la limitación de dispatch/secretos con falta de evidencia sobre ejecuciones anteriores. No hay binding de conexión Neon listo en este entorno; existencia de rol/secreto de catálogo y conteos de contenido actuales siguen sin inspección SQL. Activación del catálogo: [CATALOG_OPERATIONS.md](CATALOG_OPERATIONS.md). No se necesita volver a proporcionar el secreto de migración.
 
-### Dos workflows manuales y ejecución condicionada
+## Antecedentes históricos — inicialización ya terminada
+
+Los apartados siguientes describen el estado anterior a esas ejecuciones. Sus instrucciones de base vacía, migración inicial, CLI, Railway o autorizaciones antiguas **no son pasos pendientes ni deben ejecutarse para la Fase 13**. Se conservan únicamente como historial técnico. El procedimiento vigente utiliza Render existente y el workflow separado de catálogo, sin migraciones.
+
+### Histórico: dos workflows manuales y ejecución condicionada
 
 - `neon-staging-check.yml`: solo workflow_dispatch/main, contents:read, Node 24, lockfile, sesión TLS/read-only. Invoca `node --import tsx scripts/neon-staging.ts inspect` y exige destino/rol/proyecto verificados. No escribe, no usa Neon CLI y no llama db:status sobre base vacía.
 - `neon-staging-migrate.yml`: solo workflow_dispatch/main, contents:read y actions:read. Concurrency compartida con el workflow de conexión, sin cancelación de una migración en curso. Requiere connection_run_id exitoso del workflow correcto, repo/main, evento manual y **mismo SHA**; confirm_target debe coincidir con cold-shadow-53495242/atlas_staging. Antes de entregar el secreto ejecuta npm ci, check (incluye lint/TypeScript/unitarias) y build/generación Prisma.
@@ -17,7 +21,7 @@ El adjunto del propietario autoriza commits/push normales y workflows manuales; 
 
 El nombre de DB y el usuario no identifican por sí solos un proyecto Neon. El script usa `current_setting('neon.project_id', true)` si está disponible y exige cold-shadow-53495242. Si el servidor no expone ese identificador, **se detiene** salvo que el propietario haya configurado la variable no secreta de repositorio `NEON_STAGING_EXPECTED_HOST` con el hostname directo exacto obtenido en la consola de ese proyecto (sin usuario/password/URL). NEON_STAGING_PROJECT_ID se fija en el workflow al ID autorizado. El host esperado no se deriva del mismo secreto para autoaprobarse y no se imprime. No se solicita volver a compartir el secreto de migración.
 
-### Secuencia una vez habilitado el acceso a Actions
+### Histórico: secuencia de la primera migración, ya completada
 
 1. Publicar el commit preparado, sin force push. Confirmar que main remota coincide con el SHA a ejecutar.
 2. Ejecutar primero Neon staging read-only check en main. El resultado debe demostrar EMPTY/0 tablas, TLS e identidad/proyecto válidos. Registrar URL e ID reales. Si falla una condición crítica, detenerse.
@@ -32,7 +36,7 @@ El respaldo/branch Neon previo no se creó: sin acceso API autorizado y sin cert
 Hosting elegido: Render, no Railway. Consultar [RENDER_STAGING.md](RENDER_STAGING.md) para build/start/Node/TLS, rol runtime distinto del migrador, pool, HTTPS, health, admin interactivo y límites de Free a revisar. Worker deshabilitado, sin despliegue/cron/cobros/IA/email. **Neon no se declara listo para Render mientras falten ejecución real, 16 migraciones/status y vínculo de proyecto comprobado**, además del rol runtime mínimo y decisiones de lanzamiento.
 
 
-## Procedimiento vigente: GitHub Actions, solo lectura
+## Histórico: preparación inicial de GitHub Actions, solo lectura
 
 Actualización 26-10-2026 (America/Bogota). El propietario confirma proyecto ai-workflow-atlas-staging, base atlas_staging, PostgreSQL 17.11, AWS US East 1 y esquema público inicialmente vacío. También confirma que el secreto **MIGRATION_DATABASE_URL** ya está configurado en GitHub Actions con conexión directa. Estos son datos aportados por el propietario: la conectividad desde Actions aún no se ha ejecutado/verificado.
 
@@ -42,7 +46,7 @@ La URL debe corresponder a un host Neon terminado en .neon.tech, sin -pooler, pu
 
 Salida permitida: atlas_staging, versión numérica PostgreSQL, conexión directa, certificado verificado, protocolo TLS, readOnly y número de tablas. No muestra host, usuario, URL, password, tokens o mensajes originales de error del proveedor. Errores solo indican una etapa fija; GitHub conserva sus propias protecciones de secrets. No publica artifacts con datos de conexión.
 
-### Ejecutar después de autorizar la publicación
+### Histórico: ejecución sobre la base inicialmente vacía
 
 1. Publicar el commit aprobado en main; antes de ello el workflow nuevo no estará disponible en la interfaz de Actions de la rama principal.
 2. En el repositorio oficial: **Actions → Neon staging read-only check → Run workflow → Branch: main → Run workflow**. No elegir otra rama: el job la rechazará omitiendo su ejecución.
@@ -57,7 +61,7 @@ Los apartados que siguen conservan el diagnóstico histórico del intento con CL
 
 26-10-2026, America/Bogota. Base Git comprobada: `70984e42d862d8c47e34531648f8c531698cb42e`, checkout existente limpio antes de este intento. No es producción comercial y no se desplegó Railway.
 
-## Destino solicitado, todavía no verificado
+## Histórico: destino solicitado antes de la primera verificación
 
 - Organización: `org-purple-boat-02914113`.
 - Proyecto existente: `cold-shadow-53495242`.
@@ -110,7 +114,7 @@ Tras completar acceso, continuar con init usando **el mismo --config-dir**, los 
 8. Prueba controlada de dominio con registro sintético DRAFT/no personal/identificable, lectura desde conexión independiente y consultas de directorios/contenido. No publicar ejemplos como contenido real o eliminar filas previas. Registrar límites: un rollback solo demuestra la transacción, no persistencia durable. Acordar conservación de la fixture de staging.
 9. No apuntar TEST_DATABASE_URL a esta DB compartida. Los runners existentes crean bases efímeras y usan seeds: no ejecutarlos sobre Neon staging por omisión ni crear una DB duplicada para ellos.
 
-## Preparación de Railway — sin despliegue
+## Histórico: preparación descartada de Railway — no utilizar
 
 Configuración prevista para un servicio web sobre este mismo repositorio/commit aprobado, sin crear recursos todavía:
 

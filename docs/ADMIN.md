@@ -6,6 +6,8 @@ Panel privado en español: `/admin`; acceso en `/login`. PostgreSQL es obligator
 
 Desde el checkout, con las dieciséis migraciones aplicadas y `DATABASE_URL` privada:
 
+Para **Neon staging ya migrado**, ir directamente al procedimiento Windows de CATALOG_OPERATIONS.md. No ejecutar migraciones/seed o usar el owner de PostgreSQL para conseguir acceso al panel. La conexión runtime deliberadamente no necesita leer todo el historial Prisma; el db:status genérico siguiente corresponde al procedimiento de operador/local, no al bootstrap staging. Primero comprobar privadamente el booleano owner_initialized y conservar una cuenta existente.
+
 ```bash
 npm run db:status
 # Configurar el correo en ADMIN_BOOTSTRAP_EMAIL dentro de .env.local privado,

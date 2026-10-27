@@ -31,6 +31,21 @@ test('restricted importer can inspect 16 migrations but cannot create users, upd
     for (const sql of ['SELECT email FROM "User"', 'SELECT email FROM "NewsletterSubscriber"', 'UPDATE "Tool" SET name=name', 'DELETE FROM "Tool"', 'INSERT INTO "User" (email) VALUES (\'fixture@example.invalid\')', 'CREATE TABLE public.forbidden (id int)']) await assert.rejects(connection.query(sql), { code: '42501' });
   } finally { await connection.end(); }
 });
+test('column-level grants cannot bypass the least-privilege import guard', async () => {
+  const role = new URL(process.env.ATLAS_CATALOG_IMPORT_TEST_URL!).username;
+  assert.match(role, /^atlas_catalog_[a-f0-9]+$/);
+  const connection = new pg.Client({ connectionString: process.env.ATLAS_CATALOG_IMPORT_TEST_URL }); await connection.connect();
+  try {
+    // Deliberately forbidden grants ONLY on this runner's disposable DB/role.
+    // Revoke each addition even when the negative assertion fails.
+    for (const privilege of ['SELECT (email) ON public."User"', 'INSERT (email) ON public."User"', 'UPDATE (summary) ON public."Tool"', 'REFERENCES (email) ON public."User"', 'SELECT (metadata) ON public."AuditLog"', 'SELECT (logs) ON public._prisma_migrations']) {
+      await owner.$executeRawUnsafe(`GRANT ${privilege} TO "${role}"`);
+      try { await assert.rejects(assertCatalogPrivileges(connection), /IMPORT_PRIVILEGES_REJECTED/); }
+      finally { await owner.$executeRawUnsafe(`REVOKE ${privilege} FROM "${role}"`); }
+    }
+    await assertCatalogPrivileges(connection);
+  } finally { await connection.end(); }
+});
 test('lost write permission rolls back its entire batch and reports only committed count and safe codes', async () => {
   const role = new URL(process.env.ATLAS_CATALOG_IMPORT_TEST_URL!).username;
   assert.match(role, /^atlas_catalog_[a-f0-9]+$/);

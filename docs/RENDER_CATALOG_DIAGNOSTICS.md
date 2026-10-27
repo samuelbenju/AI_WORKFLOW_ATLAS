@@ -1,5 +1,7 @@
 # Diagnóstico seguro del catálogo en Render
 
+> Actualización operativa Fase 13: el propietario confirmó posteriormente la portada funcional. Este documento conserva el incidente y su runbook; no afirma que el error continúe actualmente. Las migraciones de Neon ya tienen evidencia remota satisfactoria en docs/NEON_STAGING.md. El acceso directo de este executor a Render sigue no disponible: no se inventa una nueva causa ni un SHA Live observado. No repetir migraciones para diagnosticar el catálogo.
+
 26-10-2026 (America/Bogota). Incidente comunicado por el propietario: Render Live, Neon atlas_staging con 16 migraciones/55 tablas y rol runtime atlas_staging_app; portada muestra error genérico. Esta información remota procede del propietario, no de acceso a sus secretos/logs.
 
 ## Qué está demostrado y qué falta

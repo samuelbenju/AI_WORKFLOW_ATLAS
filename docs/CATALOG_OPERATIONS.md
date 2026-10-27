@@ -28,11 +28,48 @@ Una interrupción puede dejar **lotes anteriores confirmados**, nunca una fracci
 
 ## Configuración privada única de GitHub
 
+Estado confirmado: las 16 migraciones ya se aplicaron con éxito; ver [NEON_STAGING.md](NEON_STAGING.md). **No ejecutar de nuevo el workflow de migración para importar el catálogo.** La presencia del rol/secreto de catálogo debe comprobarse; no se presupone que falten. La guarda de permisos verifica también concesiones por columna, incluidas lecturas no autorizadas de User/AuditLog/historial, no solo permisos por tabla.
+
+Si Codex no dispone de sesión PostgreSQL o gestor de secretos autenticados, la intervención privada es la siguiente, desde el checkout confiable del propietario con psql instalado. HOST_DIRECTO_CONFIRMADO y ROL_OPERADOR_AUTORIZADO son marcadores; reemplazarlos únicamente en su terminal privada, sin incluir una contraseña en el comando:
+
+```powershell
+psql -X -W --set=ON_ERROR_STOP=1 --dbname="host=HOST_DIRECTO_CONFIRMADO port=5432 dbname=atlas_staging user=ROL_OPERADOR_AUTORIZADO sslmode=verify-full"
+```
+
+`-W` solicita la contraseña sin eco. No usar `\conninfo`, transcripciones, capturas ni logs que expongan conexiones. Primero ejecutar solo lectura:
+
+```sql
+BEGIN READ ONLY;
+SELECT current_database()='atlas_staging' AS target_ok,
+       current_setting('server_version_num')::int BETWEEN 170000 AND 179999 AS postgres17,
+       (SELECT ssl FROM pg_stat_ssl WHERE pid=pg_backend_pid()) AS tls_encrypted,
+       (SELECT count(*) FROM public._prisma_migrations
+        WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL) AS finished_migrations,
+       EXISTS(SELECT 1 FROM pg_roles WHERE rolname='atlas_staging_catalog') AS catalog_role_exists;
+SELECT rolcanlogin AS can_login, rolsuper AS superuser, rolcreatedb AS create_db,
+       rolcreaterole AS create_role, rolreplication AS replication, rolbypassrls AS bypass_rls,
+       has_schema_privilege(oid,'public','USAGE') AS schema_usage,
+       has_schema_privilege(oid,'public','CREATE') AS schema_create
+FROM pg_roles WHERE rolname='atlas_staging_catalog';
+COMMIT;
+```
+
+Destino/PG/TLS deben ser true y finished_migrations=16. La verificación del certificado/hostname corresponde además a sslmode=verify-full del cliente. Si catalog_role_exists=true, **no ejecutar creación, no rotar contraseña ni ampliar privilegios**: conservar la credencial existente y dejar que el dry-run inspeccione todas las restricciones. Si hay permisos excesivos, detener la importación para revisión del operador. Si el rol no existe y el destino fue confirmado en el proyecto correcto, continuar una sola vez:
+
+```text
+\i docs/sql/catalog-import-grants.sql
+\password atlas_staging_catalog
+ALTER ROLE atlas_staging_catalog LOGIN;
+\q
+```
+
+El script crea solo el rol nuevo NOLOGIN y sus concesiones mínimas; no toca tablas/migraciones o roles runtime/owner. `\password` solicita el secreto oculto del rol **recién creado**, nunca lo copia al chat ni a un argumento. Para un rol preexistente no ejecutar este paso. No hace falta un administrador humano de la aplicación para importar el catálogo.
+
 1. Un operador autorizado confirma en Neon el proyecto `cold-shadow-53495242`, base atlas_staging y endpoint **directo**. No cambiar contraseñas del runtime/migrador.
 2. Revisar [sql/catalog-import-grants.sql](sql/catalog-import-grants.sql) para crear una credencial **nueva e independiente** de catálogo, inicialmente NOLOGIN. Es configuración de privilegios, no una migración ni parte del workflow. Si el rol ya existe, el script se detiene: inspeccionar, no reemplazarlo o ampliar permisos a ciegas. Este entorno no lo aplicó en Neon.
 3. Desde una sesión privada de psql contra el destino confirmado, un operador puede ejecutar `\password atlas_staging_catalog` (entrada oculta), y después `ALTER ROLE atlas_staging_catalog LOGIN;`. No escribir la contraseña en SQL, comandos, logs, Git o chat. Usar el gestor de secretos para custodiar esa credencial nueva. No conceder membresía del propietario.
 4. En [Settings → Actions secrets](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/settings/secrets/actions), agregar **CATALOG_DATABASE_URL** con la conexión directa de ese rol, TLS verify-full. La credencial de migración existente no sirve para esta operación.
-5. En las variables Actions, conservar/configurar **NEON_STAGING_EXPECTED_HOST** con el hostname directo confirmado en la consola del proyecto, sin protocolo/path. No se imprime en el workflow. Es la vinculación independiente del destino; un ID de proyecto declarado por sí solo no prueba qué endpoint se usa.
+5. En [Settings → Actions variables](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/settings/variables/actions), conservar/configurar **NEON_STAGING_EXPECTED_HOST** con el hostname directo confirmado en la consola del proyecto, sin protocolo/path. No se imprime en el workflow. Es la vinculación independiente del destino; un ID de proyecto declarado por sí solo no prueba qué endpoint se usa.
 
 No compartir el secreto por chat. Los secretos Render no se transfieren automáticamente a Actions. No hace falta añadir una clave de IA, contratar servicios o configurar Neon CLI.
 
@@ -42,7 +79,7 @@ Abrir [Actions → Catalog import into Neon staging](https://github.com/samuelbe
 
 1. **Run workflow**, branch **main**, mode **dry-run**, confirm_target `cold-shadow-53495242/atlas_staging`. dry_run_id vacío.
 2. Esperar éxito y revisar Summary + artefacto `catalog-plan/plan.json`. En una base sin contenido se esperan 101 registros propuestos: 65 herramientas + 30 guías + seis borradores; categorías/tags se crean con sus primeras relaciones. Si ya hay contenido, revisar omitidos/conflictos. Un dry-run no importa nada.
-3. Copiar el número público de esa ejecución desde su URL Actions. Ejecutar otra vez sobre **el mismo commit main**, mode **apply**, dry_run_id ese número y la misma confirmación. Una ejecución exitosa de apply no puede sustituir al dry-run: el artefacto incluye el modo.
+3. Copiar el número público de esa ejecución desde su URL Actions; los IDs de CI, conexión o migración no son un dry-run de catálogo válido. Ejecutar otra vez sobre **el mismo commit main**, mode **apply**, dry_run_id ese número y la misma confirmación. Una ejecución exitosa de apply no puede sustituir al dry-run: el artefacto incluye el modo.
 4. Revisar los conteos reales post-importación y el SHA en Summary. Conservar enlace de run y artefacto. Ante error, consultar solo etapa/códigos permitidos; nunca reenviar logs privados o cadenas de conexión.
 5. Verificar Render Live en el SHA publicado y abrir `/`, `/tools`, `/use-cases`, `/tools/whisper` y una guía relacionada. Buscar Whisper (tres fichas de transcripción en esta biblioteca), filtrar categoría/tag, ir a página 2 y recorrer enlaces oficiales. Confirmar móvil y ausencia del error de catálogo. Seis artículos DRAFT deben permanecer fuera de `/blog` y del sitemap.
 
@@ -60,7 +97,14 @@ npm run db:generate
 
 No cambiar ExecutionPolicy global ni ejecutar como administrador del sistema. Si una política de la organización bloquea el .ps1, usar el mismo CLI Node desde una terminal privada autorizada y configurar variables solo en ese proceso. El script PowerShell requiere correo elegido localmente, host directo confirmado y conexión runtime **atlas_staging_app** mediante entrada oculta. Después ejecuta `npm run admin:init -- --staging`: verifica destino/rol/TLS y pide dos veces la contraseña del OWNER sin eco. La contraseña humana no entra en argumentos, archivos o secretos CI. Se restauran las variables de conexión/identidad del proceso al salir. La memoria de un proceso no es una bóveda ni se promete borrado físico absoluto de strings de runtimes administrados.
 
-No se crea una cuenta humana desde Codex: la elección de contraseña requiere la intervención privada del propietario. El rol OWNER de la aplicación no es propietario de PostgreSQL. No ejecutar admin:password para sustituir una cuenta ya existente: bootstrap se detiene si ya hay un OWNER/ADMIN inicializado. Recuperación es una operación humana distinta.
+No se crea una cuenta humana desde Codex: la elección de contraseña requiere la intervención privada del propietario. El rol OWNER de la aplicación no es propietario de PostgreSQL. Antes de inicializar, una sesión privada autorizada puede comprobar su existencia sin imprimir identidades ni hashes:
+
+```sql
+SELECT EXISTS(SELECT 1 FROM public."User"
+  WHERE active AND role IN ('OWNER','ADMIN') AND "passwordHash" IS NOT NULL) AS owner_initialized;
+```
+
+Si devuelve true, conservar la cuenta y comprobar el acceso existente; no ejecutar bootstrap ni cambiar su contraseña. Si devuelve false, usar el procedimiento interactivo anterior. No ejecutar admin:password para sustituir una cuenta ya existente: bootstrap también se detiene transaccionalmente si ya hay un OWNER/ADMIN inicializado. Recuperación es una operación humana distinta. Esta sesión no verificó ese booleano en Neon.
 
 Después abrir `https://ai-workflow-atlas.onrender.com/login`, iniciar sesión, comprobar dashboard/CRUD/CMS y cerrar sesión. Una ventana privada debe volver a login. Verificar `SITE_URL` y `ADMIN_ORIGIN` exactos para ese HTTPS si aparece rechazo de origen; no desactivar CSRF/cookies/roles para resolverlo. Se probaron los servicios con cuentas temporales aisladas; el login humano y PowerShell en Windows requieren verificación del propietario.
 
