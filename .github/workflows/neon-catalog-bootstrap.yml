@@ -1,0 +1,56 @@
+name: One-time existing Neon catalog credential bootstrap
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_target:
+        description: Initialize only the existing NOLOGIN catalog role in this staging database
+        required: true
+        type: string
+        default: cold-shadow-53495242/atlas_staging
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neon-staging-database
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    if: >-
+      github.repository == 'samuelbenju/AI_WORKFLOW_ATLAS' &&
+      github.ref == 'refs/heads/main' &&
+      vars.NEON_CATALOG_BOOTSTRAP_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      AGENTS_ENABLED: 'false'
+      AGENTS_MONTHLY_BUDGET_USD_MICROS: '0'
+      WOMPI_SANDBOX_ENABLED: 'false'
+      NEWSLETTER_MODE: disabled
+      ANALYTICS_ENABLED: 'false'
+      GA4_MODE: disabled
+      ADSENSE_ENABLED: 'false'
+      SEO_INDEXING_ENABLED: 'false'
+      CATALOG_DEMO_MODE: 'false'
+      OPS_EXPECT_WORKER: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install existing locked dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Initialize only the existing restricted NOLOGIN role and verify its connection
+        env:
+          MIGRATION_DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
+          CATALOG_DATABASE_URL: ${{ secrets.CATALOG_DATABASE_URL }}
+          NEON_STAGING_EXPECTED_HOST: ${{ vars.NEON_STAGING_EXPECTED_HOST }}
+          CATALOG_BOOTSTRAP_ENABLED: ${{ vars.NEON_CATALOG_BOOTSTRAP_ENABLED }}
+          CATALOG_CONFIRM_TARGET: ${{ inputs.confirm_target }}
+        run: node --import tsx scripts/catalog-bootstrap.ts

@@ -1,10 +1,10 @@
 # Progreso real
 
-## Estado vigente — preparación de lanzamiento, 27-10-2026
+## Estado vigente — activación privada del catálogo, 27-10-2026
 
-Base main `4bbcfe9f198c2bef8c4e6182a4be356700253661`, CI 40448939535 SUCCESS observado; conexión/migraciones Neon ya exitosas, no reejecutadas. Biblioteca 65/30/20/24/seis DRAFT intacta. Catálogo remoto, rol/secreto, OWNER y Render Live sin nueva evidencia: API Forbidden y sin sesiones privadas autorizadas. Esto no confirma que falten ni que el sitio esté caído.
+Base de esta continuación main `1fe6f9afbe61a571322ba9a203887340f6fe4741`, CI 40566049699 SUCCESS observado. Conexión/migraciones Neon ya exitosas: 16/16, no reejecutadas. El propietario confirma **atlas_staging_catalog creado NOLOGIN** y configuración Actions ausente. Runs 40570443429/40570577609 fallaron con `STAGING_CONFIGURATION_MISSING` antes de conectar; no es un rechazo PostgreSQL ni requiere migraciones. Biblioteca 65/30/20/24/seis DRAFT intacta.
 
-Se preparan SEO/breadcrumbs/404 reales, verificación GSC, AdSense deduplicado y apagado con puertas de aprobación/CMP, ads.txt real condicionado y consulta manual de estimaciones oficiales separada del dinero confirmado. No se activa indexación/publicidad/legal ni servicios. [Estado operativo y procedimiento](docs/PUBLIC_LAUNCH.md), [calendario propuesto sin publicar](docs/EDITORIAL_CALENDAR.md). Pruebas y límites de esta continuación se registran al final de BUILD_LOG.md. El historial siguiente no sustituye este estado vigente.
+Bootstrap manual restringido del rol existente preparado y probado con PostgreSQL aislado, sin crear roles reales, conceder permisos o rotar LOGIN. Reutiliza secrets separados, protege el verificador SCRAM y falla si el operador no puede administrarlo con seguridad. Custodia/configuración privadas, ejecución real del bootstrap/dry-run/apply, conteos Neon, OWNER y Render Live permanecen pendientes: API GitHub Forbidden, sin sesión Neon o integración Render autorizada. No se declara importación ni publicación funcional. [Operación y cinco pasos privados](docs/CATALOG_OPERATIONS.md). SEO/AdSense/agentes/pagos/correo y demás servicios permanecen sin activación. Pruebas y límites en BUILD_LOG.md; el historial siguiente no sustituye este estado vigente.
 
 Actualizado: 26 de octubre de 2026 (America/Bogota; métricas propias agregadas en UTC).
 
