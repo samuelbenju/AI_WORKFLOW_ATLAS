@@ -1,10 +1,10 @@
 # AI Workflow Atlas
 
-Actualización de lanzamiento (27-10-2026): SEO, AdSense apagado, adaptador CMP, ads.txt condicionado e informes externos separados preparados sobre la aplicación existente. **Catálogo Neon, OWNER, SHA Live, revisión legal, GSC y aprobación Google requieren evidencia real; no se declara lanzamiento.** Procedimiento actual: [docs/PUBLIC_LAUNCH.md](docs/PUBLIC_LAUNCH.md); [calendario editorial propuesto](docs/EDITORIAL_CALENDAR.md). No repetir las 16 migraciones de staging ni usar seeds demo.
+Actualización 28-10-2026: el catálogo se importó en Neon; [apply 40714352948](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/40714352948) figura SUCCESS en GitHub y el propietario confirma **101 registros creados y contenido visible en Render**: 65 herramientas, 30 guías y seis artículos DRAFT, con 20 categorías/24 etiquetas. No volver a importar, migrar o inicializar el rol. No se modifican estos registros desde esta entrega.
 
-Plataforma independiente sobre herramientas y flujos prácticos de IA. Nombre comercial provisional. Público en inglés, administración en español. **Fases 1–12 respaldadas; Fase 13 prepara catálogo real/importación y activación humana. No listo para producción comercial.** El propietario confirma portada funcional en Render Free y Neon staging con las 16 migraciones aplicadas; no se presenta esa confirmación como una verificación remota de esta sesión. Panel con login, roles, CRUD, CMS editorial y CRM; sin activar correo, pagos o agentes. Operación PostgreSQL en [docs/DATABASE.md](docs/DATABASE.md); catálogo en [docs/PUBLIC_CATALOG.md](docs/PUBLIC_CATALOG.md).
+Plataforma independiente sobre herramientas y flujos prácticos de IA; público en inglés y administración en español. Fases 1–12 respaldadas y catálogo de Fase 13 activado. La revisión legal, la comprobación del OWNER humano, la propiedad de Search Console y las aprobaciones de AdSense siguen siendo requisitos separados. **No se declara lanzamiento comercial ni indexación activada.**
 
-Biblioteca inicial: 65 herramientas con fuentes oficiales, 30 guías y seis borradores editoriales. **Preparada y probada en DB temporal; su importación en Neon y visibilidad remota requieren evidencia de Actions/Render.** Procedimiento repetible, secreto de catálogo independiente y bootstrap OWNER desde Windows: [docs/CATALOG_OPERATIONS.md](docs/CATALOG_OPERATIONS.md). Estado verificable de esta entrega: [docs/PHASE13_REPORT.md](docs/PHASE13_REPORT.md). No usar los seeds demo para poblar staging.
+La mejora SEO incorpora navegación por temas (`/categories`), perfiles relacionados, metodología editorial, paginación canónica y exclusión de páginas vacías/borradores. Estrategia y límites de la investigación: [docs/SEO_STRATEGY.md](docs/SEO_STRATEGY.md); [calendario de ocho semanas](docs/EDITORIAL_CALENDAR.md); operación y aprobaciones: [docs/PUBLIC_LAUNCH.md](docs/PUBLIC_LAUNCH.md). La sesión cloud no puede consultar Render/Google por su política de red; eso no contradice la confirmación del propietario ni significa que el sitio esté caído.
 
 Administración e inicialización segura en [docs/ADMIN.md](docs/ADMIN.md). Blog, CMS, fuentes y control de indexación en [docs/EDITORIAL.md](docs/EDITORIAL.md).
 
@@ -70,6 +70,7 @@ npm run build        # build real de producción; no ejecuta ESLint por sí mism
 npm run test:e2e     # inicia y detiene su propio servidor de producción en 3100
 npm run catalog:validate    # valida biblioteca/evidencia sin conexión a Neon
 npm run test:catalog-import # DB/roles temporales propios, necesita build y Chromium
+node scripts/test-seo-catalog.mjs # SEO habilitado solo en fixtures PostgreSQL/navegador aislados
 ```
 
 `check` también valida el esquema. `typecheck` y `build` generan automáticamente el cliente Prisma sin necesitar conexión. `db:validate`, `db:generate`, `db:deploy` y `db:status` usan módulos oficiales WASM fijados, debido al bloqueo 403 del motor nativo de Prisma; no se desactivan checksums/TLS. La instalación con `--ignore-scripts` evita los hooks que intentan descargar ese binario. Limitaciones de esas APIs internas y del CLI nativo documentadas en `docs/DATABASE.md`.

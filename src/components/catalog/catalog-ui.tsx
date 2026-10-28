@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight,  Layers3, Search, Route } from "lucide-react";
-import type { PublicTool, PublicWorkflow, Facets } from "@/server/data/public-catalog";
+import type { PublicToolCard, PublicWorkflowCard, Facets } from "@/server/data/public-catalog";
 import { catalogHref, type CatalogQuery } from "@/lib/catalog-query";
 import { difficultyLabels } from "@/lib/catalog-content";
 
@@ -8,12 +8,12 @@ export function SearchForm() {
   return <form action="/tools" method="get" className="atlas-search" role="search"><Search size={19} aria-hidden="true" /><label className="sr-only" htmlFor="hero-search">Search AI tools</label><input id="hero-search" name="q" type="search" maxLength={100} placeholder="What would you like to do?" /><button type="submit">Explore <ArrowRight size={16} aria-hidden="true" /></button></form>;
 }
 
-export function ToolCard({ tool }: { tool: PublicTool }) {
-  return <article className="catalog-card tool-card" data-testid="tool-card"><div className="card-top"><span className={`tool-monogram tone-${tool.name.length % 4}`} aria-hidden="true">{tool.name.slice(0, 2)}</span><span className="record-type">{tool.isDemo ? "Sample listing" : "AI TOOL"}</span></div><h3><Link href={`/tools/${tool.slug}`}>{tool.name}<ArrowUpRight size={17} aria-hidden="true" /></Link></h3><p>{tool.summary}</p><div className="record-footer"><span>{tool.categories[0]?.name ?? "General"}</span><span><Layers3 size={13} aria-hidden="true" /> Tool guide</span></div></article>;
+export function ToolCard({ tool }: { tool: PublicToolCard }) {
+  return <article className="catalog-card tool-card" data-testid="tool-card"><div className="card-top"><span className={`tool-monogram tone-${tool.name.length % 4}`} aria-hidden="true">{tool.name.slice(0, 2)}</span><span className="record-type">{tool.isDemo ? "Sample listing" : "AI TOOL"}</span></div><h3><Link prefetch={false} href={`/tools/${tool.slug}`}>{tool.name}<ArrowUpRight size={17} aria-hidden="true" /></Link></h3><p>{tool.summary}</p><div className="record-footer"><span>{tool.categories[0]?.name ?? "General"}</span><span><Layers3 size={13} aria-hidden="true" /> Tool guide</span></div></article>;
 }
 
-export function WorkflowCard({ workflow }: { workflow: PublicWorkflow }) {
-  return <article className="catalog-card workflow-card" data-testid="workflow-card"><div className="card-top"><span className="workflow-symbol"><Route size={23} strokeWidth={1.5} aria-hidden="true" /></span><span className="difficulty-label">{difficultyLabels[workflow.difficulty]}</span></div>{workflow.isDemo && <span className="sample-label">Development example</span>}<h3><Link href={`/use-cases/${workflow.slug}`}>{workflow.title}</Link></h3><p>{workflow.problem}</p><div className="record-footer"><span>{workflow.categories[0]?.name ?? "General"}</span><Link href={`/use-cases/${workflow.slug}`} aria-label={`Explore workflow: ${workflow.title}`}>Explore workflow <ArrowRight size={14} aria-hidden="true" /></Link></div></article>;
+export function WorkflowCard({ workflow }: { workflow: PublicWorkflowCard }) {
+  return <article className="catalog-card workflow-card" data-testid="workflow-card"><div className="card-top"><span className="workflow-symbol"><Route size={23} strokeWidth={1.5} aria-hidden="true" /></span><span className="difficulty-label">{difficultyLabels[workflow.difficulty]}</span></div>{workflow.isDemo && <span className="sample-label">Development example</span>}<h3><Link prefetch={false} href={`/use-cases/${workflow.slug}`}>{workflow.title}</Link></h3><p>{workflow.problem}</p><div className="record-footer"><span>{workflow.categories[0]?.name ?? "General"}</span><Link prefetch={false} href={`/use-cases/${workflow.slug}`} aria-label={`Explore workflow: ${workflow.title}`}>Explore workflow <ArrowRight size={14} aria-hidden="true" /></Link></div></article>;
 }
 
 export function CatalogFilters({ kind, query, facets }: { kind: "tools" | "use-cases"; query: CatalogQuery; facets: Facets }) {
@@ -32,7 +32,7 @@ export function EmptyState({ title = "Nothing here just yet.", description, href
 }
 
 export function DirectoryHeading({ kind }: { kind: "tools" | "use-cases" }) {
-  return <div className="directory-heading"><p className="eyebrow"><span className="status-dot" /> {kind === "tools" ? "THE TOOL ATLAS" : "FROM IDEA TO ACTION"}</p><h1>{kind === "tools" ? <>Find your next <span className="gradient-text">unfair advantage.</span></> : <>Good ideas deserve <span className="gradient-text">a practical workflow.</span></>}</h1><p>{kind === "tools" ? "Explore AI tools by what they help you do. Find a starting point, understand its purpose, and make it your own." : "Start with a problem. Discover the tools, steps, and human judgment needed to work through it."}</p></div>;
+  return <div className="directory-heading"><p className="eyebrow"><span className="status-dot" /> {kind === "tools" ? "THE TOOL ATLAS" : "FROM IDEA TO ACTION"}</p><h1>{kind === "tools" ? <>Find useful <span className="gradient-text">AI tools.</span></> : <>Turn a task into <span className="gradient-text">an AI workflow.</span></>}</h1><p>{kind === "tools" ? "Explore AI tools by what they help you do. Find a starting point, understand its purpose, and make it your own." : "Start with a problem. Discover the tools, steps, and human judgment needed to work through it."}</p></div>;
 }
 
 export {NewsletterSection as NewsletterBlock} from "@/components/newsletter/section";

@@ -38,6 +38,7 @@ test("official report fixture is domain-scoped, read-only, audited and separate 
     assert.equal(url.pathname, "/v2/accounts/pub-1234567890123456/reports:generate");
     assert.equal(url.searchParams.get("filters"), "DOMAIN_NAME==atlas.example");
     assert.equal(url.searchParams.get("metrics"), "ESTIMATED_EARNINGS");
+    assert.deepEqual(url.searchParams.getAll('metrics'),['ESTIMATED_EARNINGS','PAGE_VIEWS','IMPRESSIONS','CLICKS','PAGE_VIEWS_RPM','PAGE_VIEWS_CTR','AD_REQUESTS_COVERAGE']);
     assert.equal(url.searchParams.get("reportingTimeZone"), "ACCOUNT_TIME_ZONE");
     assert.ok(!url.search.includes("isolated-fixture-token")); assert.equal(init?.redirect, "error");
     assert.equal(new Headers(init?.headers).get("authorization"), "Bearer isolated-fixture-token");

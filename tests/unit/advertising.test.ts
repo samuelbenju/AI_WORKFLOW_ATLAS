@@ -62,3 +62,25 @@ test("external estimates preserve decimals/currency and reject malformed or trun
     { rows: [{ cells: [{ value: "2026-02-10" }, { value: "1" }] }] }, { rows: [...report().rows, ...report().rows], totalMatchedRows: "2" },
     { totals: { cells: [{ value: "" }, { value: "NaN" }] } }]) assert.throws(() => parseAdsenseReport({ ...report(), ...change }, "2026-01-01", "2026-01-31"));
 });
+
+test('AdSense engagement metrics are validated provider values, with no local revenue calculation',()=>{
+  const input=report();
+  const extended={...input,headers:[...input.headers,
+    {name:'PAGE_VIEWS',type:'METRIC_TALLY'},{name:'IMPRESSIONS',type:'METRIC_TALLY'},
+    {name:'CLICKS',type:'METRIC_TALLY'},{name:'PAGE_VIEWS_RPM',type:'METRIC_CURRENCY',currencyCode:'USD'},
+    {name:'PAGE_VIEWS_CTR',type:'METRIC_RATIO'},{name:'AD_REQUESTS_COVERAGE',type:'METRIC_RATIO'}],
+    rows:[{cells:[{value:'2026-01-01'},{value:'12.345678'},{value:'1000'},{value:'700'},{value:'3'},
+      {value:'12.345678'},{value:'0.003'},{value:'0.875'}]}],totals:undefined};
+  const parsed=parseAdsenseReport(extended,'2026-01-01','2026-01-31');
+  assert.equal(parsed.rows[0]?.metrics.PAGE_VIEWS,'1000');
+  assert.equal(parsed.rows[0]?.metrics.PAGE_VIEWS_RPM,'12.345678');
+  assert.equal(parsed.rows[0]?.metrics.AD_REQUESTS_COVERAGE,'0.875');
+  assert.equal(parsed.totalMetrics,null);
+  assert.equal(parseAdsenseReport(input,'2026-01-01','2026-01-31').rows[0]?.metrics.PAGE_VIEWS,undefined);
+  for(const index of [2,6,7]){
+    const bad=structuredClone(extended);bad.rows[0]!.cells[index]!.value=index===2?'-1':'1.1';
+    assert.throws(()=>parseAdsenseReport(bad,'2026-01-01','2026-01-31'));
+  }
+  const mixed=structuredClone(extended);mixed.headers[5]!.currencyCode='EUR';
+  assert.throws(()=>parseAdsenseReport(mixed,'2026-01-01','2026-01-31'));
+});

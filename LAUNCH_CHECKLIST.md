@@ -1,9 +1,9 @@
 # Lista de lanzamiento — AI Workflow Atlas
 
-Actualización 27-10-2026: [procedimiento vigente de publicación, GSC y AdSense](docs/PUBLIC_LAUNCH.md). No se declara lanzamiento ni catálogo importado. Las 16 migraciones de **este Neon staging ya están aplicadas**; no repetirlas. CI remota de la base 4bbcfe9 aprobada. Los pendientes históricos que siguen requieren evidencia del destino real, no reinstalar infraestructura.
+Actualización 28-10-2026: [procedimiento vigente de publicación, GSC y AdSense](docs/PUBLIC_LAUNCH.md) y [estrategia SEO/editorial](docs/SEO_STRATEGY.md). Apply 40714352948 SUCCESS observado; propietario confirma 101 registros y sitio funcional con catálogo. Las 16 migraciones ya están aplicadas: no repetir migraciones, bootstrap o importación. Las aprobaciones de lanzamiento/legales/Google son independientes.
 
-- [ ] Catálogo aplicado mediante dry-run/apply del mismo SHA y plan sin conflictos, con conteos reales y ediciones humanas conservadas.
-- [ ] OWNER humano privado si falta; SHA Live/rutas y acceso anónimo público comprobados.
+- [x] Catálogo inicial aplicado: workflow 40714352948 SUCCESS; propietario confirma 101 registros creados, 65 herramientas/30 guías/seis DRAFT. No reimportar. No se hicieron escrituras remotas en la mejora SEO.
+- [ ] Comprobar OWNER humano privadamente solo si falta; conservarlo si existe. Sitio con contenido confirmado por propietario; comprobar SHA Live y rutas de la nueva entrega SEO por separado.
 - [ ] Resolver disponibilidad/robots del Render Free y validar rastreo real antes de indexar. No pings artificiales.
 - [ ] Textos legales y datos públicos aprobados por persona competente; solo entonces LEGAL_REVIEW_CONFIRMED=true.
 - [ ] PUBLIC_LAUNCH_CONFIRMED y SEO_INDEXING_ENABLED tras revisar catálogo, HTTPS, canonical y permisos.
@@ -66,8 +66,17 @@ Actualización 26-10-2026 (America/Bogota): Fases 1–12 respaldadas y Render Fr
 ## Operación y publicación
 
 - [x] CI y vercel.json preparados sin despliegues, crons o migraciones automáticos.
-- [ ] Revisar branch protection, required checks, revisiones y secret scanning. CI remota base 4bbcfe9 SUCCESS observada; comprobar la CI específica de cada nueva versión.
+- [ ] Revisar branch protection, required checks, revisiones y secret scanning. CI remota base 5af53c41 SUCCESS observada; comprobar la CI específica de cada nueva versión.
 - [ ] Configurar monitor externo autenticado a `/api/internal/readiness`, token local fuerte y OPS_EXPECT_WORKER según infraestructura; cadencia, responsables y canal de alertas autorizados. La aplicación devuelve alertas, no las envía automáticamente.
 - [ ] Pruebas del host: recuperación de DB/worker, caída del proveedor, carga/pooling, logs redactados/retención, restauración y rollback de versión compatible.
 - [ ] Ejecutar todas las comprobaciones finales en staging privado, registrar SHA, migraciones, backups y checklist firmado.
 - [ ] Solicitar autorización de despliegue para ese resultado concreto; habilitar integraciones y publicación comercial mediante decisiones separadas. No activar cobros reales con la infraestructura Sandbox actual.
+
+## Verificación técnica SEO y medición — 28-10-2026
+
+- [x] Hubs de categorías reales, About/metodología, metadatos por página, filtros/vacíos noindex y exclusión de drafts en sitemap implementados y cubiertos por regresión aislada.
+- [x] Estrategia cualitativa, brechas de los seis DRAFT y calendario de ocho semanas preparados sin publicar o modificar contenido importado.
+- [x] Informes GA4/AdSense administrativos ampliados con permisos, validación, fuente y límites, sin activar seguimiento o anuncios.
+- [ ] Validar la nueva versión y su SHA Live en Render; registrar pruebas de campo p75 cuando haya muestra suficiente. Lighthouse local no las reemplaza.
+- [ ] Contrastar condiciones vigentes de Render Free/rastreo y elegibilidad del hostname en AdSense; ayuda oficial inaccesible desde cloud.
+- [ ] Verificar en Google propiedad GSC, sitemap e inspección de URLs cuando las puertas de lanzamiento estén aprobadas. Aprobación publicitaria y CMP real requieren evidencia aparte.

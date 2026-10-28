@@ -5,6 +5,7 @@ import { Brand } from "@/components/ui/brand";
 const links = [
   { href: "/tools", label: "AI tools" },
   { href: "/use-cases", label: "Use cases" },
+  { href: "/categories", label: "Topics" },
   { href: "/blog", label: "Journal" },
   { href: "/sponsor", label: "Sponsor" },
   { href: "/#approach", label: "Our approach" },

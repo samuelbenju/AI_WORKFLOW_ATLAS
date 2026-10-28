@@ -1,6 +1,6 @@
 import {z} from "zod";
 export const consentVersion="atlas-analytics-v1";
-export function publicPath(value:string){return value.length<=200&&/^(\/(?:tools|use-cases|blog)(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)?|\/newsletter|\/sponsor|\/)$/.test(value)?value:null;}
+export function publicPath(value:string){return value.length<=200&&/^(\/(?:tools|use-cases|blog|categories)(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)?|\/about|\/newsletter|\/sponsor|\/)$/.test(value)?value:null;}
 const path=z.string().refine(v=>publicPath(v)!==null,"Selecciona una ruta pública canónica, sin query ni datos privados.");
 export const eventSchema=z.object({id:z.uuid(),kind:z.enum(["PAGE_VIEW","SEARCH","TOOL_VIEW","CAMPAIGN_CLICK"]),path,campaignId:z.uuid().optional()}).strict().refine(d=>d.kind!=="SEARCH"||["/tools","/use-cases","/blog"].includes(d.path)).refine(d=>d.kind!=="TOOL_VIEW"||/^\/tools\/.+/.test(d.path)).refine(d=>d.kind!=="CAMPAIGN_CLICK"||!!d.campaignId);
 export const rangeSchema=z.object({days:z.coerce.number().int().min(1).max(90).default(30)}).strict();

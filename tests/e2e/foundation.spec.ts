@@ -12,9 +12,9 @@ test("the homepage renders and navigation reaches real sections", async ({ page 
   await expect(page.getByRole("complementary", { name: "Development preview" })).toBeVisible();
   await expect(page.getByTestId("tool-card")).toHaveCount(3);
   await expect(page.getByTestId("workflow-card")).toHaveCount(3);
-  await page.getByRole("link", { name: "Explore the atlas" }).click();
+  await page.getByRole("link", { name: "Browse all tools", exact: true }).click();
   await expect(page).toHaveURL(/\/tools$/);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Find your next");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Find useful AI tools.");
   await expect(page.locator("a[href='#']")).toHaveCount(0);
   expect(errors).toEqual([]);
   await page.goto("/");

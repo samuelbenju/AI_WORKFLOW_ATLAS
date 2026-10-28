@@ -4,7 +4,7 @@ import { getDatabase } from "@/server/db/client";
 import { authorizeActor } from "@/server/admin/content";
 import { AccessError } from "@/server/auth/policy";
 import { rangeSchema, dateRange } from "@/lib/growth";
-import { parseAdsenseReport } from "@/lib/adsense-report";
+import { parseAdsenseReport,adsenseMetrics } from "@/lib/adsense-report";
 import { parseSiteOrigin } from "@/lib/config/env";
 
 export function adsenseReportsConfigured() {
@@ -21,7 +21,8 @@ export async function readAdsenseReport(userId: string, input: unknown, db: Pris
   const from = start.toISOString().slice(0, 10), to = last.toISOString().slice(0, 10);
   const url = new URL(`https://adsense.googleapis.com/v2/accounts/${process.env.ADSENSE_PUBLISHER_ID!.slice(3)}/reports:generate`);
   url.searchParams.set("dateRange", "CUSTOM"); url.searchParams.set("dimensions", "DATE");
-  url.searchParams.set("metrics", "ESTIMATED_EARNINGS"); url.searchParams.set("orderBy", "+DATE");
+  for(const metric of adsenseMetrics)url.searchParams.append('metrics',metric);
+  url.searchParams.set("orderBy", "+DATE");
   url.searchParams.set("reportingTimeZone", "ACCOUNT_TIME_ZONE"); url.searchParams.set("limit", "90");
   url.searchParams.set("filters", `DOMAIN_NAME==${origin.hostname}`);
   for (const [name, date] of [["startDate", start], ["endDate", last]] as const) {

@@ -17,6 +17,8 @@ export async function listPublicArticles(input: ArticleQuery,db:PrismaClient=get
     db.category.findMany({where:{articles:{some:publishedArticleWhere()}},select:{slug:true,name:true},orderBy:{name:"asc"}}),
   ],{isolationLevel:"RepeatableRead"});return {items,total,categories,pageCount:Math.ceil(total/6)}; });
 }
+const cachedArticleListing=cache((key:string)=>listPublicArticles(articleQuerySchema.parse(JSON.parse(key))));
+export const articlesPageData=(query:ArticleQuery)=>cachedArticleListing(JSON.stringify(query));
 export async function readPublicArticle(slug:string,db:PrismaClient=getDatabase()) {
   if(!editorialSlug.safeParse(slug).success)return null;
   return read(async()=>{

@@ -1,5 +1,13 @@
 # Fase 13 — catálogo real y operación en staging
 
+## Estado actual confirmado — 28-10-2026
+
+[Apply 40714352948](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/40714352948) **SUCCESS**, sobre main 5af53c41e29dbe387a9675e6da749379819623b9, observado en GitHub público. El propietario confirma **101 registros creados**, 65 herramientas, 30 guías, seis artículos DRAFT y contenido visible en Render; taxonomía preparada de 20 categorías/24 etiquetas. Rol de importación verificado por el propietario y 16 migraciones aplicadas. No volver a crear roles, inicializar contraseñas, aplicar migraciones o importar este lote. Esta entrega SEO no hace escrituras en Neon.
+
+Los incidentes de NOLOGIN/configuración/protección de logs y los conteos no observados descritos abajo son **históricos**. No niegan la ejecución posterior confirmada. Se conserva el procedimiento para futuras operaciones expresamente autorizadas, no como siguiente paso del lanzamiento. OWNER humano, SHA Live posterior y aprobaciones legales/Google se verifican de forma independiente; ver [PUBLIC_LAUNCH.md](PUBLIC_LAUNCH.md).
+
+## Registro histórico y procedimiento conservado
+
 Fecha editorial: 26-10-2026, America/Bogota. Solo Neon Free + Render Free existentes. No se crea otra aplicación o base. Las 16 migraciones, Prisma 7.10.1, PrismaPg, pg y el esquema permanecen intactos.
 
 ## Alcance y evidencia
@@ -26,7 +34,7 @@ El apply exige un dry-run exitoso del mismo workflow/main/SHA y su artefacto ver
 
 Una interrupción puede dejar **lotes anteriores confirmados**, nunca una fracción del lote fallido. El error seguro informa `committedBeforeFailure`; no intentar rollback masivo. Ejecutar un nuevo dry-run: omite los lotes ya guardados. No reusar un artefacto anterior ni modificar filas para que coincida. La auditoría permite localizar la procedencia sin almacenar una contraseña, contacto o URL de conexión.
 
-## Incidente actual: configuración completa, restricciones de Neon
+## Incidente histórico: configuración completa, restricciones de Neon
 
 Actualización 28-10-2026. El propietario confirma que **CATALOG_DATABASE_URL, MIGRATION_DATABASE_URL, NEON_STAGING_EXPECTED_HOST** y la puerta temporal están configurados. No reemplazarlos ni volver a crear atlas_staging_catalog. Los fallos históricos STAGING_CONFIGURATION_MISSING ya fueron superados.
 

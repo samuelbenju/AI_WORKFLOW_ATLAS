@@ -1,16 +1,14 @@
 # Progreso real
 
-## Estado vigente — restricción de inicialización Neon, 28-10-2026
+## Estado vigente — operación SEO y crecimiento, 28-10-2026
 
-Base main `d4641f210a84643ede4a6bd74b116792ca0197b7`, CI 40577842791 SUCCESS. **Secrets/host/puerta de Actions ya configurados**, confirmado por propietario y diagnóstico de presencia. Run40585973261 llega a inicialización y se detiene en BOOTSTRAP_LOG_PROTECTION_UNAVAILABLE, credentialCommitted=false; según la ruta del código, operador/TLS/destino/PG17/historial16/esquema/permisos previos ya aceptados. Rol de catálogo existente NOLOGIN, sin contraseña; reset de Console rechazado por ese motivo. No volver a diagnosticar variables ausentes ni repetir migraciones. Biblioteca 65/30/20/24/seis DRAFT intacta.
+Base main local/remota **5af53c41e29dbe387a9675e6da749379819623b9**, limpia al iniciar. [Apply 40714352948](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/40714352948) SUCCESS observado en GitHub sobre esa base. El propietario confirma 101 registros creados (65 herramientas, 30 guías, seis DRAFT), taxonomía 20/24 y web pública mostrando contenido. El bootstrap y los bloqueos de configuración anteriores son **históricos**, no actividades pendientes. No reimportar ni repetir las 16 migraciones; esquema, biblioteca, lockfile y credenciales se conservan.
 
-Causa técnica reproducida: CREATEROLE/ADMIN no autoriza SET de log_statement (contexto superuser), aunque su valor ya sea protector. El catch anterior ocultaba el control exacto; nueva inspección remota de solo lectura lo identificará sin mostrar valores. La documentación oficial de Neon exige contraseñas SQL en texto plano y no soporta hashes: la prueba SCRAM local no habilita ese método en Neon. Corregida esa suposición: ruta remota BEGIN READ ONLY, diagnóstico seguro y rechazo de inicialización no soportada; un LOGIN ya inicializado puede verificarse sin rotación. No se relajan protecciones ni se intenta enviar material secreto a SQL. Hace falta un procedimiento administrativo privado aprobado por Neon o una decisión explícita sobre el riesgo del método SQL oficial. [Estado, fuentes y pasos exactos](docs/CATALOG_OPERATIONS.md). Sin nuevo dry-run exitoso/apply/conteos, OWNER o SHA Live Render observados. API GitHub sigue Forbidden; no sesión Neon directa ni integración Render. Servicios comerciales/IA sin activación. Pruebas en BUILD_LOG.md; lo siguiente es historial.
+Implementación de esta entrega: hubs por categorías existentes, About/metodología en inglés, enlaces entre herramientas/guías/artículos realmente publicados, metadatos de paginación, filtros noindex, sitemap sin vacíos/borradores y JSON-LD fiel al contenido. Consultas de tarjetas reducidas y caché limitada a la petición; sin datos estáticos ni errores silenciados. Informes Google administrativos ampliados, exclusivamente manuales/autorizados: GA4 por seis dimensiones y métricas oficiales de AdSense, sin activar tracking o publicidad. Estrategia y calendario de ocho semanas en docs/SEO_STRATEGY.md y docs/EDITORIAL_CALENDAR.md.
 
-Actualizado: 26 de octubre de 2026 (America/Bogota; métricas propias agregadas en UTC).
+La evidencia local y las mediciones constan en BUILD_LOG.md. Las pruebas usan PostgreSQL desechable, Chromium y proveedores interceptados, sin tocar Neon. Se observaron las ejecuciones públicas de Actions; **no hay nueva sesión SQL Neon ni acceso HTTP/privado a Render o Google desde este cloud**. La nueva versión requiere comprobar SHA Live y rutas tras publicarse; no se confunde un build con despliegue o métricas de campo.
 
-## Alcance autorizado
-
-Fases 1–12 y construcción de Fase 13 respaldadas; base de activación b5319e2ba2d7c8beb94adb4700468dabd2753e69. Se observaron en GitHub público **SUCCESS** de conexión 40372875357, migración 40373255135 y CI 40402836767 (b5319e2). El propietario confirma 16/16 migraciones, 55 tablas, 72 FK, dbStatus PASS/COMPLETE; no volver a migrar. Catálogo existente: 65 tools, 30 guías, seis DRAFT, 20 categorías/24 etiquetas. **No importación Neon por esta sesión; rol/secreto/contenido real y OWNER aún sin verificación SQL.** API autenticada sigue Forbidden, Render inaccesible y no hay conexión Neon/conector listo. Se corrige un bypass demostrado de la guarda por privilegios de columna, sin otorgar permisos reales. Sin nuevos servicios, esquema, migraciones o activación comercial/IA. Ver docs/PHASE13_REPORT.md. Las secciones históricas conservan el estado de cada intervención; este resumen y el último apartado son los vigentes.
+Permanecen las puertas de revisión legal, publicación e indexación; sin cuenta Google verificada o AdSense aprobado, sin envíos/IA/pagos/workers/cron ni coste activado. OWNER no se crea ni se presupone inexistente; comprobarlo privadamente con el procedimiento existente solo si hace falta.
 
 | Fase | Estado |
 | --- | --- |
@@ -26,7 +24,7 @@ Fases 1–12 y construcción de Fase 13 respaldadas; base de activación b5319e2
 | 10. Agentes especializados | Publicada y sincronizada en GitHub mediante push normal autorizado. Modelos TEST_FIXTURE; OpenAI real pendiente de credenciales/consumo autorizados. |
 | 11. Analítica y afiliados | Publicada; Google/proveedores reales pendientes de configuración/pruebas externas. |
 | 12. Auditoría y lanzamiento | Auditoría/correcciones/pruebas locales y preparación realizadas. Lanzamiento pendiente de los bloqueos de LAUNCH_CHECKLIST.md; no listo para producción comercial. |
-| 13. Activación y catálogo real | Implementación, investigación y pruebas locales completadas; importación Neon, cuenta humana y verificación Render pendientes de acceso/operación privada. No marcar completa operativamente. |
+| 13. Activación y catálogo real | Apply 40714352948 SUCCESS observado; propietario confirma 101 registros y sitio con contenido. OWNER y lanzamiento comercial requieren validación humana independiente. |
 
 ## Implementación de Fase 1
 
@@ -42,7 +40,7 @@ Sin compras, correos, llamadas IA o cobros. Render Free fue desplegado por el pr
 
 ## Siguiente actividad
 
-Comprobar privadamente rol/secreto de catálogo; conservarlos si ya existen o aprovisionar únicamente lo que falte. Ejecutar workflow manual dry-run → apply del mismo SHA sin nuevos pushes entre ambos. Comprobar si OWNER ya está inicializado sin revelar identidades; solo si falta, usar scripts/admin-staging.ps1 en Windows/Node 24 y contraseña elegida sin eco. Verificar login/logout, fichas reales y SHA Live. Instrucciones en docs/CATALOG_OPERATIONS.md. No repetir migraciones o activar IA, pagos, correo, tracking/indexación.
+Validar la nueva versión en Render y su SHA Live mediante acceso del propietario. Revisar identidad/contacto y textos legales antes de cualquier declaración de revisión/publicación. Completar propiedad GSC y evaluación AdSense en Google con valores reales. No repetir importación, bootstrap, contraseñas o migraciones ya realizados. Procedimiento en docs/PUBLIC_LAUNCH.md.
 
 ## Historial de conservación y fases anteriores
 

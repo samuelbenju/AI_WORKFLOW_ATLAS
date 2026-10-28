@@ -42,7 +42,7 @@ Los bloques/formularios y referencias están acotados; no hay fetch automático 
 | Artículo con noindex individual | Sigue siendo público, meta noindex/follow y exclusión del sitemap. No es un control de acceso. |
 | Borrador/demo/futuro/no revisado/retirado | No ficha pública ni sitemap; no existe preview público mediante parámetros. |
 
-`src/proxy.ts` aplica únicamente headers SEO por petición; no sustituye guards de autenticación. `robots.ts` y `sitemap.ts` son dinámicos. El sitemap consulta herramientas/casos y artículos publicados/no-demo/no-futuros, y excluye artículos noindex. Usa updatedAt real para detalles; no inventa fecha de modificación de páginas de índice. Si supera 50.000 URLs falla explícitamente y requiere partición; no trunca silenciosamente. No se afirma disponibilidad/indexación real en buscadores ni se registró Search Console o analítica.
+`src/proxy.ts` aplica headers SEO y comprueba existencia pública de slugs antes del streaming para devolver HTTP 404; no sustituye guards de autenticación. `robots.ts` y `sitemap.ts` son dinámicos. El sitemap consulta herramientas/casos y artículos publicados/no-demo/no-futuros, y excluye artículos noindex. Usa updatedAt real para detalles; no inventa fecha de modificación de páginas de índice. Si supera 50.000 URLs falla explícitamente y requiere partición; no trunca silenciosamente. No se afirma disponibilidad/indexación real en buscadores ni se registró Search Console o analítica.
 
 Antes de lanzamiento, configurar el origen real, revisar contenido y decisiones del propietario, ajustar flag y reconstruir/reiniciar para mantener metadata/entorno coherentes. No cambiar los controles solo para hacer visible una demo. RSS se aplaza hasta contar con publicaciones aprobadas y una decisión de distribución; no es requisito crítico de esta fase.
 
@@ -76,3 +76,11 @@ Se consultó además el README de Google Workspace Samples como contexto. Un pri
 Persisten las limitaciones de infraestructura/hardening anteriores de DATABASE/ADMIN. La contraseña humana sigue pendiente del ingreso seguro mediante `npm run admin:init`; no se pide por chat. No se desplegó, publicó en GitHub, activó indexación ni comenzó Fase 6.
 
 Preparación posterior: breadcrumbs/HTTP 404 y verificación GSC en [PUBLIC_LAUNCH.md](PUBLIC_LAUNCH.md). AdSense no altera revisión/publicación de los seis borradores; su consentimiento/ubicaciones son independientes de analítica y requieren sus aprobaciones.
+
+## Mejora SEO y revisión editorial — 28-10-2026
+
+Se conservan los seis artículos DRAFT importados; no se editan ni publican por completar SEO. La [estrategia editorial](SEO_STRATEGY.md) revisa cada borrador y propone mejoras; el [calendario de ocho semanas](EDITORIAL_CALENDAR.md) requiere fuentes/autor/revisor reales y aprobación CMS. HEAD 200 de una fuente verifica disponibilidad, no sus afirmaciones o una prueba práctica del producto.
+
+Nuevos hubs `/categories`/`/categories/[slug]` reutilizan datos existentes; About explica alcance y límites. Metadatos paginados tienen título/canonical propio. El sitemap excluye blog vacío, categorías sin contenido o con una sola ficha según política editorial, artículos DRAFT/noindex/demo/futuros y rutas privadas. Las listas vacías, filtros y queries de paginación en rutas que no son directorios son noindex. No se crean combinaciones de filtros indexables, traducciones incompletas ni hreflang inexistente. Los hubs no reciben fechas de modificación inventadas.
+
+Se conserva Organization/WebSite, BreadcrumbList, BlogPosting y CollectionPage/ItemList donde el contenido visible lo respalda. No se añade SoftwareApplication con ofertas/precios/reseñas inexistentes para intentar obtener un rich result. La aplicación puede ser técnicamente correcta y continuar noindex hasta la revisión humana legal y de lanzamiento; esta entrega no cambia esas declaraciones.

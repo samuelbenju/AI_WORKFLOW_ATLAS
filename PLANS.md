@@ -28,7 +28,7 @@ Cada fase requiere solicitud expresa. La Fase 1 es la única autorizada en la pr
 
 ## Fase 13 autorizada posteriormente — operación y catálogo
 
-La solicitud adjunta autoriza investigación, implementación, pruebas, commits/push normales y publicación de contenido revisado exclusivamente en atlas_staging. Se añaden catálogo/evidencia, importación manual guardada y bootstrap seguro desde Windows, reutilizando modelos/servicios existentes. No es una reconstrucción o reapertura de las doce fases. Meta inicial comprobable: 65 herramientas, 30 guías, seis artículos DRAFT; 200 herramientas sigue aspiracional. La fase permanece **incompleta operativamente** hasta importar de verdad en Neon, verificar Render y completar el login humano. Alcance, resultados y bloqueos: docs/PHASE13_REPORT.md. Servicios con coste, tracking, indexación y automatizaciones continúan deshabilitados.
+La solicitud adjunta autoriza investigación, implementación, pruebas, commits/push normales y publicación de contenido revisado exclusivamente en atlas_staging. Se añaden catálogo/evidencia, importación manual guardada y bootstrap seguro desde Windows, reutilizando modelos/servicios existentes. No es una reconstrucción o reapertura de las doce fases. Meta inicial comprobable: 65 herramientas, 30 guías, seis artículos DRAFT; 200 herramientas sigue aspiracional. Actualización 28-10-2026: catálogo aplicado mediante workflow 40714352948 SUCCESS y contenido público confirmado por el propietario; no reimportar. El login OWNER humano y el lanzamiento comercial se verifican de forma independiente, sin negar esa activación ya realizada. Alcance, resultados y bloqueos: docs/PHASE13_REPORT.md. Servicios con coste, tracking, indexación y automatizaciones continúan deshabilitados.
 
 ## Estado de cierre de Fase 12 — 26-10-2026
 
@@ -38,3 +38,7 @@ Solicitud 12/12 autorizada y ejecutada sobre el proyecto existente. Auditoría, 
 ## Lanzamiento público autorizado posteriormente — 27-10-2026
 
 Sobre Fase 13 existente: completar activación remota cuando se disponga de acceso; preparar Google/GSC/AdSense, consentimiento certificado y control de indexación, validar y conservar infraestructura. No repetir migraciones, publicar DRAFT, asumir revisión legal, fabricar ingresos o activar agentes/pagos/correo. Alcance y evidencias diferenciadas en docs/PUBLIC_LAUNCH.md; no es una fase nueva que reinicie las doce anteriores.
+
+## Operación SEO y crecimiento autorizada — 28-10-2026
+
+Catálogo ya importado y sitio operativo confirmado por el propietario; no volver a ejecutarlos. Mejorar SEO técnico, descubrimiento por categorías, enlaces internos, rendimiento y medición administrativa sobre los módulos existentes. Proponer ocho semanas editoriales con fuentes y revisión humana. Conservar los seis DRAFT, los 101 registros, esquema/16 migraciones y barreras legales/Google. No activar seguimiento/anuncios/indexación/servicios ni comprar infraestructura. Validar localmente y diferenciar CI, prueba efímera y comportamiento real de Render.

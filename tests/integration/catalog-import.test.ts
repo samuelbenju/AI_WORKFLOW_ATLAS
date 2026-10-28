@@ -114,10 +114,9 @@ test('production server serves all imported slugs, desktop/mobile discovery and 
     }
     for (const article of library.articles) {
       assert.equal(await readPublicArticle(article.slug, owner), null);
-      // Next streams a dynamic not-found response with 200 once headers have
-      // been sent. Check absence of draft content, not just the HTTP status.
+      // The existing proxy must identify unpublished slugs before streaming.
       const response = await fetch(`${origin}/blog/${article.slug}`);
-      assert.ok([200, 404].includes(response.status));
+      assert.equal(response.status,404);
       assert.ok(!(await response.text()).includes(article.excerpt));
     }
     assert.equal((await fetch(origin + '/api/admin/content/tools')).status, 401);
