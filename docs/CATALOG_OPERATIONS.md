@@ -26,68 +26,37 @@ El apply exige un dry-run exitoso del mismo workflow/main/SHA y su artefacto ver
 
 Una interrupción puede dejar **lotes anteriores confirmados**, nunca una fracción del lote fallido. El error seguro informa `committedBeforeFailure`; no intentar rollback masivo. Ejecutar un nuevo dry-run: omite los lotes ya guardados. No reusar un artefacto anterior ni modificar filas para que coincida. La auditoría permite localizar la procedencia sin almacenar una contraseña, contacto o URL de conexión.
 
-## Configuración privada única de GitHub
+## Incidente actual: configuración completa, restricciones de Neon
 
-### Incidente confirmado: rol existente NOLOGIN, configuración ausente
+Actualización 28-10-2026. El propietario confirma que **CATALOG_DATABASE_URL, MIGRATION_DATABASE_URL, NEON_STAGING_EXPECTED_HOST** y la puerta temporal están configurados. No reemplazarlos ni volver a crear atlas_staging_catalog. Los fallos históricos STAGING_CONFIGURATION_MISSING ya fueron superados.
 
-El propietario confirma la creación satisfactoria de **atlas_staging_catalog NOLOGIN**. **No repetir el SQL de creación.** Las ejecuciones [40570443429](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/40570443429) y [40570577609](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/40570577609) fallaron con `catalog.import.workflow guards / STAGING_CONFIGURATION_MISSING`; el propietario comprobó vacías las secciones correspondientes. No se había intentado conectar a PostgreSQL. No es un fallo de migraciones y esos IDs no autorizan apply.
+La ejecución [40585973261](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/40585973261), sobre d4641f2, llegó a `catalog.bootstrap.one-time credential initialization` y devolvió `BOOTSTRAP_LOG_PROTECTION_UNAVAILABLE`, `credentialCommitted=false`. Según la secuencia verificada del script, ya había aceptado conexión del operador/TLS, destino/PG17, 16 migraciones/checksums/esquema, permisos del rol y autorización para ALTER ROLE. **No comprobó autenticación del catálogo ni inicializó su contraseña.** El propietario confirma que el rol sigue NOLOGIN y sin contraseña, y Console → Reset password falla con `cannot update password for role without password`.
 
-Para evitar instalar psql existe ahora el [bootstrap manual de la credencial](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/workflows/neon-catalog-bootstrap.yml), sin otra contraseña secreta adicional ni permisos de escritura sobre GitHub. Intervención privada, cinco pasos:
+El bootstrap anterior intentaba SET LOCAL de parámetros de contexto superuser: primero log_statement, después duración/muestreo/parámetros/errores. CREATEROLE y ADMIN OPTION no dan ese permiso. El catch genérico ocultaba cuál fallaba. PostgreSQL17 aislado reproduce el rechazo de log_statement con CREATEROLE/ADMIN, incluso cuando su valor ya es protector. El run anterior no permite distinguir por sí solo ese parámetro, otro posterior o la auditoría activa: **no afirmar el parámetro remoto exacto sin el nuevo informe**.
 
-1. Confirmar el hostname directo del proyecto Neon y base atlas_staging. Preparar una entrada recuperable en el gestor de contraseñas confiable; generar y guardar allí una contraseña CSPRNG independiente de **64 caracteres base64url** (`A-Z a-z 0-9 _ -`, equivalente a `crypto.randomBytes(48).toString('base64url')`). No imprimirla ni generarla sin esa custodia disponible.
-2. En [Actions secrets](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/settings/secrets/actions), guardar **CATALOG_DATABASE_URL** del rol existente, esa contraseña, host directo, atlas_staging y `sslmode=verify-full`. Conservar **MIGRATION_DATABASE_URL** existente sin cambios. No compartir ni capturar la URL.
-3. En [Actions variables](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/settings/variables/actions), guardar **NEON_STAGING_EXPECTED_HOST** (solo hostname directo) y habilitar temporalmente **NEON_CATALOG_BOOTSTRAP_ENABLED=true**.
-4. Ejecutar el bootstrap sobre **main**, `confirm_target=cold-shadow-53495242/atlas_staging`. Esperar **INITIALIZED** o **ALREADY_CONFIGURED_NO_CHANGE**, TLS y permisos verificados; compartir solo URL del run/JSON sanitizado.
-5. Tras éxito, deshabilitar **NEON_CATALOG_BOOTSTRAP_ENABLED** (false o eliminarla). Continuar con el dry-run existente y después su apply guardado, no directamente con apply.
+Hay además una incompatibilidad independiente: [Neon exige contraseñas SQL en texto plano, no hashes](https://neon.com/docs/manage/roles#manage-roles-with-sql). El verificador SCRAM probado en PostgreSQL local no es un protocolo de inicialización soportado por Neon. [Neon limita parámetros configurables al contexto user](https://neon.com/docs/reference/compatibility#configuring-postgres-parameters-for-a-session-database-or-role); su neon_superuser no es el superusuario PostgreSQL.
 
-El procedimiento solo inicializa el rol existente NOLOGIN; nunca rota LOGIN, crea roles/concesiones, cambia tablas o aplica migraciones. Comprueba operador autorizado, PG17, destino, TLS, historial/esquema y permisos efectivos. Usa SCRAM con sal aleatoria, parámetros y DO fijo; protege consultas/parámetros/errores únicamente en su transacción antes de vincular el verificador y rechaza auditoría pgaudit activa. Si Neon no permite ALTER ROLE o esa protección, falla **antes de modificar la credencial** con `BOOTSTRAP_OPERATOR_CANNOT_ALTER_ROLE` o `BOOTSTRAP_LOG_PROTECTION_UNAVAILABLE`: no ampliar privilegios, utilizar el procedimiento privado psql de respaldo. No se afirma que Neon conceda esas capacidades por haber aprobado la prueba local. Si falla la prueba posterior con `credentialCommitted=true`, o se pierde la respuesta del commit (`null`, incierto), conservar la credencial ya custodiada y revisar conexión, sin rotarla. No hay artefactos o archivos de secretos; el GITHUB_TOKEN no configura secrets ni deshabilita workflows: la variable temporal restringe nuevas ejecuciones.
+### Corrección segura publicada
 
-### Procedimiento psql de respaldo
+Se conserva el mismo workflow [neon-catalog-bootstrap.yml](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/workflows/neon-catalog-bootstrap.yml), ahora **Neon catalog bootstrap safety inspection and verification**. La ruta remota utiliza BEGIN READ ONLY. Para NOLOGIN solo inspecciona controles de logging y se detiene: no ejecuta SET de logging, no vincula contraseñas/verificadores a SQL y no ejecuta ALTER ROLE. El helper SCRAM queda restringido a PostgreSQL aislado y rechaza destinos Neon antes de consultar. No se deshabilita auditoría ni se amplían privilegios.
 
-Estado confirmado: las 16 migraciones ya se aplicaron con éxito; ver [NEON_STAGING.md](NEON_STAGING.md). **No ejecutar de nuevo el workflow de migración para importar el catálogo.** La presencia del rol/secreto de catálogo debe comprobarse; no se presupone que falten. La guarda de permisos verifica también concesiones por columna, incluidas lecturas no autorizadas de User/AuditLog/historial, no solo permisos por tabla.
+El JSON y el Summary sanitizado incluyen `logging.originalFirstBlocker` y controles de lista fija con contexto, presencia, `canSet` y `alreadyProtected` (null si no observable). Nunca valores de configuración, host, URL o material de autenticación. Si todos los controles fueran accesibles, la inicialización sigue rechazada con `BOOTSTRAP_NEON_PASSWORD_INITIALIZATION_UNSUPPORTED`; no asumir que permiso para cambiar logging convierte SCRAM en un método soportado. `credentialWritesAttempted=0` y `credentialCommitted=false` son garantías de esta ruta, no una afirmación de éxito.
 
-Si Codex no dispone de sesión PostgreSQL o gestor de secretos autenticados, la intervención privada es la siguiente, desde el checkout confiable del propietario con psql instalado. HOST_DIRECTO_CONFIRMADO y ROL_OPERADOR_AUTORIZADO son marcadores; reemplazarlos únicamente en su terminal privada, sin incluir una contraseña en el comando:
+Para obtener evidencia remota exacta sin escrituras:
 
-```powershell
-psql -X -W --set=ON_ERROR_STOP=1 --dbname="host=HOST_DIRECTO_CONFIRMADO port=5432 dbname=atlas_staging user=ROL_OPERADOR_AUTORIZADO sslmode=verify-full"
-```
+1. Abrir el workflow existente y elegir **Run workflow**, no Re-run de la ejecución antigua.
+2. Seleccionar **main** actual y `confirm_target=cold-shadow-53495242/atlas_staging`; conservar la puerta temporal true para esta inspección.
+3. Revisar `logging.originalFirstBlocker` y `logging.controls`. Para un rol NOLOGIN se espera una finalización bloqueada, no INITIALIZED; compartir solo URL/JSON sanitizado. No ejecutar dry-run/apply todavía.
 
-`-W` solicita la contraseña sin eco. No usar `\conninfo`, transcripciones, capturas ni logs que expongan conexiones. Primero ejecutar solo lectura:
+### Límite y procedimiento administrativo oficial
 
-```sql
-BEGIN READ ONLY;
-SELECT current_database()='atlas_staging' AS target_ok,
-       current_setting('server_version_num')::int BETWEEN 170000 AND 179999 AS postgres17,
-       (SELECT ssl FROM pg_stat_ssl WHERE pid=pg_backend_pid()) AS tls_encrypted,
-       (SELECT count(*) FROM public._prisma_migrations
-        WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL) AS finished_migrations,
-       EXISTS(SELECT 1 FROM pg_roles WHERE rolname='atlas_staging_catalog') AS catalog_role_exists;
-SELECT rolcanlogin AS can_login, rolsuper AS superuser, rolcreatedb AS create_db,
-       rolcreaterole AS create_role, rolreplication AS replication, rolbypassrls AS bypass_rls,
-       has_schema_privilege(oid,'public','USAGE') AS schema_usage,
-       has_schema_privilege(oid,'public','CREATE') AS schema_create
-FROM pg_roles WHERE rolname='atlas_staging_catalog';
-COMMIT;
-```
+Neon documenta ALTER ROLE/ALTER USER con contraseña en texto plano por SQL para fijar un valor propio. Ese método puede dejar el secreto en historial del SQL Editor, registros de consultas/errores/auditoría o instrumentación de extensiones. **No se autoriza ni recomienda pegarlo en SQL Editor ni quitar protecciones para hacerlo pasar.** Tampoco se recomienda ahora psql \password: [PostgreSQL lo cifra antes de enviar ALTER ROLE](https://www.postgresql.org/docs/17/app-psql.html), lo que evita texto plano pero no garantiza ausencia del verificador en logs y no satisface el contrato documentado por Neon. La documentación anterior que lo presentaba como respaldo suficiente queda sustituida por este límite.
 
-Destino/PG/TLS deben ser true y finished_migrations=16. La verificación del certificado/hostname corresponde además a sslmode=verify-full del cliente. Si catalog_role_exists=true, **no ejecutar creación, no rotar una contraseña funcional ni ampliar privilegios**. Para el rol existente NOLOGIN confirmado aún sin inicializar, completar solo `\password atlas_staging_catalog` y `ALTER ROLE atlas_staging_catalog LOGIN;` desde la sesión privada con la credencial nueva ya custodiada. Si hay permisos excesivos, detener la importación para revisión. El bloque siguiente es únicamente para otro despliegue donde el rol realmente no exista:
+La API oficial inspeccionada (@neondatabase/api-client2.7.3) ofrece reset_password, no un método distinto documentado para suministrar la contraseña inicial de este rol sin password. No repetir el reset ya fallido: devuelve otra contraseña y puede desconectar conexiones del compute; no preservaría necesariamente el secreto ya configurado. No crear otra credencial GitHub/Neon para intentar eludirlo.
 
-```text
-\i docs/sql/catalog-import-grants.sql
-\password atlas_staging_catalog
-ALTER ROLE atlas_staging_catalog LOGIN;
-\q
-```
+**La escritura queda detenida.** El propietario debe solicitar a Neon un procedimiento privado soportado para inicializar este rol conservando OID, concesiones y la contraseña ya custodiada, con confirmación sobre redacción/retención de credenciales y verificadores. No enviar esa contraseña en tickets, chat o capturas. Si no existe esa garantía y se decide aceptar el riesgo del método SQL oficial, hace falta autorización separada y explícita antes de ejecutarlo. Esta ejecución no da por aprobada esa excepción.
 
-El script crea solo el rol nuevo NOLOGIN y sus concesiones mínimas; no toca tablas/migraciones o roles runtime/owner. `\password` solicita el secreto oculto, nunca lo copia al chat ni a un argumento. Para el rol actual ya creado, omitir `\i`; la inicialización incompleta NOLOGIN puede finalizarse por el bootstrap guardado o por ese prompt privado. Nunca rotar un rol LOGIN funcional. No hace falta un administrador humano de la aplicación para importar el catálogo.
-
-1. Un operador autorizado confirma en Neon el proyecto `cold-shadow-53495242`, base atlas_staging y endpoint **directo**. No cambiar contraseñas del runtime/migrador.
-2. Revisar [sql/catalog-import-grants.sql](sql/catalog-import-grants.sql) para crear una credencial **nueva e independiente** de catálogo, inicialmente NOLOGIN. Es configuración de privilegios, no una migración ni parte del workflow. Si el rol ya existe, el script se detiene: inspeccionar, no reemplazarlo o ampliar permisos a ciegas. Este entorno no lo aplicó en Neon.
-3. Desde una sesión privada de psql contra el destino confirmado, un operador puede ejecutar `\password atlas_staging_catalog` (entrada oculta), y después `ALTER ROLE atlas_staging_catalog LOGIN;`. No escribir la contraseña en SQL, comandos, logs, Git o chat. Usar el gestor de secretos para custodiar esa credencial nueva. No conceder membresía del propietario.
-4. En [Settings → Actions secrets](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/settings/secrets/actions), agregar **CATALOG_DATABASE_URL** con la conexión directa de ese rol, TLS verify-full. La credencial de migración existente no sirve para esta operación.
-5. En [Settings → Actions variables](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/settings/variables/actions), conservar/configurar **NEON_STAGING_EXPECTED_HOST** con el hostname directo confirmado en la consola del proyecto, sin protocolo/path. No se imprime en el workflow. Es la vinculación independiente del destino; un ID de proyecto declarado por sí solo no prueba qué endpoint se usa.
-
-No compartir el secreto por chat. Los secretos Render no se transfieren automáticamente a Actions. No hace falta añadir una clave de IA, contratar servicios o configurar Neon CLI.
+Una vez inicializado privadamente, repetir el mismo workflow permite comprobar LOGIN, conexión real del catálogo/TLS, 16 migraciones y mínimos privilegios, sin rotación: resultado ALREADY_CONFIGURED_NO_CHANGE. Solo entonces cerrar NEON_CATALOG_BOOTSTRAP_ENABLED y continuar con dry-run → revisión del plan → apply del mismo SHA. No migrar, seedear, recrear roles ni cambiar runtime/secretos para resolver este incidente.
 
 ## Ejecución manual autorizada
 

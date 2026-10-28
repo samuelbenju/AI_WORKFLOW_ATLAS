@@ -1,7 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
-import { bootstrapConfiguration, scramVerifier } from '../../scripts/catalog-bootstrap';
+import pg from 'pg';
+import { bootstrapConfiguration, scramVerifier, inspectCredentialLogging,
+  protectCredentialStatement, initializeNoLoginRole, rejectUnsupportedNeonInitialization } from '../../scripts/catalog-bootstrap';
 
 const commit = 'a'.repeat(40);
 function fixture(): NodeJS.ProcessEnv {
@@ -47,4 +49,51 @@ test('SCRAM preparation requires the privately stored 48-byte base64url credenti
   const first = scramVerifier(password), second = scramVerifier(password);
   assert.ok(first.startsWith('SCRAM-SHA-256$4096:') && first !== second && !first.includes(password));
   assert.throws(() => scramVerifier('short'), /^Error: BOOTSTRAP_STRONG_NEW_CREDENTIAL_REQUIRED$/);
+});
+
+test('read-only logging inspection identifies forbidden SET even when the current value is already protective', async () => {
+  const statements: string[] = [];
+  const client = { query: async (sql: string, params?: string[][]) => {
+    statements.push(sql);
+    if (!params) return { rows: [{ log_active: false, role_active: false }] };
+    return { rows: params[0]!.map(control => ({ control, present: !control.includes('.'),
+      context: 'superuser', already_protected: true, can_set: false })) };
+  } } as unknown as pg.Client;
+  const report = await inspectCredentialLogging(client);
+  assert.deepEqual(report.originalFirstBlocker, { control: 'log_statement', reason: 'SET_NOT_AUTHORIZED' });
+  assert.ok(report.controls[0]?.alreadyProtected && !report.controls[0]?.canSet);
+  await assert.rejects(protectCredentialStatement(client), /^Error: BOOTSTRAP_LOG_PROTECTION_UNAVAILABLE$/);
+  assert.ok(statements.every(sql => sql.trimStart().startsWith('SELECT') && !sql.includes('set_config')));
+});
+
+test('logging diagnostics expose no unrecognized names, setting values or server context', async () => {
+  const marker = randomBytes(24).toString('hex');
+  const client = { query: async (sql: string, params?: string[][]) => !params
+    ? { rows: [{ log_active: false, role_active: false, unexpected: marker }] }
+    : { rows: params[0]!.map(control => ({ control, present: true, context: marker,
+      already_protected: false, can_set: false, setting: marker })) },
+  } as unknown as pg.Client;
+  const report = await inspectCredentialLogging(client);
+  assert.ok(!JSON.stringify(report).includes(marker));
+  assert.ok(report.controls.every(control => control.context === 'other'));
+});
+
+test('even privileged, protective settings do not authorize an undocumented Neon password protocol', async () => {
+  const client = { query: async (sql: string, params?: string[][]) => !params
+    ? { rows: [{ log_active: false, role_active: false }] }
+    : { rows: params[0]!.map(control => ({ control, present: true, context: 'superuser',
+      already_protected: true, can_set: true })) },
+  } as unknown as pg.Client;
+  const report = await inspectCredentialLogging(client);
+  assert.ok(report.originalFirstBlocker === null);
+  assert.throws(() => rejectUnsupportedNeonInitialization(report), /^Error: BOOTSTRAP_NEON_PASSWORD_INITIALIZATION_UNSUPPORTED$/);
+});
+
+test('the local-only SCRAM helper refuses Neon before connecting or binding any credential', async () => {
+  const client = new pg.Client({ host: 'ep-fixture.us-east-1.aws.neon.tech' });
+  let queried = false;
+  client.query = (async () => { queried = true; throw Error('Unexpected query'); }) as typeof client.query;
+  await assert.rejects(initializeNoLoginRole(client, randomBytes(48).toString('base64url')),
+    /^Error: BOOTSTRAP_NEON_PASSWORD_INITIALIZATION_UNSUPPORTED$/);
+  assert.ok(!queried);
 });

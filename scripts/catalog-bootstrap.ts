@@ -17,7 +17,8 @@ const safeCodes = new Set(['BOOTSTRAP_GUARD_REJECTED','BOOTSTRAP_INDEPENDENT_CRE
   'BOOTSTRAP_HISTORY_OR_SCHEMA_REJECTED','BOOTSTRAP_TLS_REJECTED','BOOTSTRAP_IDENTITY_REJECTED',
   'BOOTSTRAP_DATABASE_BUSY','BOOTSTRAP_COMMIT_NOT_CONFIRMED','STAGING_CONFIGURATION_MISSING',
   'STAGING_CONFIGURATION_INVALID','STAGING_DESTINATION_REJECTED','STAGING_TLS_REJECTED',
-  'STAGING_IDENTITY_OR_PRIVILEGES_REJECTED','IMPORT_PRIVILEGES_REJECTED']);
+  'STAGING_IDENTITY_OR_PRIVILEGES_REJECTED','IMPORT_PRIVILEGES_REJECTED',
+  'BOOTSTRAP_NEON_PASSWORD_INITIALIZATION_UNSUPPORTED']);
 function requireThat(condition: unknown, code: string): asserts condition {
   if (!condition) throw Error(code);
 }
@@ -35,6 +36,7 @@ export function bootstrapConfiguration(env: NodeJS.ProcessEnv, commit: string) {
   return { importer, operator };
 }
 
+// Standalone PostgreSQL test helper, NOT a supported Neon provisioning method.
 // Only a verifier, never the plaintext password, reaches an ALTER ROLE command.
 // Callers must already have durably stored the password in their private vault
 // and CATALOG_DATABASE_URL. Nothing is generated and lost inside this workflow.
@@ -67,27 +69,74 @@ export async function inspectCatalogRole(client: pg.Client, role = catalogRole) 
   return { login: row.login === true };
 }
 
-// Session-local only. No change to the provider's global logging or audit policy.
-// If the operator lacks SET privileges, stop BEFORE binding any verifier.
-// Active pgaudit is a hard stop rather than silently disabling an audit policy.
+const loggingSettings = {
+  log_statement: 'none', log_duration: 'off', log_min_duration_statement: '-1',
+  log_min_duration_sample: '-1', log_transaction_sample_rate: '0',
+  log_parameter_max_length: '0', log_parameter_max_length_on_error: '0',
+  log_min_error_statement: 'panic', log_error_verbosity: 'terse',
+  'pg_stat_statements.track': 'none', 'auto_explain.log_min_duration': '-1',
+} as const;
+type LoggingControl = keyof typeof loggingSettings | 'pgaudit.log' | 'pgaudit.role';
+type LoggingBlocker = { control: LoggingControl; reason: 'AUDIT_ACTIVE' | 'PARAMETER_UNAVAILABLE' | 'SET_NOT_AUTHORIZED' };
+export type LoggingProtectionReport = {
+  auditActive: boolean;
+  originalFirstBlocker: LoggingBlocker | null;
+  controls: { control: keyof typeof loggingSettings; present: boolean; context: 'user' | 'superuser' | 'other' | 'unavailable';
+    canSet: boolean; alreadyProtected: boolean | null }[];
+};
+class LogProtectionError extends Error {
+  constructor(readonly blocker: LoggingBlocker) { super('BOOTSTRAP_LOG_PROTECTION_UNAVAILABLE'); }
+}
+
+// No SET, credentials, setting values or privileged role changes. pg_settings
+// comparisons happen on the server; only allowlisted names/contexts/booleans
+// return to the workflow. This also works inside BEGIN READ ONLY on Neon.
+export async function inspectCredentialLogging(client: pg.Client): Promise<LoggingProtectionReport> {
+  const { rows: [audit] } = await client.query(`SELECT
+    coalesce(nullif(current_setting('pgaudit.log',true),''),'none') <> 'none' AS log_active,
+    coalesce(current_setting('pgaudit.role',true),'') <> '' AS role_active`);
+  const names = Object.keys(loggingSettings) as (keyof typeof loggingSettings)[];
+  const { rows } = await client.query(`SELECT r.name AS control, s.name IS NOT NULL AS present,
+    s.context, s.setting=r.expected AS already_protected,
+    coalesce(s.context='user' OR (s.context='superuser' AND
+      has_parameter_privilege(current_user,s.name,'SET')),false) AS can_set
+    FROM unnest($1::text[],$2::text[]) WITH ORDINALITY AS r(name,expected,position)
+    LEFT JOIN pg_settings s ON s.name=r.name ORDER BY r.position`, [names, Object.values(loggingSettings)]);
+  const controls: LoggingProtectionReport['controls'] = names.map(control => {
+    const row = rows.find(row => row.control === control);
+    const context = !row?.present ? 'unavailable' : row.context === 'user' || row.context === 'superuser' ? row.context : 'other';
+    return { control, present: row?.present === true, context,
+      canSet: row?.can_set === true,
+      alreadyProtected: typeof row?.already_protected === 'boolean' ? row.already_protected : null };
+  });
+  let blocker: LoggingBlocker | null = audit.log_active ? { control: 'pgaudit.log', reason: 'AUDIT_ACTIVE' }
+    : audit.role_active ? { control: 'pgaudit.role', reason: 'AUDIT_ACTIVE' } : null;
+  for (const control of controls) {
+    const optional = control.control.includes('.');
+    if (!blocker && !control.present && !optional) blocker = { control: control.control, reason: 'PARAMETER_UNAVAILABLE' };
+    if (!blocker && control.present && !control.canSet) blocker = { control: control.control, reason: 'SET_NOT_AUTHORIZED' };
+  }
+  return { auditActive: audit.log_active === true || audit.role_active === true, originalFirstBlocker: blocker, controls };
+}
+
+// The PostgreSQL-only credential helper below is covered by isolated tests. It
+// is NOT a supported Neon initializer: Neon documents plaintext SQL passwords,
+// whereas this helper sends SCRAM. Never weaken the logging gate to enable it.
+export function rejectUnsupportedNeonInitialization(report: LoggingProtectionReport): never {
+  if (report.originalFirstBlocker) throw new LogProtectionError(report.originalFirstBlocker);
+  throw Error('BOOTSTRAP_NEON_PASSWORD_INITIALIZATION_UNSUPPORTED');
+}
+
+// Local PostgreSQL helper: session-local only, no global audit changes. Inspect
+// authorization before attempting SET so denial identifies the exact control.
 export async function protectCredentialStatement(client: pg.Client) {
-  const { rows: [audit] } = await client.query(`SELECT current_setting('pgaudit.log',true) AS log,
-    current_setting('pgaudit.role',true) AS role`);
-  requireThat((!audit.log || audit.log === 'none') && !audit.role, 'BOOTSTRAP_LOG_PROTECTION_UNAVAILABLE');
-  const settings: Record<string, string> = {
-    log_statement: 'none', log_duration: 'off', log_min_duration_statement: '-1',
-    log_min_duration_sample: '-1', log_transaction_sample_rate: '0',
-    log_parameter_max_length: '0', log_parameter_max_length_on_error: '0',
-    log_min_error_statement: 'panic', log_error_verbosity: 'terse',
-  };
+  const report = await inspectCredentialLogging(client);
+  if (report.originalFirstBlocker) throw new LogProtectionError(report.originalFirstBlocker);
   try {
-    for (const [name, value] of Object.entries(settings)) {
+    for (const [name, value] of Object.entries(loggingSettings)) {
+      if (!report.controls.find(control => control.control === name)?.present) continue;
       const { rows: [setting] } = await client.query('SELECT set_config($1,$2,true) AS value', [name, value]);
       requireThat(setting.value === value, 'BOOTSTRAP_LOG_PROTECTION_UNAVAILABLE');
-    }
-    for (const [name, value] of [['pg_stat_statements.track', 'none'], ['auto_explain.log_min_duration', '-1']]) {
-      const { rows: [setting] } = await client.query('SELECT current_setting($1,true) AS value', [name]);
-      if (setting.value !== null) await client.query('SELECT set_config($1,$2,true)', [name, value]);
     }
   } catch { throw Error('BOOTSTRAP_LOG_PROTECTION_UNAVAILABLE'); }
 }
@@ -97,6 +146,8 @@ export async function protectCredentialStatement(client: pg.Client) {
 // DO catches utility errors without exposing a dynamic SQL context. No function,
 // table, persistent GUC, new role, grant or membership is created.
 export async function initializeNoLoginRole(client: pg.Client, password: string, role = catalogRole) {
+  const host = (client as unknown as { host?: string }).host;
+  requireThat(['127.0.0.1','localhost','::1'].includes(host?.toLowerCase() ?? ''), 'BOOTSTRAP_NEON_PASSWORD_INITIALIZATION_UNSUPPORTED');
   requireThat((await inspectCatalogRole(client, role)).login === false, 'BOOTSTRAP_ALREADY_LOGIN_NO_ROTATION');
   const { rows: [operator] } = await client.query(`SELECT r.rolsuper OR (r.rolcreaterole AND EXISTS(
     SELECT 1 FROM pg_auth_members m JOIN pg_roles t ON t.oid=m.roleid
@@ -136,7 +187,8 @@ async function verifyHistory(client: pg.Client) {
 }
 
 async function main() {
-  let stage = 'configuration', client: pg.Client | undefined, committed = false, commitAttempted = false, initialized = false;
+  let stage = 'configuration', client: pg.Client | undefined, committed = false;
+  let logging: LoggingProtectionReport | undefined;
   try {
     const commit = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
     console.log(JSON.stringify({ stage: 'catalog.bootstrap.configuration presence',
@@ -156,19 +208,21 @@ async function main() {
     requireThat(identity.database === 'atlas_staging' && identity.role === cfg.operator.role
       && identity.session_role === cfg.operator.role && identity.version >= 170000 && identity.version < 180000
       && (!identity.project || identity.project === 'cold-shadow-53495242'), 'BOOTSTRAP_IDENTITY_REJECTED');
-    await client.query('BEGIN');
+    await client.query('BEGIN READ ONLY');
     const { rows: [lock] } = await client.query('SELECT pg_try_advisory_xact_lock(48183725) AS acquired');
     requireThat(lock.acquired, 'BOOTSTRAP_DATABASE_BUSY');
     stage = 'existing history and minimum privileges';
     await verifyHistory(client);
     const state = await inspectCatalogRole(client);
     if (!state.login) {
-      stage = 'one-time credential initialization';
-      await initializeNoLoginRole(client, cfg.importer.client.password);
-      initialized = true;
+      stage = 'credential safety inspection';
+      logging = await inspectCredentialLogging(client);
+      // The existing remote workflow never binds plaintext or SCRAM to SQL.
+      // Stop until the provider supplies a supported, private initialization
+      // procedure; CREATEROLE is not permission to change managed logging.
+      rejectUnsupportedNeonInitialization(logging);
     }
-    // Future executions with LOGIN already enabled NEVER change its password.
-    commitAttempted = true;
+    // A previously initialized LOGIN role can still be verified, never rotated.
     const completion = await client.query('COMMIT');
     requireThat(completion.command === 'COMMIT', 'BOOTSTRAP_COMMIT_NOT_CONFIRMED');
     committed = true;
@@ -182,16 +236,21 @@ async function main() {
       await verifyHistory(probe);
       await assertCatalogPrivileges(probe);
     } finally { await probe.end(); }
-    const report = { commit, status: initialized ? 'INITIALIZED' : 'ALREADY_CONFIGURED_NO_CHANGE',
+    const report = { commit, status: 'ALREADY_CONFIGURED_NO_CHANGE',
       credentialConfigured: true, tlsVerified: true, minimumPrivilegesVerified: true, migrationsVerified: 16,
-      migrationsApplied: 0, tableWrites: 0, roleCreated: false, credentialRotated: false,
+      migrationsApplied: 0, tableWrites: 0, roleCreated: false, credentialRotated: false, credentialWritesAttempted: 0,
       next: 'Disable NEON_CATALOG_BOOTSTRAP_ENABLED; then run the existing catalog dry-run.' };
     console.log(JSON.stringify(report));
     if (process.env.GITHUB_STEP_SUMMARY) await appendFile(process.env.GITHUB_STEP_SUMMARY, `## Catalog credential bootstrap\n\n\`\`\`json\n${JSON.stringify(report, null, 2)}\n\`\`\`\n`);
   } catch (error) {
     const codes = error instanceof Error && safeCodes.has(error.message) ? [error.message] : databaseDiagnostic(error, 'database.unknown').codes;
-    console.error(JSON.stringify({ stage: `catalog.bootstrap.${stage}`, codes,
-      credentialCommitted: initialized && commitAttempted ? (committed ? true : null) : false }));
+    const failure = { stage: `catalog.bootstrap.${stage}`, codes,
+      credentialCommitted: false, credentialWritesAttempted: 0,
+      ...(logging ? { initializationSupported: false, logging,
+        next: 'Provider-supported private initialization required. Do not change the configured secrets, logging privileges or existing role.' } : {}) };
+    console.error(JSON.stringify(failure));
+    if (process.env.GITHUB_STEP_SUMMARY) await appendFile(process.env.GITHUB_STEP_SUMMARY,
+      `## Neon bootstrap stopped (read-only)\n\n\`\`\`json\n${JSON.stringify(failure, null, 2)}\n\`\`\`\n`).catch(() => {});
     process.exitCode = 1;
   } finally {
     if (client) {
