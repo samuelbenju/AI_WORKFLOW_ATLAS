@@ -54,3 +54,5 @@ Conservar 96105c4 y sucesores. Entrega 1.5: abstracción local/Neon privado S3, 
 ## Etapas 14 y 15 autorizadas — 29-10-2026
 
 14: paquete n8n original privado, ejecución nativa aislada, evidencia y propuesta editorial sin publicar. 15: reutilizar storage/upload/auth/UI/download; corregir defectos demostrados y verificar paquete real en PostgreSQL temporal. Persistencia Neon/Render exige acceso privado, configuración y aprobación independientes. Dos commits locales lógicos; solicitar autorización antes del push. No desplegar/publicar/provisionar automáticamente. No etapa 16. Checkpoint 14: docs/PHASE14_REPORT.md. Producto y fuentes privadas fuera de Git público.
+
+Checkpoint15: implementación y validación local completadas; activación remota pendiente, no dictamen de producción. Reutilizados adaptadores/CLI/API/UI; paquete original probado sin incorporarlo a Git. docs/PHASE15_REPORT.md distingue S3 simulado, archivos/SQL/HTTP reales locales y Neon/Render sin acceso. Publicación editorial, recursos cloud, secretos y deploy requieren aprobación propia; no etapa16.

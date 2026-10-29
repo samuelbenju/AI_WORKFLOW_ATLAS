@@ -80,3 +80,12 @@ Actualización 26-10-2026 (America/Bogota): Fases 1–12 respaldadas y Render Fr
 - [ ] Validar la nueva versión y su SHA Live en Render; registrar pruebas de campo p75 cuando haya muestra suficiente. Lighthouse local no las reemplaza.
 - [ ] Contrastar condiciones vigentes de Render Free/rastreo y elegibilidad del hostname en AdSense; ayuda oficial inaccesible desde cloud.
 - [ ] Verificar en Google propiedad GSC, sitemap e inspección de URLs cuando las puertas de lanzamiento estén aprobadas. Aprobación publicitaria y CMP real requieren evidencia aparte.
+
+## Etapas14–15: paquete original y almacenamiento
+
+- [x] n8n real importado/ejecutado/re-exportado en aislamiento; fuentes, manifiesto y ZIP privado verificables (PHASE14_REPORT.md).
+- [x] Diez archivos reales cargados/descargados con hashes exactos en Atlas local; privacidad, RBAC, UI, reinicio/corrupción/retirada probados (PHASE15_REPORT.md).
+- [ ] Propietario descarga/conserva copia privada; aprobación de licencia/propuesta/editorial y prueba de cuentas reales, incluido header Tally.
+- [ ] Comprobar bucket privado existente, región/cuotas/scopes y configuración privada Neon/Render; crear recursos o credenciales solo tras aprobación específica.
+- [ ] Carga/estados editoriales remotos aprobados, SHA Live, descarga/reinicio/redeploy con persistencia y errores controlados, sin cambiar registros anteriores.
+- [ ] Aprobar push de los dos commits locales; CI propia posterior. Un push no autoriza deploy o publicación del paquete.

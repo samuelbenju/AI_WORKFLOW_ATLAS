@@ -1,6 +1,8 @@
 # Reporte entrega 1.5 — almacenamiento privado
 
-29-10-2026. Base conservada: `96105c4cad3684546026cc56b8ec07216c17b67f`. Estado: **adaptadores implementados y probados localmente; Neon Object Storage pendiente de configuración y verificación remota**. No se ha creado un bucket/credencial ni se ha cargado un blueprint real. No se modifica PostgreSQL remoto, esquema, migraciones, roles, catálogo o declaraciones comerciales.
+Estado posterior: [etapa 15](PHASE15_REPORT.md) registra la carga/descarga del primer paquete real en QA local y correcciones del adaptador. Bucket, credenciales y persistencia **remotos** siguen sin observarse. El siguiente checkpoint conserva evidencia histórica.
+
+29-10-2026. Base conservada: `96105c4cad3684546026cc56b8ec07216c17b67f`. Estado: **adaptadores implementados y probados localmente; Neon Object Storage pendiente de configuración y verificación remota**. En aquella entrega no se creó bucket/credencial ni se cargó un blueprint real. No se modifica PostgreSQL remoto, esquema, migraciones, roles, catálogo o declaraciones comerciales.
 
 Código entrega 1.5 publicado: `3be6e1210d524b7b0670cdd8c0a515e261f98c0a`. [CI 40925735689](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/40925735689) **SUCCESS observado**. Ese éxito comprueba CI/servicios efímeros, no almacenamiento Neon real. La interfaz posterior se documenta por separado.
 
@@ -49,3 +51,7 @@ La CLI no crea manifiestos, publica, migra o borra; exige OWNER/ADMIN, DRAFT sin
 Pruebas de S3 con transporte **simulado**, explícitamente etiquetadas: comandos/privacidad/no reemplazo/bytes/integridad/timeout/red/configuración. Pruebas locales reales de archivos/POSIX, carga auditada/RBAC y descarga HTTP sobre PostgreSQL efímero. Reiniciar un adaptador simulado o leer disco local tras recrear un objeto de clase **no demuestra persistencia en Neon**. Resultados finales en BUILD_LOG.md. No se provisiona infraestructura ni se publica un archivo descargable en GitHub.
 
 Cuotas, proveedor/región, ACL/policy compatibles, credenciales/scopes reales, persistencia tras Next/redeploy, backup externo y disponibilidad siguen siendo dependencias remotas. Render Free puede suspenderse; no pings ni tráfico artificial. Mantener límites de descarga y observar uso de egress (no se introduce contador por GET).
+
+## Correcciones de etapa 15
+
+GetBucketPolicy vacío/ambiguo rechaza; ausencia exige NoSuchBucketPolicy+HTTP404. Ausencia de objeto exige nombre+HTTP404; conflicto condicional exige PreconditionFailed+HTTP412 y bytes íntegros. Abortar timeout destruye un body bloqueado inmediatamente. Regresiones fallaron antes/pasan después con S3 simulado, sin relajar privacidad o afirmar prueba Neon. El runner existente admite --private-package absoluto para QA del paquete original sin incluirlo en Git. Reporte independiente enlazado arriba.

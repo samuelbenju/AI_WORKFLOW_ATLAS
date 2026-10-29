@@ -26,7 +26,9 @@ export type ObjectRequest = GetBucketAclCommand | GetBucketPolicyCommand | GetOb
 export type ObjectResult = { Owner?: { ID?: string }; Grants?: { Grantee?: { Type?: string; ID?: string }; Permission?: string }[];
   Policy?: string; ContentLength?: number; Body?: ReadBody };
 export type ObjectTransport = (command: ObjectRequest, signal: AbortSignal) => Promise<ObjectResult>;
-const notFound = (error: unknown) => error instanceof Error && ['NoSuchKey', 'NotFound'].includes(error.name);
+const providerError = (error: unknown, names: string[], status: number) => error instanceof Error && names.includes(error.name)
+  && (error as Error & { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode === status;
+const notFound = (error: unknown) => providerError(error, ['NoSuchKey', 'NotFound'], 404);
 const objectKey = (file: BlueprintFile) => `objects/sha256/${file.sha256}`;
 
 export class NeonObjectStorage implements BlueprintStorageProvider {
@@ -78,20 +80,24 @@ export class NeonObjectStorage implements BlueprintStorageProvider {
       || g.Grantee.ID !== acl.Owner!.ID || g.Permission !== 'FULL_CONTROL')) throw new BlueprintUnavailable();
     try {
       const result = await this.send(new GetBucketPolicyCommand({ Bucket: this.bucket }), signal);
-      if (result.Policy) {
-        const policy = JSON.parse(result.Policy);
-        // Restrictive policies only; credentials already provide branch-scoped access.
-        if (!Array.isArray(policy.Statement) || policy.Statement.some((s: { Effect?: string }) => s.Effect !== 'Deny')) throw new BlueprintUnavailable();
-      }
-    } catch (error) { if (!(error instanceof Error && error.name === 'NoSuchBucketPolicy')) throw error; }
+      // A successful but empty/ambiguous response is not proof of an absent policy.
+      if (!result.Policy) throw new BlueprintUnavailable();
+      const policy = JSON.parse(result.Policy);
+      // Restrictive policies only; credentials already provide branch-scoped access.
+      if (!policy || !Array.isArray(policy.Statement) || policy.Statement.some((s: { Effect?: string } | null) => s?.Effect !== 'Deny')) throw new BlueprintUnavailable();
+    } catch (error) { if (!providerError(error, ['NoSuchBucketPolicy'], 404)) throw error; }
+    if (signal.aborted) throw new BlueprintUnavailable();
   }
   private async object(file: BlueprintFile, signal: AbortSignal): Promise<Uint8Array | null> {
     let response: ObjectResult;
     try { response = await this.send(new GetObjectCommand({ Bucket: this.bucket, Key: objectKey(file) }), signal); }
     catch (error) { if (notFound(error)) return null; throw error; }
     const body = response.Body;
+    // An interrupted iteration may never reach finally without closing the transport body.
+    const close = () => { try { body?.destroy?.(); } catch { /* Never expose provider cleanup errors. */ } };
+    signal.addEventListener('abort', close, { once: true });
     try {
-      if (!body || response.ContentLength !== file.size) throw new BlueprintUnavailable();
+      if (signal.aborted || !body || response.ContentLength !== file.size) throw new BlueprintUnavailable();
       const chunks: Uint8Array[] = []; let size = 0;
       for await (const chunk of body) {
         size += chunk.byteLength;
@@ -101,7 +107,7 @@ export class NeonObjectStorage implements BlueprintStorageProvider {
       const bytes = Buffer.concat(chunks, size);
       validateBlueprintBytes(bytes, file);
       return bytes;
-    } finally { body?.destroy?.(); }
+    } finally { signal.removeEventListener('abort', close); close(); }
   }
   async read(file: BlueprintFile) {
     blueprintFileSchema.parse(file);
@@ -125,12 +131,13 @@ export class NeonObjectStorage implements BlueprintStorageProvider {
     return this.bounded(async signal => {
       await this.privateBucket(signal);
       if (await this.object(file, signal)) return 'existing' as const;
+      if (signal.aborted) throw new BlueprintUnavailable();
       try {
         await this.send(new PutObjectCommand({ Bucket: this.bucket, Key: objectKey(file), Body: bytes,
           ContentLength: bytes.length, ContentType: file.format === 'json' ? 'application/json' : 'text/markdown',
           CacheControl: 'private, no-store', IfNoneMatch: '*' }), signal);
       } catch (error) {
-        if (!(error instanceof Error && error.name === 'PreconditionFailed')) throw error;
+        if (!providerError(error, ['PreconditionFailed'], 412)) throw error;
         // A concurrent writer may have inserted the same content-addressed object.
         if (!await this.object(file, signal)) throw new BlueprintUnavailable();
         return 'existing' as const;

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, writeFile, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { Readable } from 'node:stream';
 import { GetBucketAclCommand, GetBucketPolicyCommand, GetObjectCommand, HeadObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { LocalPrivateStorage } from '../../src/server/blueprints/local-storage';
 import { NeonObjectStorage, neonStorageConfiguration, type ObjectTransport } from '../../src/server/blueprints/neon-storage';
@@ -59,18 +60,18 @@ function mockStorage() {
     if (command instanceof GetBucketAclCommand) return { Owner: { ID: 'fixture-owner' }, Grants: [
       { Grantee: isPublic ? { Type: 'Group', ID: '*' } : { Type: 'CanonicalUser', ID: 'fixture-owner' }, Permission: 'FULL_CONTROL' }] };
     if (command instanceof GetBucketPolicyCommand) {
-      if (!policy) throw Object.assign(Error(), { name: 'NoSuchBucketPolicy' });
+      if (!policy) throw Object.assign(Error(), { name: 'NoSuchBucketPolicy', $metadata: { httpStatusCode: 404 } });
       return { Policy: policy };
     }
     const key = command.input.Key!;
     assert.match(key, /^objects\/sha256\/[a-f0-9]{64}$/);
     if (command instanceof PutObjectCommand) {
       assert.equal(command.input.IfNoneMatch, '*'); assert.equal(command.input.CacheControl, 'private, no-store');
-      if (objects.has(key)) throw Object.assign(Error(), { name: 'PreconditionFailed' });
+      if (objects.has(key)) throw Object.assign(Error(), { name: 'PreconditionFailed', $metadata: { httpStatusCode: 412 } });
       objects.set(key, new Uint8Array(command.input.Body as Uint8Array)); return {};
     }
     const stored = objects.get(key);
-    if (!stored) throw Object.assign(Error(), { name: command instanceof HeadObjectCommand ? 'NotFound' : 'NoSuchKey' });
+    if (!stored) throw Object.assign(Error(), { name: command instanceof HeadObjectCommand ? 'NotFound' : 'NoSuchKey', $metadata: { httpStatusCode: 404 } });
     return { ContentLength: stored.length + Number(incorrectLength),
       ...(command instanceof GetObjectCommand ? { Body: (async function* () { yield stored; })() } : {}) };
   };
@@ -106,6 +107,57 @@ test('SIMULATED S3: hard timeout, no retries and no fallback', async () => {
   let calls = 0, signal: AbortSignal | undefined;
   const provider = new NeonObjectStorage(env, async (_, s) => { calls++; signal = s; return new Promise(() => {}); }, 15);
   await assert.rejects(provider.read(file)); assert.equal(calls, 1); assert.equal(signal?.aborted, true);
+});
+
+test('SIMULATED S3: ambiguous or unreadable bucket policy never authorizes reads or writes', async () => {
+  for (const policyResult of [{}, { Policy: '' }, { Policy: 'null' }, { Policy: '{bad' },
+    Object.assign(Error(), { name: 'NoSuchBucketPolicy', $metadata: { httpStatusCode: 403 } }),
+    Object.assign(Error(), { name: 'NoSuchBucketPolicy' }),
+    Object.assign(Error(), { name: 'NotImplemented', $metadata: { httpStatusCode: 501 } })]) {
+    const mock = mockStorage(); mock.objects.set(`objects/sha256/${file.sha256}`, bytes);
+    const provider = new NeonObjectStorage(env, async (command, signal) => {
+      if (!(command instanceof GetBucketPolicyCommand)) return mock.transport(command, signal);
+      if (policyResult instanceof Error) throw policyResult;
+      return policyResult;
+    });
+    await assert.rejects(provider.read(file)); await assert.rejects(provider.exists(file)); await assert.rejects(provider.put(file, bytes));
+    assert.equal(mock.calls.filter(c => ['GetObjectCommand', 'PutObjectCommand', 'HeadObjectCommand'].includes(c)).length, 0);
+  }
+});
+
+test('SIMULATED S3: missing-object error names without matching HTTP status do not permit upload', async () => {
+  for (const status of [undefined, 403, 500]) {
+    const mock = mockStorage();
+    const provider = new NeonObjectStorage(env, async (command, signal) => {
+      if (command instanceof HeadObjectCommand || command instanceof GetObjectCommand)
+        throw Object.assign(Error(), { name: command instanceof HeadObjectCommand ? 'NotFound' : 'NoSuchKey', $metadata: { httpStatusCode: status } });
+      return mock.transport(command, signal);
+    });
+    await assert.rejects(provider.exists(file)); await assert.rejects(provider.put(file, bytes));
+    assert.equal(mock.calls.filter(c => c === 'PutObjectCommand').length, 0);
+  }
+});
+
+test('SIMULATED S3: a stalled object body is destroyed on timeout, not only when iteration completes', async () => {
+  const mock = mockStorage(), body = new Readable({ read() { /* Deliberately never finishes. */ } });
+  const provider = new NeonObjectStorage(env, async (command, signal) => command instanceof GetObjectCommand
+    ? { ContentLength: file.size, Body: body } : mock.transport(command, signal), 20);
+  try { await assert.rejects(provider.read(file)); assert.equal(body.destroyed, true); }
+  finally { body.destroy(); }
+});
+
+test('SIMULATED S3: conditional-write conflict requires HTTP 412 and exact readback; no second PUT', async () => {
+  for (const [status, corrupt, succeeds] of [[412, false, true], [412, true, false], [403, false, false]] as const) {
+    const mock = mockStorage(); let puts = 0;
+    const provider = new NeonObjectStorage(env, async (command, signal) => {
+      if (!(command instanceof PutObjectCommand)) return mock.transport(command, signal);
+      puts++; mock.objects.set(`objects/sha256/${file.sha256}`, corrupt ? new Uint8Array(file.size) : bytes);
+      throw Object.assign(Error(), { name: 'PreconditionFailed', $metadata: { httpStatusCode: status } });
+    });
+    if (succeeds) assert.equal(await provider.put(file, bytes), 'existing');
+    else await assert.rejects(provider.put(file, bytes));
+    assert.equal(puts, 1);
+  }
 });
 
 test('storage credential patterns are rejected before writing (synthetic strings only)', () => {
