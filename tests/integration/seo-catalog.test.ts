@@ -35,22 +35,22 @@ test('published catalog SEO and discovery, isolated PostgreSQL and browser only'
         const page=await context.newPage();
         await page.route('**/*',route=>new URL(route.request().url()).origin===origin?route.continue():route.abort());
         await t.test('pagination has distinct titles and self-canonicals; empty and filtered views stay noindex',async()=>{
-          await page.goto(origin+'/');assert.equal((await page.title()).split('AI Workflow Atlas').length-1,1);
+          await page.goto(origin+'/');await expect(page).toHaveTitle('AI Workflow Atlas — Discover What AI Can Actually Do');
           await page.goto(origin+'/tools?page=2');
-          await expect(page).toHaveTitle(/Page 2/);assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'),canonical+'/tools?page=2');
-          await page.goto(origin+'/tools?page=999');assert.match(await page.locator('meta[name="robots"]').getAttribute('content')??'',/noindex/);
+          await expect(page).toHaveTitle(/Page 2/);await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href',canonical+'/tools?page=2');
+          await page.goto(origin+'/tools?page=999');await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content',/noindex/);
           for(const path of ['/tools?q=Whisper','/tools?tag=human-review','/tools/whisper?page=2','/about?page=2']){
             const response=await page.goto(origin+path);assert.match(response?.headers()['x-robots-tag']??'',/noindex/);
           }
-          await page.goto(origin+'/blog');assert.match(await page.locator('meta[name="robots"]').getAttribute('content')??'',/noindex/);
-          await page.goto(origin+'/categories/scientific-research');assert.match(await page.locator('meta[name="robots"]').getAttribute('content')??'',/noindex/);
+          await page.goto(origin+'/blog');await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content',/noindex/);
+          await page.goto(origin+'/categories/scientific-research');await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content',/noindex/);
         });
         await t.test('real categories, cards and breadcrumbs work on mobile and desktop without ads',async()=>{
           for(const width of [390,1440]){
             await page.setViewportSize({width,height:900});await page.goto(origin+'/categories');
             await page.getByRole('link',{name:/Transcription & meetings/}).waitFor();assert.equal(await page.locator('h1').count(),1);
             await page.getByRole('link',{name:/Transcription & meetings/}).click();await page.waitForURL(/\/categories\/transcription$/);
-            assert.equal(await page.locator('h1').innerText(),'Transcription & meetings');
+            await expect(page.locator('h1')).toHaveText('Transcription & meetings');
             await page.getByTestId('tool-card').first().waitFor();assert.ok(await page.getByTestId('tool-card').count()>0);
             assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
             assert.equal((await new AxeBuilder({page}).analyze()).violations.length,0);
