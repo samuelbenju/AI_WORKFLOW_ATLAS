@@ -244,3 +244,5 @@ La importación remota inicial ya fue confirmada por el propietario y Actions SU
 - ADR-081: AnalyticsEvent tiene CHECK cerrado que excluye descargas. Preparar un descriptor consentido y deduplicable reutilizando AnalyticsSession, sin escrituras o métrica de sustitución. Activar persistencia requiere autorización posterior y controles de límites/retención/retirada. No cambiar las 16 migraciones o activar tracking por preparar el hook.
 
 No UI o blueprint real publicados. Store privado efímero de tests no acredita persistencia en Render; provisioning y almacenamiento durable deben aprobarse por separado. Contrato: docs/BLUEPRINT_ENGINE.md.
+
+Contrato de asociación para la siguiente interfaz: publicBlueprintsForGuide(slug, after?) devuelve hasta 20 versiones explícitas y cursor público, con revalidación por descriptor. No aliases latest, claves privadas o listados de drafts. Sin componentes ni ruta HTTP de listado en esta entrega.

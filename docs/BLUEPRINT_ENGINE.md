@@ -53,7 +53,7 @@ Una versión queda sellada al verificarse: no se sobrescribe su contenido, inclu
 - GET privado para EDITOR/ADMIN/OWNER: release completa o null. Nunca bytes de archivos.
 - POST con sesión existente, Origin correcto y `x-csrf-token`. Body estricto ≤64 KB: `action`, `expectedRevision` y, según operación, `manifest`, `evidence` o `confirmation`. Tipos exactos en `blueprintActionSchema`. No nuevo sistema de login o aprobación automática.
 
-La fase de UI puede usar `publicBlueprintDescriptor(id, version)`: devuelve null si no está autorizado; de lo contrario ID/versión/status, fecha de publicación, método/fecha de verificación, título, descripción, slug, atribución y archivos con nombre/formato/plataforma/tamaño/hash/href. No devuelve actor, evidencia privada o ruta de disco. No se añade todavía una ruta de listado público, selector de versiones o componentes.
+La fase de UI puede usar `publicBlueprintsForGuide(slug, after?)` desde el servidor para descubrir asociaciones sin conocer claves privadas. Devuelve `{items,next}` con hasta 20 versiones explícitas, cursor público `{blueprint,version}` y orden estable por identidad, no una selección automática de versión más reciente. Omite drafts, aprobaciones caducadas y guías no públicas; revalida cada descriptor. `publicBlueprintDescriptor(id, version)` devuelve null si no está autorizado; de lo contrario ID/versión/status, fecha de publicación, método/fecha de verificación, título, descripción, slug, atribución y archivos con nombre/formato/plataforma/tamaño/hash/href. No devuelve actor, evidencia privada o ruta de disco. No se añade todavía una ruta HTTP de listado público, selector de versiones o componentes.
 
 `GET /api/blueprints/{id}/{version}/{fileId}`:
 

@@ -96,4 +96,27 @@ export async function publicBlueprintDescriptor(id: string, version: string, db:
       href: `/api/blueprints/${id}/${version}/${f.id}` })) };
 }
 
+// Guide pages know their slug, not private registry keys. Explicit versions,
+// bounded discovery, no automatic "latest" alias or exposure of draft metadata.
+export async function publicBlueprintsForGuide(slug: string, after?: { blueprint: string; version: string }, db: PrismaClient = getDatabase()) {
+  z.string().max(150).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).parse(slug);
+  const cursor = after ? blueprintKey.parse(after) : null;
+  if (!await db.useCase.findFirst({ where: publicGuide(slug), select: { id: true } })) return { items: [], next: null };
+  const rows = await db.siteSetting.findMany({
+    where: { key: { startsWith: 'blueprint.release.', ...(cursor ? { gt: settingKey(cursor.blueprint, cursor.version) } : {}) },
+      AND: [{ value: { path: ['manifest', 'useCaseSlug'], equals: slug } }, { value: { path: ['status'], equals: 'PUBLISHED' } }] },
+    select: { key: true }, orderBy: { key: 'asc' }, take: 21,
+  });
+  const identity = (key: string) => {
+    const [blueprint, version] = key.slice('blueprint.release.'.length).split('@');
+    return blueprintKey.parse({ blueprint, version });
+  };
+  const items = [];
+  for (const row of rows.slice(0, 20)) {
+    const key = identity(row.key), item = await publicBlueprintDescriptor(key.blueprint, key.version, db);
+    if (item && item.useCaseSlug === slug) items.push(item);
+  }
+  return { items, next: rows.length > 20 ? identity(rows[19]!.key) : null };
+}
+
 export const downloadParams = blueprintKey.extend({ file: z.string().max(40).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/) });

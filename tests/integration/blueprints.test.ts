@@ -6,7 +6,7 @@ import path from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { createDatabaseClient } from '../../src/server/db/client';
 import { initializeOwner, authenticate, csrfForToken } from '../../src/server/auth/service';
-import { changeBlueprint, readRelease, publicBlueprintDescriptor } from '../../src/server/blueprints/service';
+import { changeBlueprint, readRelease, publicBlueprintDescriptor, publicBlueprintsForGuide } from '../../src/server/blueprints/service';
 import { blueprintDownload } from '../../src/server/blueprints/download';
 import { contentDigest, readBlueprintFile, validateBlueprintBytes } from '../../src/server/blueprints/storage';
 import { prepareDownloadMeasurement } from '../../src/server/blueprints/measurement';
@@ -46,6 +46,7 @@ test('blueprint lifecycle, private storage and production HTTP on isolated Postg
     await t.test('only editors/admins draft and verify; publication requires an administrator and explicit confirmation', async () => {
       await assert.rejects(action(viewer.id, { action: 'save', expectedRevision: 0, manifest }), { status: 403 });
       const draft = await action(editor.id, { action: 'save', expectedRevision: 0, manifest }); assert.equal(draft.status, 'DRAFT');
+      assert.equal((await publicBlueprintsForGuide(slug, undefined, db)).items.length, 0);
       assert.equal((await blueprintDownload(request, params, db)).status, 404);
       await assert.rejects(action(owner.id, { action: 'publish', expectedRevision: 1, confirmation: 'PUBLISH' }), { status: 409 });
       const verified = await action(editor.id, { action: 'verify', expectedRevision: 1, evidence }); assert.equal(verified.status, 'VERIFIED');
@@ -64,6 +65,20 @@ test('blueprint lifecycle, private storage and production HTTP on isolated Postg
       assert.deepEqual(Buffer.from(await markdown.arrayBuffer()), notes); assert.match(markdown.headers.get('content-type')!, /text\/markdown/);
       const metadata = await publicBlueprintDescriptor(manifest.id, '1.0.0', db);
       assert.ok(metadata?.attribution); assert.ok(!JSON.stringify(metadata).includes(store) && !JSON.stringify(metadata).includes(owner.id));
+      const byGuide = await publicBlueprintsForGuide(slug, undefined, db);
+      assert.equal(byGuide.items.length, 1); assert.equal(byGuide.items[0]?.id, manifest.id); assert.equal(byGuide.next, null);
+      assert.equal((await publicBlueprintsForGuide('absent-guide', undefined, db)).items.length, 0);
+      // Real service transitions on disposable fixtures, never production data.
+      for (let i = 1; i <= 21; i++) {
+        const version = `9.0.${i}`;
+        await action(owner.id, { action: 'save', expectedRevision: 0, manifest: { ...manifest, version } }, version);
+        await action(owner.id, { action: 'verify', expectedRevision: 1, evidence }, version);
+        await action(owner.id, { action: 'publish', expectedRevision: 2, confirmation: 'PUBLISH' }, version);
+      }
+      const page = await publicBlueprintsForGuide(slug, undefined, db); assert.equal(page.items.length, 20); assert.ok(page.next);
+      const last = await publicBlueprintsForGuide(slug, page.next, db); assert.equal(last.items.length, 2); assert.equal(last.next, null);
+      assert.equal(new Set([...page.items, ...last.items].map(item => item.version)).size, 22);
+      await db.siteSetting.deleteMany({ where: { key: { startsWith: `blueprint.release.${manifest.id}@9.` } } });
       assert.equal((await blueprintDownload(request, { ...params, file: '../private' }, db)).status, 404);
       assert.equal((await blueprintDownload(new Request(request.url + '?path=.env'), params, db)).status, 404);
       assert.equal((await blueprintDownload(new Request(request.url, { headers: { Range: 'bytes=0-1' } }), params, db)).status, 416);
@@ -71,6 +86,7 @@ test('blueprint lifecycle, private storage and production HTTP on isolated Postg
     await t.test('guide visibility and edits invalidate a release without changing the guide from this service', async () => {
       for (const data of [{ status: 'DRAFT' as const }, { status: 'PUBLISHED' as const, isDemo: true }, { isDemo: false, publishedAt: new Date(Date.now() + 86400000) }]) {
         await db.useCase.update({ where: { id: guide.id }, data }); assert.equal((await blueprintDownload(request, params, db)).status, 404);
+        assert.equal((await publicBlueprintsForGuide(slug, undefined, db)).items.length, 0);
       }
       await db.useCase.update({ where: { id: guide.id }, data: { status: 'PUBLISHED', isDemo: false, publishedAt: new Date(), updatedAt: guide.updatedAt } });
       assert.equal((await blueprintDownload(request, params, db)).status, 200);
@@ -101,6 +117,7 @@ test('blueprint lifecycle, private storage and production HTTP on isolated Postg
       await action(owner.id, { action: 'verify', expectedRevision: 4, evidence }); await action(owner.id, { action: 'publish', expectedRevision: 5, confirmation: 'PUBLISH' });
       await action(owner.id, { action: 'save', expectedRevision: 0, manifest: { ...manifest, version: '2.0.0' } }, '2.0.0');
       assert.equal((await readRelease(manifest.id, '2.0.0', db))?.status, 'DRAFT');
+      assert.deepEqual((await publicBlueprintsForGuide(slug, undefined, db)).items.map(item => item.version), ['1.0.0']);
     });
     await t.test('measurement requires enabled consent, live session and same-origin guide; no download SQL writes', async () => {
       process.env.ANALYTICS_ORIGIN = 'http://localhost:3000'; process.env.ANALYTICS_ENABLED = 'true';
