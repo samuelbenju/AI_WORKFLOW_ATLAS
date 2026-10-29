@@ -51,9 +51,12 @@ test('published catalog SEO and discovery, isolated PostgreSQL and browser only'
             await page.getByRole('link',{name:/Transcription & meetings/}).waitFor();assert.equal(await page.locator('h1').count(),1);
             await page.getByRole('link',{name:/Transcription & meetings/}).click();await page.waitForURL(/\/categories\/transcription$/);
             await expect(page.locator('h1')).toHaveText('Transcription & meetings');
+            // Metadata can stream after the route's H1/cards on client navigation.
+            await expect(page).toHaveTitle(/Transcription & meetings: AI tools and workflows/);
             await page.getByTestId('tool-card').first().waitFor();assert.ok(await page.getByTestId('tool-card').count()>0);
             assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-            assert.equal((await new AxeBuilder({page}).analyze()).violations.length,0);
+            const accessibility=await new AxeBuilder({page}).analyze();
+            assert.deepEqual(accessibility.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})),[]);
             const schemas=await page.locator('script[type="application/ld+json"]').allTextContents();
             const parsed=schemas.map(text=>JSON.parse(text));assert.ok(parsed.some(schema=>schema['@type']==='BreadcrumbList'));
             assert.ok(parsed.some(schema=>schema['@type']==='CollectionPage'));

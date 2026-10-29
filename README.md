@@ -10,11 +10,11 @@ Administración e inicialización segura en [docs/ADMIN.md](docs/ADMIN.md). Blog
 
 Patrocinios, formulario y CRM en [docs/COMMERCIAL.md](docs/COMMERCIAL.md).
 
-## Blueprint Engine — backend, entrega 1
+## Blueprint Engine — entregas 1, 1.5 y 2
 
 Entrega 1.5: adaptadores privados local/Neon S3 y CLI de carga autorizada; configuración y reporte en [docs/BLUEPRINT_STORAGE.md](docs/BLUEPRINT_STORAGE.md). Sin provisioning, archivos publicados o persistencia remota verificada. No usar el disco efímero de Render como almacenamiento durable.
 
-Manifiestos versionados privados, revisión/publicación autorizadas y descarga gratuita con integridad SHA-256. Sin UI o blueprint real publicado; archivos fuera de Git/public y sin cambios en Prisma/16 migraciones. La medición se prepara sin activar persistencia o tracking. Contrato de API, almacenamiento y límites de Render: [docs/BLUEPRINT_ENGINE.md](docs/BLUEPRINT_ENGINE.md). Prueba aislada, después de build: `node scripts/test-blueprints.mjs`; rechaza hosts remotos y nunca usa Neon staging.
+Manifiestos versionados privados, revisión/publicación autorizadas y descarga gratuita con integridad SHA-256. La interfaz de guías permite elegir versiones/archivos y consultar diagramas conceptuales/requisitos: [docs/BLUEPRINT_INTERFACE.md](docs/BLUEPRINT_INTERFACE.md). Ningún blueprint real publicado automáticamente; archivos fuera de Git/public y sin cambios en Prisma/16 migraciones. La medición se prepara sin activar persistencia o tracking. Contrato de API y límites: [docs/BLUEPRINT_ENGINE.md](docs/BLUEPRINT_ENGINE.md). Prueba aislada, después de build: `node scripts/test-blueprints.mjs`; rechaza hosts remotos y nunca usa Neon staging. Requiere Chromium como las E2E existentes.
 
 ## Requisitos y versiones
 

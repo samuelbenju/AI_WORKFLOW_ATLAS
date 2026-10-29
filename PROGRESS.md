@@ -1,6 +1,12 @@
 # Progreso real
 
-## Estado vigente — Blueprint Engine, entrega 1.5, 29-10-2026
+## Estado vigente — Blueprint Engine, entrega 2, 29-10-2026
+
+Sobre entrega 1.5 publicada como **3be6e1210d524b7b0670cdd8c0a515e261f98c0a**, [CI 40925735689 SUCCESS](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/40925735689) observado. Interfaz inglesa en guías sobre discovery/descriptores/API existentes: elección explícita de versiones, archivos individuales, descarga real sin registro/email, estados de error, atribución/licencia/revisión, diagrama conceptual accesible, requisitos/setup y contacto solo público/revisado. Presentation opcional sin defaults preserva digests anteriores y no permite modificar versiones selladas. La página comprueba solo metadatos de almacenamiento; no descarga bytes o escribe tracking al visitarla. Registro/almacenamiento fallidos se muestran como errores, sin fallback estático.
+
+Pruebas aisladas de backend/archivos/PostgreSQL/HTTP/browser, 84 unitarias y check/build; regresión 122 E2E y cinco SEO aprobadas. Evidencia final y correcciones en BUILD_LOG.md; CI del commit de interfaz se comprueba por separado al publicar, sin atribuirle la CI de 1.5. No se declara activación remota: **bucket/credenciales/persistencia de Neon Object Storage y versión Live de Render no verificadas desde este cloud**. No archivos reales publicados, 101 registros/migraciones/roles/secretos/SEO/legal/AdSense intactos, sin servicios activados. Contrato/reporte: docs/BLUEPRINT_INTERFACE.md. Configuración privada mínima y reporte 1.5: docs/BLUEPRINT_STORAGE.md.
+
+## Estado previo — Blueprint Engine, entrega 1.5, 29-10-2026
 
 Base main local/remota 96105c4, árbol inicialmente limpio. Proveedores local privado y Neon S3 implementados, sin fallback; objetos por SHA, lectura acotada/TLS/ACL/policy/integridad, carga CLI autenticada/auditada que no publica. Manifiestos originales, registro SQL, autorizaciones, descargas y 16 migraciones conservados. SDK AWS exacto y lockfile incluidos. Check 82/82, build y 17 pruebas de storage/backend/DB/HTTP aprobados localmente. S3 es simulado en tests; **no hay acceso Console/credenciales/bucket Neon y no se declara persistencia remota**. Documentación oficial confirma Free 5 GB de objetos y egress compartido 5 GB/mes; región declarada compatible, disponibilidad de proyecto aún pendiente. Reporte/checkpoint y pasos privados: docs/BLUEPRINT_STORAGE.md. Entrega 2 autorizada por nueva solicitud, independiente del provisioning remoto.
 

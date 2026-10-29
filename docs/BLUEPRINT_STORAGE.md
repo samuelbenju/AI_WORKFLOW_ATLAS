@@ -2,6 +2,8 @@
 
 29-10-2026. Base conservada: `96105c4cad3684546026cc56b8ec07216c17b67f`. Estado: **adaptadores implementados y probados localmente; Neon Object Storage pendiente de configuración y verificación remota**. No se ha creado un bucket/credencial ni se ha cargado un blueprint real. No se modifica PostgreSQL remoto, esquema, migraciones, roles, catálogo o declaraciones comerciales.
 
+Código entrega 1.5 publicado: `3be6e1210d524b7b0670cdd8c0a515e261f98c0a`. [CI 40925735689](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/40925735689) **SUCCESS observado**. Ese éxito comprueba CI/servicios efímeros, no almacenamiento Neon real. La interfaz posterior se documenta por separado.
+
 ## Proveedor y límites comprobados en documentación oficial
 
 Fuentes consultadas el 29-10-2026: [overview](https://neon.com/docs/storage/overview), [planes](https://neon.com/docs/introduction/plans#object-storage), [autenticación](https://neon.com/docs/storage/authentication), [buckets](https://neon.com/docs/storage/buckets), [compatibilidad S3](https://neon.com/docs/storage/s3-compatibility). Se consultaron sus fuentes oficiales en [neondatabase/website](https://github.com/neondatabase/website/tree/main/content/docs/storage), porque el acceso directo a neon.com está bloqueado en este cloud.

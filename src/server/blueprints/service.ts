@@ -4,7 +4,7 @@ import type { PrismaClient } from '@/generated/prisma/client';
 import { getDatabase } from '@/server/db/client';
 import { authorizeActor } from '@/server/admin/content';
 import { AccessError } from '@/server/auth/policy';
-import { blueprintActionSchema, blueprintKey, releaseSchema, type BlueprintManifest, type BlueprintRelease } from '@/lib/blueprints';
+import { blueprintActionSchema, blueprintKey, releaseSchema, type BlueprintManifest, type BlueprintRelease, type PublicBlueprintDescriptor } from '@/lib/blueprints';
 import { contentDigest, readBlueprintFile, validateBlueprintBytes } from './storage';
 
 const settingKey = (id: string, version: string) => `blueprint.release.${id}@${version}`;
@@ -85,13 +85,14 @@ export async function authorizedBlueprint(id: string, version: string, db: Prism
 }
 
 // Contract for the next UI phase: no filesystem paths, reviewer identity or draft data.
-export async function publicBlueprintDescriptor(id: string, version: string, db: PrismaClient = getDatabase()) {
+export async function publicBlueprintDescriptor(id: string, version: string, db: PrismaClient = getDatabase()): Promise<PublicBlueprintDescriptor | null> {
   const release = await authorizedBlueprint(id, version, db);
   if (!release) return null;
   const m = release.manifest;
   return { id, version, status: 'PUBLISHED' as const, publishedAt: release.publication!.at,
     verification: { method: release.verification!.evidence.method, at: release.verification!.at },
     useCaseSlug: m.useCaseSlug, title: m.title, description: m.description, attribution: m.attribution,
+    ...(m.presentation ? { presentation: m.presentation } : {}),
     files: m.files.map(f => ({ id: f.id, filename: f.filename, format: f.format, platform: f.platform, size: f.size, sha256: f.sha256,
       href: `/api/blueprints/${id}/${version}/${f.id}` })) };
 }

@@ -7,6 +7,7 @@ import { GetBucketAclCommand, GetBucketPolicyCommand, GetObjectCommand, HeadObje
 import { LocalPrivateStorage } from '../../src/server/blueprints/local-storage';
 import { NeonObjectStorage, neonStorageConfiguration, type ObjectTransport } from '../../src/server/blueprints/neon-storage';
 import { blueprintStorage, contentDigest, validateBlueprintBytes } from '../../src/server/blueprints/storage';
+import { blueprintAvailability } from '../../src/server/blueprints/availability';
 
 const bytes = Buffer.from('{"fixture":"Storage test only, not an automation"}');
 const file = { id: 'fixture', filename: 'fixture.json', format: 'json' as const, platform: 'generic' as const, size: bytes.length, sha256: contentDigest(bytes) };
@@ -25,6 +26,7 @@ test('local private provider: atomic no-replace uploads, restart, traversal, mis
     assert.deepEqual(Buffer.from(await restarted.read(file)), bytes);
     assert.deepEqual(await restarted.inspect(file), { exists: true, integrity: 'verified' });
     assert.equal(await restarted.exists(file), true);
+    assert.deepEqual(await blueprintAvailability([{ ...file, href: '/api/blueprints/fixture/1.0.0/export' } as typeof file], restarted), { fixture: 'available' });
     await assert.rejects(provider.read({ ...file, sha256: '../../.env' }));
     const target = path.join(root, 'objects', file.sha256 + '.json');
     const corrupt = Buffer.from(bytes); corrupt[0] = 0;
@@ -112,4 +114,15 @@ test('storage credential patterns are rejected before writing (synthetic strings
     const unsafe = Buffer.from(JSON.stringify(value));
     assert.throws(() => validateBlueprintBytes(unsafe, { ...file, size: unsafe.length, sha256: contentDigest(unsafe) }));
   }
+});
+
+test('page availability uses only metadata and preserves missing/unavailable errors, bounded at four concurrent checks', async () => {
+  let concurrent = 0, peak = 0;
+  const provider = new LocalPrivateStorage();
+  provider.read = async () => { throw Error('Opening a guide must not read file bytes'); };
+  provider.exists = async f => { concurrent++; peak = Math.max(peak, concurrent); await new Promise(r => setTimeout(r, 2)); concurrent--;
+    if (f.id === 'missing') return false; if (f.id === 'broken') throw Error(); return true; };
+  const files = ['available', 'missing', 'broken', 'four', 'five'].map(id => ({ ...file, id }));
+  assert.deepEqual(await blueprintAvailability(files, provider), { available: 'available', missing: 'missing', broken: 'unavailable', four: 'available', five: 'available' });
+  assert.equal(peak, 4);
 });

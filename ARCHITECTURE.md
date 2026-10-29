@@ -250,3 +250,7 @@ Contrato de asociación para la siguiente interfaz: publicBlueprintsForGuide(slu
 ## Blueprint Engine — entrega 1.5
 
 - ADR-082: proveedor de almacenamiento privado separado del registry SQL: local POSIX compatible y Neon S3, selección explícita de servidor y sin fallback. S3 por SHA, TLS, credenciales independientes de PostgreSQL, ACL/policy de lectura comprobadas, operaciones limitadas en tiempo/tamaño, no borrados/presignado. CLI reutiliza login privado y exige OWNER/ADMIN/DRAFT no sellado; almacenar no publica. Lectura final revalida bytes y autorización. Head solo presencia, inspect integridad. No se depende de versionado/lifecycle S3 no aplicados por Neon. Configuración y pruebas reales remotas pendientes, límites/cuotas y evidencia oficial en docs/BLUEPRINT_STORAGE.md.
+
+## Blueprint Engine — entrega 2
+
+- ADR-083: discovery/selección sobre servicios existentes, sección Server Component en Suspense y pequeño botón cliente; cero bytes de objeto en page view, disponibilidad metadata acotada/errores visibles. Varias versiones requieren elección; queries de selector/cursor permanecen noindex y canonical de guía. Presentation opcional sin defaults preserva digests sellados; arquitectura conceptual/atribución/requisitos se revisan en la misma transición. React escapa textos y el frontend no publica. Descarga exacta mediante API/Blob sin correo/cookies, con estados honestos; no nuevo tracking, lead backend, integración o contacto inventado. Contrato y pruebas en docs/BLUEPRINT_INTERFACE.md.
