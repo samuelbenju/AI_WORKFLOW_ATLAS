@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 try {
   const target = new URL(process.env.TEST_DATABASE_URL ?? '');
   if (!['127.0.0.1', 'localhost'].includes(target.hostname) || !target.pathname.endsWith('_test')) throw Error();
-  for (const files of [['tests/integration/blueprint-storage.test.ts', 'tests/integration/blueprints.test.ts'], ['tests/integration/blueprint-ui.test.ts']]) {
+  for (const files of [['tests/integration/blueprint-package.test.ts', 'tests/integration/blueprint-storage.test.ts', 'tests/integration/blueprints.test.ts'], ['tests/integration/blueprint-ui.test.ts']]) {
   await withTestDatabase(url => new Promise((resolve, reject) => {
     const child = spawn(process.execPath, ['--conditions=react-server', '--import', 'tsx', '--test', ...files], {
       stdio: 'inherit', env: { ...process.env, DATABASE_URL: url, TEST_DATABASE_URL: url, ADSENSE_ENABLED: 'false', GA4_MODE: 'disabled', ANALYTICS_ENABLED: 'false' },

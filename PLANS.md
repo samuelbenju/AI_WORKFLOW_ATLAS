@@ -50,3 +50,7 @@ Implementar solo backend: manifiesto validado/versionado, guía existente por sl
 ## Blueprint Engine — entregas 1.5 y 2 autorizadas posteriormente
 
 Conservar 96105c4 y sucesores. Entrega 1.5: abstracción local/Neon privado S3, carga CLI segura y pruebas; no provisionar si no hay acceso/autorización, no declarar durabilidad remota por simulaciones. Checkpoint en docs/BLUEPRINT_STORAGE.md. Entrega 2: UI pública inglesa sobre servicios existentes, versiones explícitas, descarga real, diagrama sustentado/conceptual etiquetado, requisitos/atribución/errores y contacto público solo configurado. Extensión compatible del manifiesto, sin editar releases selladas. Pruebas aisladas, sin blueprint ficticio en Neon, sin migraciones/roles/catálogo/SEO/AdSense/servicios nuevos. Dos entregas/commits independientes; no primer workflow comercial o publicación automática de archivos.
+
+## Etapas 14 y 15 autorizadas — 29-10-2026
+
+14: paquete n8n original privado, ejecución nativa aislada, evidencia y propuesta editorial sin publicar. 15: reutilizar storage/upload/auth/UI/download; corregir defectos demostrados y verificar paquete real en PostgreSQL temporal. Persistencia Neon/Render exige acceso privado, configuración y aprobación independientes. Dos commits locales lógicos; solicitar autorización antes del push. No desplegar/publicar/provisionar automáticamente. No etapa 16. Checkpoint 14: docs/PHASE14_REPORT.md. Producto y fuentes privadas fuera de Git público.

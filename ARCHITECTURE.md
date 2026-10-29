@@ -254,3 +254,7 @@ Contrato de asociación para la siguiente interfaz: publicBlueprintsForGuide(slu
 ## Blueprint Engine — entrega 2
 
 - ADR-083: discovery/selección sobre servicios existentes, sección Server Component en Suspense y pequeño botón cliente; cero bytes de objeto en page view, disponibilidad metadata acotada/errores visibles. Varias versiones requieren elección; queries de selector/cursor permanecen noindex y canonical de guía. Presentation opcional sin defaults preserva digests sellados; arquitectura conceptual/atribución/requisitos se revisan en la misma transición. React escapa textos y el frontend no publica. Descarga exacta mediante API/Blob sin correo/cookies, con estados honestos; no nuevo tracking, lead backend, integración o contacto inventado. Contrato y pruebas en docs/BLUEPRINT_INTERFACE.md.
+
+## Paquetes de automatización privados — etapa 14
+
+El paquete original y su generador permanecen en .private/, fuera del repositorio público. Nuevo checker genérico de solo lectura valida directorio POSIX privado, inventario completo, contrato schemaVersion=1, límites/digests/secretos y exportación n8n inactiva con identidades/conexiones coherentes, sin bindings privados. No sustituye el importador n8n ni atribuye ejecución real a una comprobación estructural. Reutiliza las validaciones de Blueprint Engine, no añade DB, API, proveedor o publicación. Checker y fixtures mínimos genéricos sí pueden versionarse; producto y evidencia detallada se entregan privadamente. Reporte docs/PHASE14_REPORT.md.
