@@ -11,17 +11,18 @@ const source = z.url().max(1000).refine(value => {
     return u.protocol === 'https:' && !u.username && !u.password && !u.search && !u.hash;
   } catch { return false; }
 });
+export const blueprintFileSchema = z.object({
+    id: blueprintId, filename: z.string().max(100).regex(/^[a-z0-9][a-z0-9_-]*\.(?:json|md)$/),
+    format: z.enum(['json', 'markdown']), platform: z.enum(['generic', 'n8n', 'make']),
+    size: z.number().int().min(1).max(1024 * 1024), sha256,
+  }).strict().refine(f => f.filename.endsWith(f.format === 'json' ? '.json' : '.md'))
+    .refine(f => f.format === 'json' || f.platform === 'generic');
 export const blueprintManifestSchema = z.object({
   schemaVersion: z.literal(1), id: blueprintId, version: blueprintVersion,
   useCaseSlug: z.string().max(150).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   title: text(200), description: text(1000),
   attribution: z.object({ credit: text(200), license: text(160), sources: z.array(source).min(1).max(10) }).strict(),
-  files: z.array(z.object({
-    id: blueprintId, filename: z.string().max(100).regex(/^[a-z0-9][a-z0-9_-]*\.(?:json|md)$/),
-    format: z.enum(['json', 'markdown']), platform: z.enum(['generic', 'n8n', 'make']),
-    size: z.number().int().min(1).max(1024 * 1024), sha256,
-  }).strict().refine(f => f.filename.endsWith(f.format === 'json' ? '.json' : '.md'))
-    .refine(f => f.format === 'json' || f.platform === 'generic')).min(1).max(10),
+  files: z.array(blueprintFileSchema).min(1).max(10),
 }).strict().refine(m => new Set(m.files.map(f => f.id)).size === m.files.length)
   .refine(m => new Set(m.files.map(f => f.filename)).size === m.files.length)
   .refine(m => m.files.reduce((n, f) => n + f.size, 0) <= 4 * 1024 * 1024);

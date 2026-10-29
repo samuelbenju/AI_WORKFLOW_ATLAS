@@ -246,3 +246,7 @@ La importación remota inicial ya fue confirmada por el propietario y Actions SU
 No UI o blueprint real publicados. Store privado efímero de tests no acredita persistencia en Render; provisioning y almacenamiento durable deben aprobarse por separado. Contrato: docs/BLUEPRINT_ENGINE.md.
 
 Contrato de asociación para la siguiente interfaz: publicBlueprintsForGuide(slug, after?) devuelve hasta 20 versiones explícitas y cursor público, con revalidación por descriptor. No aliases latest, claves privadas o listados de drafts. Sin componentes ni ruta HTTP de listado en esta entrega.
+
+## Blueprint Engine — entrega 1.5
+
+- ADR-082: proveedor de almacenamiento privado separado del registry SQL: local POSIX compatible y Neon S3, selección explícita de servidor y sin fallback. S3 por SHA, TLS, credenciales independientes de PostgreSQL, ACL/policy de lectura comprobadas, operaciones limitadas en tiempo/tamaño, no borrados/presignado. CLI reutiliza login privado y exige OWNER/ADMIN/DRAFT no sellado; almacenar no publica. Lectura final revalida bytes y autorización. Head solo presencia, inspect integridad. No se depende de versionado/lifecycle S3 no aplicados por Neon. Configuración y pruebas reales remotas pendientes, límites/cuotas y evidencia oficial en docs/BLUEPRINT_STORAGE.md.

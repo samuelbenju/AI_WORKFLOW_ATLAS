@@ -1,5 +1,7 @@
 # Blueprint Engine — entrega 1, backend
 
+Actualización entrega 1.5: el contrato de almacenamiento se amplía con proveedores local/Neon S3 y carga privada auditada, sin cambiar registros o autorizaciones. Esta sección conserva el diseño original como antecedente; configuración/estado vigente y límites de persistencia en [BLUEPRINT_STORAGE.md](BLUEPRINT_STORAGE.md). Neon Object Storage real aún no configurado/verificado desde este entorno.
+
 29-10-2026. Base aprobada y conservada: main `9a824bf833712a3ab44fac12e7c7289f96d9aa07`, CI 40733346624. Sin componentes de interfaz, workflows completos, servicios externos o escrituras en Neon. Las pruebas crean exclusivamente DB, usuarios y archivos desechables locales.
 
 ## Arquitectura y persistencia

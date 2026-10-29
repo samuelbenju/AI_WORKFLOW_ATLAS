@@ -46,3 +46,7 @@ Catálogo ya importado y sitio operativo confirmado por el propietario; no volve
 ## Blueprint Engine — entrega 1 autorizada, 29-10-2026
 
 Implementar solo backend: manifiesto validado/versionado, guía existente por slug, estados/autorización, archivos privados, descarga verificada, preparación consentida de medición y pruebas. Conservar commit SEO aprobado 9a824bf y cualquier avance posterior. Sin esquema/migraciones/Neon, UI, workflow completo, monetización o automatizaciones nuevas. Interfaz y primer blueprint real son entregas futuras independientes, sin inicio automático. Contrato y riesgos en docs/BLUEPRINT_ENGINE.md.
+
+## Blueprint Engine — entregas 1.5 y 2 autorizadas posteriormente
+
+Conservar 96105c4 y sucesores. Entrega 1.5: abstracción local/Neon privado S3, carga CLI segura y pruebas; no provisionar si no hay acceso/autorización, no declarar durabilidad remota por simulaciones. Checkpoint en docs/BLUEPRINT_STORAGE.md. Entrega 2: UI pública inglesa sobre servicios existentes, versiones explícitas, descarga real, diagrama sustentado/conceptual etiquetado, requisitos/atribución/errores y contacto público solo configurado. Extensión compatible del manifiesto, sin editar releases selladas. Pruebas aisladas, sin blueprint ficticio en Neon, sin migraciones/roles/catálogo/SEO/AdSense/servicios nuevos. Dos entregas/commits independientes; no primer workflow comercial o publicación automática de archivos.

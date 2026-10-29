@@ -1,6 +1,10 @@
 # Progreso real
 
-## Estado vigente — Blueprint Engine, entrega 1, 29-10-2026
+## Estado vigente — Blueprint Engine, entrega 1.5, 29-10-2026
+
+Base main local/remota 96105c4, árbol inicialmente limpio. Proveedores local privado y Neon S3 implementados, sin fallback; objetos por SHA, lectura acotada/TLS/ACL/policy/integridad, carga CLI autenticada/auditada que no publica. Manifiestos originales, registro SQL, autorizaciones, descargas y 16 migraciones conservados. SDK AWS exacto y lockfile incluidos. Check 82/82, build y 17 pruebas de storage/backend/DB/HTTP aprobados localmente. S3 es simulado en tests; **no hay acceso Console/credenciales/bucket Neon y no se declara persistencia remota**. Documentación oficial confirma Free 5 GB de objetos y egress compartido 5 GB/mes; región declarada compatible, disponibilidad de proyecto aún pendiente. Reporte/checkpoint y pasos privados: docs/BLUEPRINT_STORAGE.md. Entrega 2 autorizada por nueva solicitud, independiente del provisioning remoto.
+
+## Estado previo — Blueprint Engine, entrega 1, 29-10-2026
 
 HEAD inicial y main remota **9a824bf833712a3ab44fac12e7c7289f96d9aa07**, checkout limpio y CI aprobada 40733346624. Se conservan íntegramente SEO, categorías, catálogo importado y servicios existentes. Se implementa exclusivamente backend de releases descargables: manifiesto Zod, asociación por slug/updatedAt de UseCase, estados DRAFT/VERIFIED/PUBLISHED, roles/sesión/CSRF, versiones selladas, revisiones optimistas y auditoría atómica usando SiteSetting/AuditLog existentes. Consulta de servidor paginada por slug devuelve solo descriptores autorizados, sin claves privadas. GET público entrega solo archivos aprobados y guía publicada/no demo/no futura/vigente, validando almacenamiento privado, tamaño/formato/SHA-256 y credenciales antes de responder.
 

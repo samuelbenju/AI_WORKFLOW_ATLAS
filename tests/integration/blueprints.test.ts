@@ -10,6 +10,7 @@ import { changeBlueprint, readRelease, publicBlueprintDescriptor, publicBlueprin
 import { blueprintDownload } from '../../src/server/blueprints/download';
 import { contentDigest, readBlueprintFile, validateBlueprintBytes } from '../../src/server/blueprints/storage';
 import { prepareDownloadMeasurement } from '../../src/server/blueprints/measurement';
+import { uploadBlueprintFile } from '../../src/server/blueprints/upload';
 import { cookieNames, setConsent } from '../../src/server/growth/tracking';
 import { consentVersion } from '../../src/lib/growth';
 import { withAppServer } from '../e2e/test-server';
@@ -42,6 +43,22 @@ test('blueprint lifecycle, private storage and production HTTP on isolated Postg
     const action = (userId: string, input: unknown, version = '1.0.0') => changeBlueprint(userId, manifest.id, version, input, db);
     const params = { blueprint: manifest.id, version: '1.0.0', file: 'export' };
     const request = new Request('http://localhost:3000/api/blueprints/isolated-fixture/1.0.0/export');
+
+    await t.test('private operator upload validates explicit local source, role, draft, integrity and audit; does not publish', async () => {
+      const draftManifest = { ...manifest, version: '0.0.1' };
+      await action(owner.id, { action: 'save', expectedRevision: 0, manifest: draftManifest }, '0.0.1');
+      const source = path.join(store, 'source-fixture.json'); await writeFile(source, bytes, { mode: 0o600 });
+      const key = { blueprint: manifest.id, version: '0.0.1' };
+      await assert.rejects(uploadBlueprintFile(viewer.id, key, 'export', source, db), { status: 403 });
+      await assert.rejects(uploadBlueprintFile(editor.id, key, 'export', source, db), { status: 403 });
+      await assert.rejects(uploadBlueprintFile(owner.id, key, 'export', 'relative.json', db));
+      assert.deepEqual(await uploadBlueprintFile(owner.id, key, 'export', source, db), { stored: true, integrity: 'verified', outcome: 'existing' });
+      assert.equal((await readRelease(manifest.id, '0.0.1', db))?.status, 'DRAFT');
+      assert.equal(await db.auditLog.count({ where: { action: 'blueprint.object.store' } }), 1);
+      await writeFile(source, Buffer.alloc(bytes.length)); await assert.rejects(uploadBlueprintFile(owner.id, key, 'export', source, db));
+      await db.siteSetting.delete({ where: { key: `blueprint.release.${manifest.id}@0.0.1` } });
+      await db.auditLog.deleteMany({ where: { entityType: 'BlueprintRelease', entityId: `${manifest.id}@0.0.1` } });
+    });
 
     await t.test('only editors/admins draft and verify; publication requires an administrator and explicit confirmation', async () => {
       await assert.rejects(action(viewer.id, { action: 'save', expectedRevision: 0, manifest }), { status: 403 });
@@ -152,6 +169,14 @@ test('blueprint lifecycle, private storage and production HTTP on isolated Postg
       assert.equal((await blueprintDownload(request, params, blocked)).status, 429);
       unblock(); assert.ok((await Promise.all(pending)).every(response => response.status === 404));
       assert.equal((await blueprintDownload(request, params, blocked)).status, 404);
+    });
+    await t.test('local-only persistence survives two separate Next processes; this is not Neon persistence evidence', async () => {
+      for (let start = 0; start < 2; start++) {
+        await withAppServer({ DATABASE_URL: url, BLUEPRINT_STORAGE_ROOT: store, BLUEPRINT_STORAGE_BACKEND: 'local', ADSENSE_ENABLED: 'false' }, async origin => {
+          const response = await fetch(`${origin}/api/blueprints/${manifest.id}/1.0.0/export`);
+          assert.equal(response.status, 200); assert.deepEqual(Buffer.from(await response.arrayBuffer()), bytes);
+        });
+      }
     });
     await t.test('real HTTP enforces anonymous access, CSRF, roles, attachment and absence of static/private URLs', async () => {
       const session = await authenticate('fixture@blueprint.invalid', password, undefined, db);
