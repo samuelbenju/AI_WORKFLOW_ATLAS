@@ -42,3 +42,7 @@ Sobre Fase 13 existente: completar activación remota cuando se disponga de acce
 ## Operación SEO y crecimiento autorizada — 28-10-2026
 
 Catálogo ya importado y sitio operativo confirmado por el propietario; no volver a ejecutarlos. Mejorar SEO técnico, descubrimiento por categorías, enlaces internos, rendimiento y medición administrativa sobre los módulos existentes. Proponer ocho semanas editoriales con fuentes y revisión humana. Conservar los seis DRAFT, los 101 registros, esquema/16 migraciones y barreras legales/Google. No activar seguimiento/anuncios/indexación/servicios ni comprar infraestructura. Validar localmente y diferenciar CI, prueba efímera y comportamiento real de Render.
+
+## Blueprint Engine — entrega 1 autorizada, 29-10-2026
+
+Implementar solo backend: manifiesto validado/versionado, guía existente por slug, estados/autorización, archivos privados, descarga verificada, preparación consentida de medición y pruebas. Conservar commit SEO aprobado 9a824bf y cualquier avance posterior. Sin esquema/migraciones/Neon, UI, workflow completo, monetización o automatizaciones nuevas. Interfaz y primer blueprint real son entregas futuras independientes, sin inicio automático. Contrato y riesgos en docs/BLUEPRINT_ENGINE.md.

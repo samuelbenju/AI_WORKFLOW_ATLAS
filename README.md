@@ -10,6 +10,10 @@ Administración e inicialización segura en [docs/ADMIN.md](docs/ADMIN.md). Blog
 
 Patrocinios, formulario y CRM en [docs/COMMERCIAL.md](docs/COMMERCIAL.md).
 
+## Blueprint Engine — backend, entrega 1
+
+Manifiestos versionados privados, revisión/publicación autorizadas y descarga gratuita con integridad SHA-256. Sin UI o blueprint real publicado; archivos fuera de Git/public y sin cambios en Prisma/16 migraciones. La medición se prepara sin activar persistencia o tracking. Contrato de API, almacenamiento y límites de Render: [docs/BLUEPRINT_ENGINE.md](docs/BLUEPRINT_ENGINE.md). Prueba aislada, después de build: `node scripts/test-blueprints.mjs`; rechaza hosts remotos y nunca usa Neon staging.
+
 ## Requisitos y versiones
 
 Node.js 24 (fijado en `.nvmrc` a `24.19.0`) y npm 11 (`11.9.0`). Next.js 16.4.3, React 19.3.1, TypeScript estricto 5.9.3, Tailwind 4.3.3 y Prisma 7.10.1. Dependencias exactas en `package.json` y `package-lock.json`. PostgreSQL 17 local mediante Docker o servidor externo por `DATABASE_URL`; no se requieren cuentas comerciales. El build prepara rutas dinámicas; servir el catálogo requiere DB y migraciones actuales.

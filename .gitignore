@@ -25,5 +25,6 @@ secrets/
 credentials.json
 service-account*.json
 service_account*.json
+.private/
 src/generated/prisma/
 *.dump

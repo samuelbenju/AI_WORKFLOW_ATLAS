@@ -236,3 +236,11 @@ No publicación/indexación/anuncios/servicios activados desde este entorno. No 
 - ADR-078: reportes Google existentes ampliados sin nuevo tracking o esquema. GA4 manual por seis dimensiones, host exacto, métricas acotadas y rutas privadas/queries excluidas; snapshots persistentes y límites de Measurement Protocol explícitos. AdSense añade tallies, RPM/CTR/cobertura oficiales, conserva decimales/rangos/moneda y nunca se suma a ingresos confirmados. Tokens solo servidor, autorización/Origin/CSRF/auditoría intactas; ningún proveedor llamado por abrir el panel.
 
 La importación remota inicial ya fue confirmada por el propietario y Actions SUCCESS; no se repite. La nueva UI/metadata se valida en PostgreSQL/browser efímeros y Lighthouse local; CI, SHA Live, métricas de campo y aprobación Google/legales se distinguen. Estrategia y ocho semanas en docs/SEO_STRATEGY.md, operación en docs/PUBLIC_LAUNCH.md.
+
+## Blueprint Engine — entrega 1, 29-10-2026
+
+- ADR-079: releases con manifiesto tipado en SiteSetting por id@SemVer y transiciones auditadas en AuditLog dentro de una transacción/bloqueo por versión. Sin modificar Prisma o migraciones. Asociación lógica por slug de UseCase, fijando updatedAt al revisar; autorización del servidor, publicación solo OWNER/ADMIN y versiones inmutables después de verificar. Ningún dato importado se edita.
+- ADR-080: objetos privados por SHA-256 fuera de public/Git/build, POSIX 0700/0600, sin upload/fetch/ejecución. GET attachment valida bytes, formato, rutas y guía vigente; revalida aprobación antes de responder, sin caché/rangos, errores sanitizados y admisión acotada por proceso. Atribución separada del JSON oficial; no se afirma compatibilidad práctica sin ensayo.
+- ADR-081: AnalyticsEvent tiene CHECK cerrado que excluye descargas. Preparar un descriptor consentido y deduplicable reutilizando AnalyticsSession, sin escrituras o métrica de sustitución. Activar persistencia requiere autorización posterior y controles de límites/retención/retirada. No cambiar las 16 migraciones o activar tracking por preparar el hook.
+
+No UI o blueprint real publicados. Store privado efímero de tests no acredita persistencia en Render; provisioning y almacenamiento durable deben aprobarse por separado. Contrato: docs/BLUEPRINT_ENGINE.md.

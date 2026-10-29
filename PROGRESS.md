@@ -1,6 +1,17 @@
 # Progreso real
 
-## Estado vigente — operación SEO y crecimiento, 28-10-2026
+## Estado vigente — Blueprint Engine, entrega 1, 29-10-2026
+
+HEAD inicial y main remota **9a824bf833712a3ab44fac12e7c7289f96d9aa07**, checkout limpio y CI aprobada 40733346624. Se conservan íntegramente SEO, categorías, catálogo importado y servicios existentes. Se implementa exclusivamente backend de releases descargables: manifiesto Zod, asociación por slug/updatedAt de UseCase, estados DRAFT/VERIFIED/PUBLISHED, roles/sesión/CSRF, versiones selladas, revisiones optimistas y auditoría atómica usando SiteSetting/AuditLog existentes. GET público entrega solo archivos aprobados y guía publicada/no demo/no futura/vigente, validando almacenamiento privado, tamaño/formato/SHA-256 y credenciales antes de responder.
+
+Sin UI, primer workflow real, nuevos modelos/SQL/dependencias o proveedores. No se modifican las 16 migraciones, esquema, lockfile, biblioteca importada, roles, contraseñas o barreras legales/SEO/AdSense. No escrituras en Neon ni blueprints/archivos publicados en GitHub. Solo código y tests, con fixtures privados desechables.
+
+Validación local: check con 82 unitarias y build aprobados; nueve comprobaciones nuevas sobre PostgreSQL/HTTP reales y archivos privados temporales, más 122 E2E de regresión aprobados. Estado de Git/CI de la entrega se comprueba después de publicar el código, sin atribuirle el éxito de la base. Detalles y resultados en BUILD_LOG.md.
+
+Medición consentida preparada mediante sesión existente y clave de deduplicación, **sin persistencia**: el CHECK SQL actual no permite eventos de descarga y no se altera ni se reutilizan métricas incorrectas. El store es privado, externo a Git/public; su persistencia real en Render Free no está verificada. No hay archivos reales registrados, provisioning remoto o descargas remotas declaradas operativas. Contrato, límites y siguiente interfaz en docs/BLUEPRINT_ENGINE.md. No continuar a frontend o automatizaciones sin nueva solicitud.
+
+
+## Estado previo conservado — operación SEO y crecimiento, 28-10-2026
 
 Base main local/remota **5af53c41e29dbe387a9675e6da749379819623b9**, limpia al iniciar. [Apply 40714352948](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/40714352948) SUCCESS observado en GitHub sobre esa base. El propietario confirma 101 registros creados (65 herramientas, 30 guías, seis DRAFT), taxonomía 20/24 y web pública mostrando contenido. El bootstrap y los bloqueos de configuración anteriores son **históricos**, no actividades pendientes. No reimportar ni repetir las 16 migraciones; esquema, biblioteca, lockfile y credenciales se conservan.
 
