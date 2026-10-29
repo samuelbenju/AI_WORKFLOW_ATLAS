@@ -95,9 +95,13 @@ test('blueprint lifecycle, private storage and production HTTP on isolated Postg
       await db.useCase.update({ where: { id: guide.id }, data: { updatedAt: guide.updatedAt } });
     });
     await t.test('integrity, credentials, native shape, permissions, symbolic and hard links fail closed', async () => {
-      for (const body of ['{"password":"actual-secret-value"}', '{"token":"fixture-not-real"}', '{"headers":[{"name":"X-Api-Key","value":"fixture-not-real"}]}', '{"url":"https://u:p@example.org"}', '{"credentials":{"reference":"private"}}', '{"nodes":[]}']) {
-        const bad = Buffer.from(body); assert.throws(() => validateBlueprintBytes(bad, { ...file, size: bad.length, sha256: contentDigest(bad) }));
+      for (const body of ['{"password":"actual-secret-value"}', '{"token":"fixture-not-real"}', '{"headers":[{"name":"X-Api-Key","value":"fixture-not-real"}]}', '{"url":"https://u:p@example.org"}', '{"credentials":{"reference":"private"}}']) {
+        const bad = Buffer.from(body); assert.throws(() => validateBlueprintBytes(bad, { ...file, platform: 'generic', size: bad.length, sha256: contentDigest(bad) }));
       }
+      const escaped = Buffer.from(String.raw`{"url":"https:\u002f\u002fuser:fixture-not-real@example.org"}`);
+      assert.throws(() => validateBlueprintBytes(escaped, { ...file, platform: 'generic', size: escaped.length, sha256: contentDigest(escaped) }));
+      const native = Buffer.from('{"nodes":[]}');
+      assert.throws(() => validateBlueprintBytes(native, { ...file, size: native.length, sha256: contentDigest(native) }));
       const html = Buffer.from('<SCRIPT>alert(1)</SCRIPT>');
       assert.throws(() => validateBlueprintBytes(html, { ...noteFile, size: html.length, sha256: contentDigest(html) }));
       await writeFile(objectPath, Buffer.alloc(bytes.length, 32));
@@ -159,6 +163,15 @@ test('blueprint lifecycle, private storage and production HTTP on isolated Postg
         assert.equal((await fetch(admin)).status, 401);
         const auth = { cookie: `atlas_session=${session.token}` };
         assert.equal((await fetch(admin, { method: 'POST', headers: { ...auth, 'Content-Type': 'application/json' }, body: '{}' })).status, 403);
+        const privateHeaders = { ...auth, origin, 'x-csrf-token': csrfForToken(session.token), 'Content-Type': 'application/json' };
+        const encoded = Buffer.from(String.raw`{"url":"https:\u002f\u002fuser:fixture-not-real@example.org"}`);
+        const unsafeFile = { ...file, platform: 'generic' as const, size: encoded.length, sha256: contentDigest(encoded) };
+        await writeFile(path.join(store, 'objects', unsafeFile.sha256 + '.json'), encoded, { mode: 0o600 });
+        const unsafeAdmin = admin.replace('/1.0.0', '/3.0.0');
+        assert.equal((await fetch(unsafeAdmin, { method: 'POST', headers: privateHeaders, body: JSON.stringify({ action: 'save', expectedRevision: 0, manifest: { ...manifest, version: '3.0.0', files: [unsafeFile] } }) })).status, 200);
+        assert.equal((await fetch(unsafeAdmin, { method: 'POST', headers: privateHeaders, body: JSON.stringify({ action: 'verify', expectedRevision: 1, evidence }) })).status, 500);
+        assert.equal((await readRelease(manifest.id, '3.0.0', db))?.status, 'DRAFT');
+        assert.equal((await fetch(endpoint.replace('/1.0.0', '/3.0.0'))).status, 404);
         const result = await fetch(admin, { method: 'POST', headers: { ...auth, origin, 'x-csrf-token': csrfForToken(session.token), 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'withdraw', expectedRevision: 6, confirmation: 'WITHDRAW' }) });
         assert.equal(result.status, 200); assert.equal((await fetch(endpoint)).status, 404);
         for (const url of [`/.private/blueprints/objects/${file.sha256}.json`, `/objects/${file.sha256}.json`, `/api/blueprints/${manifest.id}/2.0.0/export`]) assert.equal((await fetch(origin + url)).status, 404);
