@@ -62,3 +62,12 @@ Checkpoint15: implementación y validación local completadas; activación remot
 Tres líneas: diagnóstico acotado y alternativa Render manual sin transferir secretos; etapa16 SEO/validación/editorial/GSC con puertas intactas; etapa17 embudo basado en agregados existentes sin nueva analítica o atribución falsa. Commits/push normales autorizados tras checks, sin deploy/activación comercial. Checkpoints A/B/C/D separados en reportes16/17 y diagnóstico. Bloqueos de plataforma no detienen código; no migraciones/importación de Neon ni nuevos servicios.
 
 Checkpoint17: panel/CEO consumen el mismo funnel de evidencia sin analítica paralela. Experimentos se proponen mediante GrowthExperiment existente, con evidencia/privacidad/parada, sin resultados inventados. Activaciones Google/CMP/editorial/storage/comercial siguen separadas; no etapa18 automática. Reporte PHASE17_REPORT.md y cierre conjunto en BUILD_LOG.
+
+## Continuidad y QA incremental — 30-10-2026
+
+Alcance autorizado: auditoría/preflight y correcciones demostradas, sin etapa nueva. Ejecución directa en el checkout existente; no worktree, nuevas dependencias o cambios productivos para compensar accesos ausentes.
+
+- [x] Reproducir la dependencia de `zzz-business-agents.test.ts` respecto al paquete creado por otras suites: ejecución parcial en PostgreSQL loopback desechable, 12/19 PASS; primer fallo en `sponsorshipPackage.findFirstOrThrow`, siete fallos en cascada.
+- [x] Corregir exclusivamente el fixture del caso CEO: reutilizar paquete disponible o preparar uno explícitamente ficticio en esa DB; conservar precios existentes cuando se reutiliza y todas las aserciones.
+- [x] Repetir las 19 pruebas aisladas de agentes, ejecutar `npm run check` y la integración general para verificar convivencia con los fixtures anteriores: 19/19, 90/90 y 91/91 PASS. Sin cambios de aplicación, reutilizar build/E2E de la CI exacta, sin repetirlos localmente.
+- [x] Corregir instrucciones operativas históricas de creación del runtime/push pendiente y revisar diff/secretos; revisión independiente sin hallazgos bloqueantes. Commit/push normal autorizado solo sin divergencia; la CI del SHA resultante se informa después de publicarlo, sin desplegar.

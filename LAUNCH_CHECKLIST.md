@@ -88,7 +88,7 @@ Actualización 26-10-2026 (America/Bogota): Fases 1–12 respaldadas y Render Fr
 - [ ] Propietario descarga/conserva copia privada; aprobación de licencia/propuesta/editorial y prueba de cuentas reales, incluido header Tally.
 - [ ] Comprobar bucket privado existente, región/cuotas/scopes y configuración privada Neon/Render; crear recursos o credenciales solo tras aprobación específica.
 - [ ] Carga/estados editoriales remotos aprobados, SHA Live, descarga/reinicio/redeploy con persistencia y errores controlados, sin cambiar registros anteriores.
-- [ ] Aprobar push de los dos commits locales; CI propia posterior. Un push no autoriza deploy o publicación del paquete.
+- [x] Etapas14–15 publicadas: `1a690e2f803c5a2c5b82ccb93005bdcc1caf9c33` y `786ef4445b3b26e6dc242ae8a7ceb267c5d44580`, conservadas como ancestros de `421842d62ac0433c4ee54125c9f6ce6cb143b5c0`; CI de ese HEAD [41011779292 SUCCESS](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/41011779292). Un push no autoriza deploy o publicación del paquete.
 
 ## Etapas16–17 — puertas conservadas
 
@@ -98,3 +98,5 @@ Actualización 26-10-2026 (America/Bogota): Fases 1–12 respaldadas y Render Fr
 - [ ] Revisión editorial/legal/Google, persistencia Blueprint y activación de medición/comercial separadas; no inferir aprobaciones por build/CI.
 - [x] Embudo con procedencia y ausencia de evidencia explícitas, sin tasas entre cohortes incompatibles ni métricas Blueprint inventadas.
 - [ ] Para experimentos: baseline, población/denominador, ventana, umbral y parada definidos antes de observar; sin datos declarar inconcluso.
+
+Continuidad 30-10-2026: [preflight y operación concreta de solo lectura](docs/RENDER_STAGING.md#preflight-de-continuidad--30-10-2026-americabogota). Render MCP funciona en otro cliente según el propietario, pero no está expuesto a esta sesión Cloud. SHA Live/configuración aportados por propietario pendientes de reconfirmar; P2028 histórico no se da por vigente ni corregido. No recrear el runtime existente. Las aprobaciones de deploy, storage, editorial, legales, Google y comercial siguen separadas.

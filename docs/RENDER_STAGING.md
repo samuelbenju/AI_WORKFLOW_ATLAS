@@ -16,7 +16,7 @@ El build usa dependencias dev para Prisma/TypeScript/WASM; --include=dev evita o
 
 Misma base Neon atlas_staging, proyecto cold-shadow-53495242, rama Neon production utilizada como staging. No conectar al rol atlas_staging_owner desde el servicio web.
 
-Antes de desplegar, un operador autorizado debe crear en la consola/procedimiento seguro de Neon un rol de aplicación distinto (por ejemplo atlas_staging_app) con contraseña privada almacenada directamente en el gestor de secretos, nunca comunicada por chat. Este documento no crea roles o contraseñas.
+El rol runtime `atlas_staging_app` ya está configurado según el propietario: conservarlo y verificarlo mediante una lectura autorizada. No volver a crearlo, rotar su contraseña ni modificar sus permisos como requisito de una nueva release. La separación descrita aquí es el contrato de conexión existente, no una orden de inicialización. Este documento no crea roles o contraseñas.
 
 Privilegios: LOGIN/CONNECT a atlas_staging, USAGE del esquema public y de tipos necesarios, SELECT/INSERT/UPDATE/DELETE solo sobre las tablas de negocio y uniones que usa Prisma; USAGE/SELECT de secuencias si existen. Sin superusuario, CREATEDB, CREATEROLE, REPLICATION, propiedad del esquema/tablas o membresía en el migrador/neon_superuser. Sin CREATE sobre public ni permisos concedidos indirectamente por PUBLIC que lo permitan. Revisar concesiones existentes antes de retirar privilegios globales que afecten a otros usuarios.
 
@@ -60,3 +60,27 @@ La preparación de Render no resuelve bloqueos legales/fiscales, proveedor de pa
 ## Incidente posterior: catálogo indisponible en Render Live
 
 El propietario confirma 16 migraciones/55 tablas en Neon y rol atlas_staging_app en Render. Es un estado reportado externamente, no una validación remota realizada por esta ejecución. Diagnóstico, códigos seguros y verificación del SHA publicado: [RENDER_CATALOG_DIAGNOSTICS.md](RENDER_CATALOG_DIAGNOSTICS.md). Las lecturas vacías se comprobaron con un rol de solo lectura aislado; no asumir que la indisponibilidad significa falta de contenido o que ya está resuelta al compilar.
+
+## Preflight de continuidad — 30-10-2026, America/Bogota
+
+- GitHub observado: `main` en `421842d62ac0433c4ee54125c9f6ce6cb143b5c0`, [CI 41011779292 SUCCESS](https://github.com/samuelbenju/AI_WORKFLOW_ATLAS/actions/runs/41011779292). Las etapas 14–17 están publicadas; las notas de push pendiente de sus reportes son históricas.
+- Evidencia aportada por el propietario desde su cliente conectado: workspace `tea-dbfo0kks728c738fd6g0`, servicio `srv-dbfprkbrjlhs73easoag`, deployment `dep-dbhosdtckfvc73fp5ulg`, SHA Live `b3f39f528b7a9b9796d363d1d3dbc276152c1355`, Auto-Deploy Off y comandos coincidentes. Esta sesión no los consultó independientemente ni los interpreta como estado perpetuo.
+- Codex Cloud expone Superpowers, no las herramientas Render/GitHub/OpenAI Developers/Firecrawl/Neon del otro cliente. No es un fallo demostrado de autenticación o del proveedor. La política efectiva sigue sin hosts Render ni bindings utilizables; no se repiten sondas del mismo proxy o cambios de revisión 15.
+- P2028 del 29-10 es histórico; sin logs actuales no se afirma recurrencia o causa. No hay diferencias de Prisma, dependencias, cliente DB o consultas del catálogo entre el Live reportado y el candidato. Se mantienen pool/transacciones/timeouts, sin reintentos nuevos.
+- Regresión actual: cuatro pruebas de catálogo/readiness/HTTP en PostgreSQL loopback desechable PASS, con rol SELECT/read-only y sin acceso al historial. Ausencia de configuración y denegación de unión fallan visiblemente y sin filtrar credenciales. No reproduce P2028; tampoco prueba latencia, conexiones o arranque frío de Neon/Render.
+- Preparación estática compatible: Node 24.19.0, build genera cliente y compila; start escucha el PORT asignado, sin migraciones/seed/worker. Las puertas SEO/legal/ads/IA/correo/pagos se conservan en código; sus valores privados en Render no fueron leídos. Storage remoto, ACL/policy, scopes, cuotas e If-None-Match continúan sin prueba real. No usar disco efímero como sustituto ni cargar el paquete para aprobar este preflight.
+
+**Operación pendiente desde el cliente que ya tiene Render MCP:** consultar dos veces el servicio por su ID; confirmar workspace/repo/main, Auto-Deploy y Build/Start/Health; obtener deployments Live/anterior y sus SHA completos; consultar logs recientes de arranque y catálogo, incluidos stage/codes y fechas, diferenciando el incidente del 29-10; comprobar `/` y `/api/health` mediante HTTPS. Compartir solo el resumen sanitizado, sin variables, tokens o respuestas privadas completas. No repetir instalación/OAuth si esa conexión ya funciona.
+
+El candidato debe estar aprobado por su SHA y tener CI propia. Punto de recuperación provisional: deployment/SHA reportados arriba, pendiente de reconfirmación y compatibilidad. Tras autorización específica: validar SHA Live, HTTP/catálogo/guías/búsqueda/privados/SEO y ausencia de anuncios o archivos no aprobados; un fallo crítico requiere diagnóstico y autorización independiente antes del rollback. **Preflight remoto BLOQUEADO POR ACCESO; deploy NO EJECUTADO.** Un commit de pruebas/documentación posterior no queda autorizado para deploy por esta nota.
+
+### Prioridades posteriores; no son etapas nuevas iniciadas
+
+| Orden | Trabajo reutilizando módulos existentes | Criterio de aceptación y dependencia |
+| --- | --- | --- |
+| P0 | Cerrar preflight y determinar recurrencia de P2028 | Dos lecturas MCP, SHA/configuración/CI, logs fechados tras peticiones reales y ruta de recuperación. Requisito antes de decidir deploy, no motivo para cambiar pool a ciegas. |
+| P0 | Custodia y recuperación de datos | Propietario verifica backup/PITR, retención y ensayo de restauración en destino aislado autorizado con RPO/RTO. No restaurar sobre Neon actual. |
+| P1 | Persistencia del primer Blueprint | Bucket privado/scopes/ACL/policy/If-None-Match/cuotas comprobados, carga y descarga exactas y supervivencia a reinicio/redeploy autorizados. Bloquea publicar ese Blueprint, no navegar el catálogo. |
+| P1 | Revisión editorial/legal y Google | Aprobar identidad/políticas/contacto y contenido, después lanzamiento/indexación y propiedad GSC. Cuenta/CMP/sitio AdSense requieren evidencias independientes. No activar flags como parte de QA. |
+| P2 | Mejorar cobertura editorial y descubrimiento | Reutilizar ocho semanas de calendario; revisar primero guías prácticas y relaciones útiles pendientes, con fuentes y aprobación humana. Oportunidad, no requisito para llenar categorías o crear páginas masivas. |
+| P3 | Medir y monetizar con evidencia | Consentimiento y fuente/cohorte definidos, informes reales, contratos de afiliación/patrocinio y experimentos sin ganadores inventados. IA/worker/newsletter/pagos siguen con autorizaciones separadas; no bloquean esta release técnica. |
