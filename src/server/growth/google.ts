@@ -1,3 +1,4 @@
+import {parseGscReport} from '@/lib/gsc-report';
 import "server-only";
 import {z} from "zod";
 import type {AnalyticsEvent,PrismaClient} from "@/generated/prisma/client";
@@ -32,7 +33,7 @@ export class GoogleReports {
   return {sourceRef:`properties/${process.env.GA4_PROPERTY_ID}`,data:{...parseGa4Report(await boundedJson(response),dimension,from,to),hostname:new URL(site.origin).hostname}};
  }
  if(dimension!=='date')throw new AccessError(400,'Search Console admite el informe diario de este módulo.');
- if(!googleStatus().searchConsole.configured)throw new AccessError(503,'Search Console: no configurado.');const source=validSearchSite(process.env.GSC_SITE_URL!)!;response=await this.transport(`https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(source)}/searchAnalytics/query`,{method:'POST',redirect:'error',signal:AbortSignal.timeout(10000),headers:{Authorization:`Bearer ${process.env.GSC_ACCESS_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({startDate:from,endDate:to,dimensions:['date'],rowLimit:100,dataState:'final'})});const raw=z.object({rows:z.array(z.object({keys:z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).length(1),clicks:z.number().finite().nonnegative(),impressions:z.number().finite().nonnegative(),ctr:z.number().finite().min(0).max(1),position:z.number().finite().nonnegative()})).max(100).optional()}).parse(await boundedJson(response));return {sourceRef:source,data:{rows:(raw.rows??[]).map(r=>({date:r.keys[0]!,clicks:r.clicks,impressions:r.impressions,ctr:r.ctr,position:r.position})),note:'Search Console final daily data uses the provider PST date calendar, not the first-party UTC calendar; not interchangeable with consented visits.'}};
+ if(!googleStatus().searchConsole.configured)throw new AccessError(503,'Search Console: no configurado.');const source=validSearchSite(process.env.GSC_SITE_URL!)!;response=await this.transport(`https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(source)}/searchAnalytics/query`,{method:'POST',redirect:'error',signal:AbortSignal.timeout(10000),headers:{Authorization:`Bearer ${process.env.GSC_ACCESS_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({startDate:from,endDate:to,dimensions:['date'],rowLimit:100,dataState:'final'})});const rows=parseGscReport(await boundedJson(response),from,to);return {sourceRef:source,data:{rows,note:'Search Console final daily data uses the provider PST date calendar, not the first-party UTC calendar; not interchangeable with consented visits.'}};
  }
 }
 export function cleanReportPath(value:string){try{return publicPath(new URL(value).pathname);}catch{return publicPath(value);}}

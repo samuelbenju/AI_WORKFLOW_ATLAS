@@ -89,3 +89,10 @@ Actualización 26-10-2026 (America/Bogota): Fases 1–12 respaldadas y Render Fr
 - [ ] Comprobar bucket privado existente, región/cuotas/scopes y configuración privada Neon/Render; crear recursos o credenciales solo tras aprobación específica.
 - [ ] Carga/estados editoriales remotos aprobados, SHA Live, descarga/reinicio/redeploy con persistencia y errores controlados, sin cambiar registros anteriores.
 - [ ] Aprobar push de los dos commits locales; CI propia posterior. Un push no autoriza deploy o publicación del paquete.
+
+## Etapas16–17 — puertas conservadas
+
+- [x] Revisión SEO y validación de snapshots GSC; no datos inválidos por calendario/intervalo/duplicado.
+- [ ] Aprobar alternativa manual Render y configurar secreto GitHub independiente solo si se elige esa vía; no transferencia automática del vault Codex.
+- [ ] Preflight real, SHA Live y recuperación observados; ningún SHA16/17 autorizado para despliegue aún.
+- [ ] Revisión editorial/legal/Google, persistencia Blueprint y activación de medición/comercial separadas; no inferir aprobaciones por build/CI.

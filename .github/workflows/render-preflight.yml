@@ -1,0 +1,22 @@
+name: Read-only Render preflight
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: render-readonly-preflight
+  cancel-in-progress: false
+jobs:
+  inspect:
+    if: github.repository == 'samuelbenju/AI_WORKFLOW_ATLAS' && github.ref == 'refs/heads/main' && vars.RENDER_PREFLIGHT_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.19.0'
+      - run: node scripts/render-preflight.mjs
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_PREFLIGHT_ENABLED: ${{ vars.RENDER_PREFLIGHT_ENABLED }}
