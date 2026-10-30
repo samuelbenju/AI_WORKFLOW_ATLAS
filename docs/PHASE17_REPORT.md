@@ -38,3 +38,5 @@ Primero contenido útil/enlaces internos y revisión editorial del calendario ex
 ## Checkpoint D — validación integrada y conservación
 
 Check89 PASS (incluye nueva unit funnel), build PASS, integración PostgreSQL91 PASS, SEO5 PASS, catálogo válido65/30/6/20/24. E2E completo escritorio/móvil PASS122/122 en3,8min. Regresiones conjuntas ejecutadas en bases locales desechables. Datos fixtures aislados, no actividad comercial. No nuevas dependencias o migraciones, registros reales, flags Google/SEO/legales/ads/pagos/IA cambiados. No despliegue. CI propia del SHA definitivo se consulta después del push; éxito antiguo no se atribuye a esta entrega.
+
+Incidente CI posterior:41010630907 FAILURE en E2E, sin detalle accesible del paso (404). Resto de suites success. Se incorpora anotación de archivo/línea/estado exclusivamente y JSON temporal para diagnóstico independiente, conservando asserts/retries/HTML/exit code; check90/smoke1 PASS. No se atribuye una causa raíz desconocida ni se afirma CI verde hasta comprobar el siguiente SHA.

@@ -1,3 +1,7 @@
+import {mkdtemp,readFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
+import {failedLocations} from './e2e-diagnostics.mjs';
 import { randomBytes } from "node:crypto";
 import { spawn } from "node:child_process";
 import { withTestDatabase } from "./test-database.mjs";
@@ -17,5 +21,14 @@ withTestDatabase(async (url) => {
   await run(["--conditions=react-server", "--import", "tsx", "prisma/seed-editorial.ts"], env);
   await run(["--conditions=react-server", "--import", "tsx", "prisma/seed-commercial.ts"], env);
   await run(["--conditions=react-server", "--import", "tsx", "scripts/seed-admin-test.ts"], env);
-  await run(["node_modules/@playwright/test/cli.js", "test", ...process.argv.slice(2)], env);
+  const diagnostics=await mkdtemp(path.join(tmpdir(),'atlas-e2e-report-'));
+  try {
+    await run(["node_modules/@playwright/test/cli.js", "test", "--reporter=list,html,json", ...process.argv.slice(2)], {...env,PLAYWRIGHT_HTML_OPEN:'never',PLAYWRIGHT_JSON_OUTPUT_NAME:path.join(diagnostics,'report.json')});
+  } catch(error) {
+    if(process.env.GITHUB_ACTIONS==='true')try {
+      const report=JSON.parse(await readFile(path.join(diagnostics,'report.json'),'utf8'));
+      for(const row of failedLocations(report))console.log(`::warning file=${row.file},line=${row.line}::E2E ${row.status}; inspect authenticated logs for details.`);
+    } catch { console.log('::warning::E2E failed; structured diagnostic report unavailable.'); }
+    throw error;
+  } finally {await rm(diagnostics,{recursive:true,force:true});}
 }).catch(() => { console.error("Public tests failed. Check the reported checks and dedicated PostgreSQL test prerequisites. Connection values are not logged."); process.exitCode = 1; });
