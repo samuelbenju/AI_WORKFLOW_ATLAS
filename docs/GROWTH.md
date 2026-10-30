@@ -85,3 +85,7 @@ GA4 dispone de seis consultas manuales de solo lectura: diario, canales, países
 GSC presenta sus filas diarias (clics/impresiones/CTR/posición) en tabla y conserva el registro original. AdSense incorpora impresiones, clics, pageviews, page RPM, page CTR y cobertura oficiales, de forma manual y separada de dinero confirmado. Sin credenciales/permisos reales no hay llamadas o valores de sustitución. Ver docs/PUBLIC_LAUNCH.md para límites y comprobaciones privadas.
 
 Las rutas About/categorías están en la lista pública permitida; eventos de categorías inexistentes o sin contenido publicado se rechazan. El control de privacidad no invita a aceptar un servicio deshabilitado: informa que está apagado, sin enviar eventos. Conserva retirada de un consentimiento anterior incluso con ANALYTICS_ENABLED=false. DNT/GPC, cookies versionadas, eliminación y controles del servidor permanecen; no se recopilan IP, User-Agent, emails o términos de búsqueda.
+
+## Etapa17 — evidencia del embudo
+
+La tabla administrativa y el agregado CEO usan growthFunnel sobre métricas ya calculadas, sin consultas/eventos nuevos. Orgánico y descargas quedan sin cifra acreditada; cero observaciones no significa cero tráfico. No se calculan tasas entre poblaciones comerciales/consentidas diferentes. Experimentos siguen en el modelo existente; protocolo y propuestas en PHASE17_REPORT.md, sin activaciones ni ganadores inventados.

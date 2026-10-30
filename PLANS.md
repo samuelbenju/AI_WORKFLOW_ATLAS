@@ -60,3 +60,5 @@ Checkpoint15: implementación y validación local completadas; activación remot
 ## Etapas16 y17 autorizadas conjuntamente — 30-10-2026
 
 Tres líneas: diagnóstico acotado y alternativa Render manual sin transferir secretos; etapa16 SEO/validación/editorial/GSC con puertas intactas; etapa17 embudo basado en agregados existentes sin nueva analítica o atribución falsa. Commits/push normales autorizados tras checks, sin deploy/activación comercial. Checkpoints A/B/C/D separados en reportes16/17 y diagnóstico. Bloqueos de plataforma no detienen código; no migraciones/importación de Neon ni nuevos servicios.
+
+Checkpoint17: panel/CEO consumen el mismo funnel de evidencia sin analítica paralela. Experimentos se proponen mediante GrowthExperiment existente, con evidencia/privacidad/parada, sin resultados inventados. Activaciones Google/CMP/editorial/storage/comercial siguen separadas; no etapa18 automática. Reporte PHASE17_REPORT.md y cierre conjunto en BUILD_LOG.

@@ -96,3 +96,5 @@ Actualización 26-10-2026 (America/Bogota): Fases 1–12 respaldadas y Render Fr
 - [ ] Aprobar alternativa manual Render y configurar secreto GitHub independiente solo si se elige esa vía; no transferencia automática del vault Codex.
 - [ ] Preflight real, SHA Live y recuperación observados; ningún SHA16/17 autorizado para despliegue aún.
 - [ ] Revisión editorial/legal/Google, persistencia Blueprint y activación de medición/comercial separadas; no inferir aprobaciones por build/CI.
+- [x] Embudo con procedencia y ausencia de evidencia explícitas, sin tasas entre cohortes incompatibles ni métricas Blueprint inventadas.
+- [ ] Para experimentos: baseline, población/denominador, ventana, umbral y parada definidos antes de observar; sin datos declarar inconcluso.

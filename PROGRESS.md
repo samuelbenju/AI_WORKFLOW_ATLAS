@@ -386,3 +386,9 @@ Cierre QA15: check86, build,35 comprobaciones Blueprint (23+8+4), integración91
 ## Checkpoints A/B — 30-10-2026
 
 A BLOQUEO EXTERNO DE PLATAFORMA conservado tras reconsulta; revisión15 guardada no equivale a aplicada. Alternativa GitHub manual GET-only preparada y deshabilitada, requiere aprobación para secreto GitHub independiente. No deploy o transferencia de clave. B etapa16: validación GSC ahora rechaza calendario/periodo/duplicados/contadores imposibles antes de persistencia; SEO existente y biblioteca conservados, catalog:validate PASS65/30/6/20/24. Check intermedio88 PASS; reportes/condiciones de publicación en PHASE16_REPORT.md. No Google/legales/indexación aprobados automáticamente.
+
+## Checkpoints C/D — etapa17, 30-10-2026
+
+Capacidades implementadas, integraciones comerciales pendientes. Vista de embudo con fuentes/límites explícitos en admin y CEO; reutiliza agregados, sin queries/eventos nuevos ni atribución falsa. Orgánico/descargas sin cifras no acreditadas, sin correo obligatorio. Afiliados/sponsors/AdSense/newsletter/agentes existentes conservados, experimentos preparados con evidencia/éxito/parada sin activación. Check89/build/integración91/SEO5 PASS; E2E final y CI del SHA publicado se registran al cierre. Ver PHASE17_REPORT.md. No código desplegado, indexación o servicios activados.
+
+Checkpoint D completado localmente:122/122 E2E PASS (3,8min),89 unitarias/check/build,91 integración,5 SEO y actionlint aprobados; sin secretos o archivos privados en candidatos. Push autorizado para ambos commits; CI propia pendiente de consulta tras publicar. A sigue BLOQUEO PLATAFORMA; B/C aprobados con observaciones/activación humana pendiente, sin despliegue o monetización activa.
