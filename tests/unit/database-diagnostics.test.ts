@@ -46,3 +46,9 @@ test('unknown P2028 reasons and untrusted timing metadata remain unclassified an
  assert.deepEqual(databaseDiagnostic(hostile,'catalog.home').codes,['P2028']);
  assert.deepEqual(databaseDiagnostic({code:'P2010',message:'Transaction API error: Unable to start a transaction in the given time.'},'catalog.home').codes,['P2010']);
 });
+
+test('known uncoded pg timeouts are distinguished without logging messages or guessing unknown errors',()=>{
+ assert.deepEqual(databaseDiagnostic(Error('timeout exceeded when trying to connect'),'catalog.use-cases').codes,['PG_POOL_QUEUE_TIMEOUT']);
+ assert.deepEqual(databaseDiagnostic(Error('Connection terminated due to connection timeout'),'catalog.facets.tools').codes,['PG_CONNECTION_TIMEOUT']);
+ assert.deepEqual(databaseDiagnostic(Error('private unknown transport detail'),'catalog.use-cases').codes,['UNCLASSIFIED_DATABASE_ERROR']);
+});

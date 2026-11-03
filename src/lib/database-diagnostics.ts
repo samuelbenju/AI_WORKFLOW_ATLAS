@@ -19,7 +19,7 @@ const permittedCodes = new Set([
   'DEPTH_ZERO_SELF_SIGNED_CERT','SELF_SIGNED_CERT_IN_CHAIN',
   'TLS_CONNECTION_ERROR','DATABASE_NOT_REACHABLE','DATABASE_URL_INVALID',
   'PRISMA_INITIALIZATION_ERROR','PRISMA_VALIDATION_ERROR','READINESS_TIMEOUT',
-  'TRANSACTION_START_TIMEOUT','TRANSACTION_EXECUTION_TIMEOUT',
+  'TRANSACTION_START_TIMEOUT','TRANSACTION_EXECUTION_TIMEOUT','PG_POOL_QUEUE_TIMEOUT','PG_CONNECTION_TIMEOUT',
   'UNCLASSIFIED_DATABASE_ERROR',
 ]);
 const kindCodes: Record<string,string> = {
@@ -58,6 +58,13 @@ export function databaseDiagnostic(error:unknown,fallback:DatabaseStage):Databas
     if(!value||typeof value!=='object'||seen.has(value)||depth>6||seen.size>=32)return;
     seen.add(value);
     const subtype=transactionSubtype(value);if(subtype)codes.add(subtype);
+    // pg-pool 3.x in the pinned driver emits these uncoded errors. Compare
+    // complete fixed messages only; never return or retain their contents.
+    if(field(value,'code')!=='P2028'){
+      const message=field(value,'message');
+      if(message==='timeout exceeded when trying to connect')codes.add('PG_POOL_QUEUE_TIMEOUT');
+      if(message==='Connection terminated due to connection timeout')codes.add('PG_CONNECTION_TIMEOUT');
+    }
     for(const key of ['code','originalCode','sqlState']){const code=field(value,key);if(typeof code==='string'&&permittedCodes.has(code))codes.add(code);}
     for(const key of ['kind','name']){const kind=field(value,key);if(typeof kind==='string'&&Object.hasOwn(kindCodes,kind))codes.add(kindCodes[kind]!);}
     for(const key of ['cause','meta','driverAdapterError','error'])visit(field(value,key),depth+1);

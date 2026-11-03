@@ -98,3 +98,10 @@ CI41556428028 de6ecf8c5 falló en E2E, aunque build/runtime/DB/SEO/Blueprint pas
 ## Misión 18 — actualización de continuidad, 03-11-2026
 
 El propietario confirma desde cliente conectado que4bcf3aa está Live en dep-dbkkaarncjis73eincn0 y aporta una ventana real de arranque:503 del proveedor→health200/catálogo con error→contenido real correcto. Los nuevos códigos identifican timeout de inicio, no su causa física; [evidencia y límites](PHASE18_REPORT.md#ventana-remota-aportada-por-el-propietario). No repetir despliegue4bcf3aa como respuesta a esta nota. La misión18 corrige por separado scope GSC y head inicial de verificación Google; su candidato nuevo exige CI propia y autorización de despliegue, sin cambiar variables o Auto-Deploy. Se mantienen sin activar indexación/publicidad/IA/correo/pagos, ni storage privado publicado. Las notas anteriores de Live b3f y deploy diagnóstico pendiente son históricas.
+
+
+## P0 — cierre de facetas03-11, deploy pendiente
+
+Último Live aportado por propietario:41b86ab/dep-dbkv40bm8hqs738m7ji0; ventana15:20–15:21UTC confirma ETIMEDOUT, TRANSACTION_START_TIMEOUT y catálogo200conerror. No aceptar producción por health200 o recuperación parcial. Corrección local mínima retira batch READ COMMITTED innecesario de facetas y secuencia grupos de consultas de los listados; mantiene RR filas/conteo, pool y cache. Ver evidencia/retirada de expiración lógica en RENDER_CATALOG_DIAGNOSTICS.md. No causa física remota determinada ni nuevo deploy ejecutado.
+
+Incidente de configuración comunicado por propietario: actualización parcial de BLUEPRINT_* provocó deploy pese a Auto-DeployOff. No repetirla. Para una futura modificación aprobada, confirmar Save only en Dashboard cuando esté disponible; si solo hay guardar/desplegar, requiere autorización del efecto. Esta ejecución no cambia variables ni prueba escritura/storage. Antes del eventual deploy del nuevo SHA: CI propia SUCCESS, reconfirmar servicio/repo/main/Auto-DeployOff/comandos/Live y punto de recuperación; después HTTP+contenido/readiness privado/logs y aceptación repetida.

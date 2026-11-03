@@ -26,6 +26,7 @@ export default async function ToolsPage({ searchParams }: { searchParams: Promis
 }
 
 async function ToolsResults({query}:{query:CatalogQuery}){
-  const [result, facets] = await Promise.all([toolsPageData(query), getCatalogFacets("tools")]);
+  const result = await toolsPageData(query);
+  const facets = await getCatalogFacets("tools");
   return <><SponsoredPlacements kind="FEATURED_TOOL_LISTING" /><CatalogFilters kind="tools" query={query} facets={facets} /><div className="results-heading" id="results"><h2>{query.q ? `Results for “${query.q}”` : "Explore the tools"}</h2><span>{result.total} {result.total === 1 ? "tool" : "tools"}{result.total > 0 && ` · Page ${query.page} of ${result.pageCount}`}</span></div><div className="catalog-grid">{result.items.map((tool) => <ToolCard key={tool.slug} tool={tool} />)}</div>{result.items.length === 0 && <EmptyState title={result.total > 0 ? "This page is off the map." : "No tools match just yet."} description={result.total > 0 ? "There are listings on earlier pages. Return to the first page to explore them." : "Try another search or clear your filters. New listings will appear here when they are available."} href={result.total > 0 ? catalogHref("/tools", query, { page: 1 }) : "/tools"} label={result.total > 0 ? "Back to first page" : "Clear filters"} />}<CollectionData name="AI tools" path={catalogHref("/tools",query)} start={(query.page-1)*6} items={result.items.map(tool=>({name:tool.name,path:`/tools/${tool.slug}`}))}/><Pagination path="/tools" query={query} pageCount={result.pageCount} /><AdvertisingPlacement placement="tools" path="/tools" eligible={!query.q && result.items.length >= 6 && result.items.every(t => !t.isDemo)} /></>;
 }

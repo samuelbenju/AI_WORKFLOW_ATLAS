@@ -43,10 +43,12 @@ export async function getCatalogFacets(kind: "tools" | "use-cases", mode = catal
     const content = visibility(mode);
     const where = kind === "tools" ? { tools: { some: content } } : { useCases: { some: content } };
     const counts = { tools: { where: content }, useCases: { where: content } };
-    const [categories, tags] = await db.$transaction([
-      db.category.findMany({ where, select: { slug: true, name: true, _count: { select: counts } }, orderBy: { name: "asc" } }),
-      db.tag.findMany({ where, select: { slug: true, name: true }, orderBy: { name: "asc" } }),
-    ]);
+    // Independent READ COMMITTED facets do not need a transaction. Sequential
+    // reads reuse the available connection without Prisma's 2s start deadline.
+    // They also have no Prisma transaction execution-expiry policy; neither
+    // this path nor the old batch guarantees cancellation of blocked SQL.
+    const categories = await db.category.findMany({ where, select: { slug: true, name: true, _count: { select: counts } }, orderBy: { name: "asc" } });
+    const tags = await db.tag.findMany({ where, select: { slug: true, name: true }, orderBy: { name: "asc" } });
     return { categories: categories.map(({ _count, ...category }) => ({ ...category, count: kind === "tools" ? _count.tools : _count.useCases })), tags };
   },db,mode==='published'?JSON.stringify(['facets',kind,mode]):undefined);
 }

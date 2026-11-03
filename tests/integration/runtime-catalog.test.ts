@@ -183,3 +183,26 @@ test('an owned isolated server stops within a bounded grace period despite an in
   assert.ok(performance.now()-callbackFinishedAt<4000,'Owned test server cleanup must not consume the E2E test deadline');
  }finally{clearTimeout(safety);socket?.destroy();}
 });
+
+test('independent facets tolerate a real pool wait above Prisma start deadline without opening a batch transaction',async()=>{
+ const pool=new pg.Pool({connectionString:url,max:5,connectionTimeoutMillis:5000,idleTimeoutMillis:30000});
+ const constrained=new PrismaClient({adapter:new PrismaPg(pool),log:[{emit:'event',level:'query'}]});let queries=0,transactionCommand=false;constrained.$on('query',event=>{queries++;transactionCommand ||= /^(BEGIN|COMMIT|ROLLBACK)/i.test(event.query);});const held:pg.PoolClient[]=[];
+ const release=()=>{for(const client of held.splice(0))client.release();};let timer:ReturnType<typeof setTimeout>|undefined;
+ try{
+  for(let i=0;i<5;i++)held.push(await pool.connect());
+  timer=setTimeout(release,2600);const start=performance.now();
+  const facets=await getCatalogFacets('tools','published',constrained);
+  assert.deepEqual(facets,{categories:[],tags:[]});assert.ok(performance.now()-start>=2000);assert.equal(transactionCommand,false);console.log(JSON.stringify({experiment:'facets-pool-wait',ms:Math.round(performance.now()-start),queries,transactionCommand}));
+ }finally{if(timer)clearTimeout(timer);release();await constrained.$disconnect();await pool.end();}
+});
+
+test('a real exhausted pg pool reaches its existing 5s queue deadline with a safe specific diagnostic',async()=>{
+ const pool=new pg.Pool({connectionString:url,max:5,connectionTimeoutMillis:5000,idleTimeoutMillis:30000});
+ const constrained=new PrismaClient({adapter:new PrismaPg(pool),log:[]});const held:pg.PoolClient[]=[];
+ try{
+  for(let i=0;i<5;i++)held.push(await pool.connect());
+  await assert.rejects(getCatalogFacets('tools','published',constrained),(error:unknown)=>{
+    assert.ok(error instanceof DatabaseOperationError);assert.deepEqual(error.diagnostic.codes,['PG_POOL_QUEUE_TIMEOUT']);return true;
+  });
+ }finally{for(const client of held)client.release();await constrained.$disconnect();await pool.end();}
+});
