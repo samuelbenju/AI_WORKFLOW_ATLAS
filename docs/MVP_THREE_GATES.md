@@ -10,9 +10,13 @@ RED unidad por helper inexistente; GREEN97 unitarias y check/lint/TS, build y Bl
 
 GATE1 — CÓDIGO COMPLETO, CONFIGURACIÓN COMERCIAL PENDIENTE. E2E126/126PASS (4,9min); revisión detectó Minor espacios+ en mailto, RED→GREEN con encodeURIComponent y check97/build/SEO6/Blueprint34 focales posteriores PASS. CI repetirá el árbol final exacto. Sin autorizar comercialización por código verde.
 
-## Etapa2 — todavía sin iniciar ejecución nueva
+## Etapa2 — original validado en Atlas; repetición nativa incompleta
 
-Original privado y evidencia histórica detectados; no se reconstruirá, publicará o modificará un manifiesto sellado. Revisar/ejecutar original en copia aislada después de Gate1 y distinguir pruebas sintéticas de proveedores reales. No upload/PUT/estado editorial remoto sin autorización.
+Original ZIP59973bytes, SHA0349bfb69e8c68c85d1ca7a28b7dcea546a254a4df787ebeb02c8c5946ac5c55 conservado. JSON574ffdd07b6c803cd07383bcddbe7c79cf7ea4c2c461bed35c6dda292bcbadcd: webhook compatibleTally, validación/clasificación, ledgerSheets y SlackHIGHcondicional;21nodos oficiales base(incluidos HTTP Request OAuth). Guías inglesas/10descargables/versiones y límites ya existen. CheckerPASS y38tests Atlas(26backend+8UI+4paquete real)PASS: permisos/publicación local, HTTP/bytes/hash/reinicio/corrupción/retirada sobre archivos privados y SQL desechable. No nueva función de descarga o publicación.
+
+Evidencia histórica privada: n8n2.45.6/17casosPASS con proveedores sintéticos. Repetición actual en copia/tmp: primer intentoCLI falla por SQLite duplicate-column scope con servidor activo; historial posterior confirma migración registrada. Ajuste solo del harness temporal para CLI exclusivo evita ese paso y permite IMPORTED; servidor posterior sale139(oomKilled:false) antes de completar escenarios. No causa del exit139 determinada ni atribución al workflow. Contenedores/red propios retirados; ZIP/harness históricos intactos. No contar histórica17 como pruebas nuevas.
+
+Gate2: archivo real/documentado y motor Atlas probados; nueva ejecución nativa completa BLOQUEADA por runtime aislado. Proveedores Sheets/Slack/Tally reales NO VERIFICADOS. Original sigue candidato privado; MIT propuesta, licencia/atribución/editorial necesitan aprobación. Bucket atlas-blueprints/rolruntime readonly reportados por propietario, no accedidos aquí. Descarga pública real/SHA/persistencia/retiro remotos PENDIENTES: no credenciales o canal administrativo accesible, sinPUT/upload/manifiesto/estado editorial público o bypass de permisos.
 
 ## Etapa3 — todavía sin iniciar
 
