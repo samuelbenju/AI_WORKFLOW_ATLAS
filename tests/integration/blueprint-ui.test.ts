@@ -141,7 +141,8 @@ test('blueprint UI on isolated PostgreSQL, local private files and real producti
           await withAppServer({ ...environment, LEGAL_REVIEW_CONFIRMED: 'true', PUBLIC_OPERATOR_NAME: 'Isolated operator fixture, not a real business',
             PUBLIC_OPERATOR_ADDRESS: 'Isolated test address', PUBLIC_CONTACT_EMAIL: 'fixture@contact.invalid', LEGAL_EFFECTIVE_DATE: '2026-01-01' }, async contactOrigin => {
             const html = await (await fetch(`${contactOrigin}/use-cases/${slug}?blueprintRelease=${manifest.id}%400.9.0`)).text();
-            assert.ok(html.includes('mailto:fixture%40contact.invalid?subject=Workflow%20implementation%20inquiry'));
+            assert.ok(html.includes('mailto:fixture%40contact.invalid?subject=Custom%20automation%20enquiry'));
+            assert.ok(html.includes('Process%20to%20automate'));
             assert.ok(!html.includes('/api/crm/inquiries'));
             assert.ok(!html.includes('[Piloto]'));assert.ok(!html.includes('Implementation Sprint'));
             const pilotSlug='qualify-tally-leads-with-n8n-and-slack';

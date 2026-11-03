@@ -52,6 +52,14 @@ test('published catalog SEO and discovery, isolated PostgreSQL and browser only'
           await expect(page.getByRole('link',{name:'Explore Free Workflows',exact:true})).toHaveAttribute('href','/use-cases');
           const inquiry=page.getByRole('link',{name:'Request Implementation',exact:true});await expect(inquiry).toBeVisible();
           assert.equal(new URL((await inquiry.getAttribute('href'))!).searchParams.get('subject'),'[Piloto] Implementación Lead Flow');
+          await page.setViewportSize({width:360,height:800});
+          for(const path of ['/contact','/tools/n8n','/use-cases/route-a-form-submission-into-a-review-queue']){
+            await page.goto(origin+path);
+            const contact=page.getByRole('link',{name:'Contact Atlas about implementation',exact:true});await expect(contact).toBeVisible();
+            const target=new URL((await contact.getAttribute('href'))!);assert.equal(target.protocol,'mailto:');assert.ok(target.searchParams.get('body')!.includes('Process to automate:'));
+            assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
+          }
+          await page.setViewportSize({width:1280,height:800});
           await page.goto(origin+'/tools?page=2');
           await expect(page).toHaveTitle(/Page 2/);await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href',canonical+'/tools?page=2');
           await page.goto(origin+'/tools?page=999');await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content',/noindex/);

@@ -129,3 +129,10 @@ RED real queryTools búsqueda con pool5 ocupado2600ms→P2028inicio~2063ms. Estr
 
 
 Validación local final: check96 (lint/TS/Prisma/unitarias), PostgreSQL99, build, runtime16, SEO6 y E2E126/126 PASS. Runtime verifica /tools y /use-cases?q=presentation con error visible y HTTP200/500/503 como fallo funcional; no catálogo vacío ficticio. Revisión independiente sin bloqueos; materialización reducida a columnas de tarjeta y riesgo de casts enum documentado. Sin cambios en schema/16migraciones/deps/Blueprint/envs/Neon/Render. CI propia se verifica tras push, no reutilizar CI base. Despliegue y validación productiva pendientes de autorización.
+
+
+## MVP controlado — tres etapas internas autorizadas03-11
+
+1. Reutilizar contacto/ServiceInquiryCard con mensaje mínimo seguro, oferta por cotización sin precio/plazo, CTA desde herramientas y guías aunque no haya Blueprint publicado; mantener validación legal/email y ausencia de descarga ficticia. Validar check/build/SEO/Blueprint y móvil antes de etapa2.
+2. Preservar original ZIP0349bfb…ac5c55; comprobar paquete, evidencia e importación/17casos n8n aislados si disponible, QA de motor/HTTP privado en DB desechable. Sin subir/publicar S3 o cambios de permisos. Registrar diferencias entre fixture e integración real.
+3. Reutilizar SEO/GSC/robots/sitemap, comprobar regresiones, preparar contenido original privado y análisis cualitativo sin volúmenes; hosting/Google real pendientes de acceso. Sin activar indexación. Checkpoints en docs/MVP_THREE_GATES.md. Final check/DB/runtime/SEO/E2E/build, push normal y CI exacta, sin deploy.

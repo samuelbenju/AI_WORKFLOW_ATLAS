@@ -1,3 +1,4 @@
+import {ImplementationContact} from './ImplementationContact';
 import Link from 'next/link';
 import { blueprintKey } from '@/lib/blueprints';
 import { legalConfiguration } from '@/lib/legal';
@@ -44,7 +45,7 @@ export async function BlueprintSection(props: SectionProps) {
     return { failed: true as const };
   });
   if ('failed' in data) return <section className="blueprint-section" aria-label="Blueprint availability"><p role="status">Blueprint information is temporarily unavailable. Please try again later.</p></section>;
-  if (data.empty) return null;
+  if (data.empty) return <ImplementationContact/>;
   const { search, after, selected, page, options, path, availability, presentation, steps, legal, newsletter } = data;
   const { conceptualSteps } = props;
     return <section className="blueprint-section" id="blueprints" aria-labelledby="blueprints-title">
@@ -74,5 +75,6 @@ export async function BlueprintSection(props: SectionProps) {
         </section>
         <ServiceInquiryCard email={legal.reviewed ? legal.email : null} guideSlug={props.slug} />
       </>}
+      {!selected&&<ImplementationContact/>}
     </section>;
 }
