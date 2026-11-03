@@ -150,7 +150,7 @@ test('blueprint UI on isolated PostgreSQL, local private files and real producti
             await contactPage.route('**/*',route=>new URL(route.request().url()).origin===contactOrigin?route.continue():route.abort());
             try{
             await contactPage.goto(`${contactOrigin}/use-cases/${pilotSlug}`);
-            const contact=contactPage.getByRole('link',{name:'Contact Atlas about implementation',exact:true});
+            const contact=contactPage.getByRole('link',{name:'Request an implementation quote',exact:true});
             await expect(contact).toBeVisible();
             const inquiry=new URL((await contact.getAttribute('href'))!);
             assert.equal(decodeURIComponent(inquiry.pathname),'fixture@contact.invalid');

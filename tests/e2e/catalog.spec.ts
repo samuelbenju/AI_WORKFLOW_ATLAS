@@ -8,6 +8,9 @@ if (process.env.ATLAS_ISOLATED_E2E !== "true" || !process.env.TEST_DATABASE_URL 
 
 test("home search reaches a real filtered tool directory and official detail link", async ({ page }) => {
   await page.goto("/");
+  await expect(page.getByRole('link',{name:'Explore Free Workflows',exact:true})).toHaveAttribute('href','/use-cases');
+  await expect(page.getByRole('link',{name:'Request Implementation',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('link',{name:'Implementation contact & availability',exact:true})).toHaveAttribute('href','/contact');
   await page.getByRole("searchbox", { name: "Search AI tools" }).fill("chatgpt");
   await page.getByRole("button", { name: "Explore", exact: true }).click();
   await expect(page).toHaveURL(/\/tools\?q=chatgpt/);

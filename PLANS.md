@@ -104,3 +104,20 @@ Sin cacheComponents ni ISR global. Probar una caché granular en memoria (32 ent
 Reutilizar paquete privado original y QA existente, sin reconstruir ZIP; verificar hash, estructura y ejecuciones aisladas si entorno disponible. No afirmar descarga remota sin bucket/credenciales/prueba HTTP real. CTA piloto específico únicamente para slug de guía propuesto, email público validado/revisado y release aprobada; no publicar precios/plazos ni crear CRM.
 
 Pruebas RED→GREEN, check/build/DB/runtime/SEO/Blueprint/E2E; revisión independiente, push normal con CI exacta. Sin despliegues/Neon/migraciones/importaciones/remotos o activaciones comerciales no aprobadas. Evidencias y bloqueos en reporte breve al cerrar.
+
+## Cierre MVP — operación storage y captación (03-11-2026)
+
+Base41b86ab, Live confirmado externamente. No redeploy, env updates, roles, credenciales, migraciones, catálogo o motor de caché. Reutilizar adaptador S3 con diagnóstico opt-in de etapas/códigos permitidos, CLI exclusivamente READ que valide destino original y paquete privado antes de HEAD/GET; no probar PUT sin autorización de carga. Tests de secretos/observador/comandos solo lectura. La CLI no acredita ejecución en Render si se usa desde otra estación.
+
+Ajustar hero/ServiceInquiryCard existentes: guías gratuitas y solicitud de presupuesto únicamente con contacto legalmente revisado; no prometer descargas ausentes, precio o48h. Ampliar preguntas del mailto sin captación/trackers nuevos. Reutilizar paquete original y preparar material de captación privado, demo/imagen auténtica si entorno disponible; no publicar ni contactar. Check/build/Blueprint/SEO/E2E pertinentes, revisión y CI del SHA nuevo. Cierre depende de almacenamiento, licencia/editorial, identidad/contacto, recepción real y aprobación de deploy.
+
+
+### P0 añadido por evidencia real15:20–15:21UTC
+
+- [x] Reproducir espera pool5/2600ms con PostgreSQL real; batchfacetas falla por inicio2s, lecturas secuenciales pasan usando conexión dentro del plazo pg ya existente.
+- [x] Retirar solo transacción facetas READ COMMITTED y secuenciar grupos del listado; conservar RR filas/conteo/cache/gates. Documentar retirada de expiración lógica5s, sin SQLcancel garantizado antes/después.
+- [x] Clasificar mensajes fijos pg uncoded con pruebas reales/negativas; no diagnosticar retrospectivamente error desconocido remoto.
+- [x] Revisión independiente y regresiones afectadas; verificar CI propia y pedir autorización del SHA nuevo antes de deploy. Producción todavía falla según evidencia externa, no resuelta por suite local.
+
+
+Cierre local final: check96/lint/TS/PrismaValidate, PostgreSQL99, build, runtime13, SEO6, Blueprint34(26backend+8UI), catálogo válido65/30/6DRAFT/20categorías/24etiquetas y E2E126/126 PASS. E2E completa repetida tras la corrección P0, no reutilizada del build previo. Revisión independiente sin hallazgos bloqueantes; main remota conservaba41b86ab antes de preparar commits. SHA/CI del candidato se verifican después del push normal, sin despliegue. Producción continúa sin aceptar según evidencia externa.

@@ -31,10 +31,20 @@ const providerError = (error: unknown, names: string[], status: number) => error
 const notFound = (error: unknown) => providerError(error, ['NoSuchKey', 'NotFound'], 404);
 const objectKey = (file: BlueprintFile) => `objects/sha256/${file.sha256}`;
 
+export type StorageDiagnostic = {stage:'blueprint.storage.acl'|'blueprint.storage.policy'|'blueprint.storage.head'|'blueprint.storage.get'|'blueprint.storage.put';code:string;http?:number};
+const safeCodes=new Set(['AccessDenied','InvalidAccessKeyId','SignatureDoesNotMatch','NoSuchBucket','NoSuchBucketPolicy','NoSuchKey','NotFound','NotImplemented','MethodNotAllowed','RequestTimeout','TimeoutError','AbortError','PreconditionFailed']);
+function diagnostic(command:ObjectRequest,error?:unknown):StorageDiagnostic{
+ const stage=command instanceof GetBucketAclCommand?'blueprint.storage.acl':command instanceof GetBucketPolicyCommand?'blueprint.storage.policy':command instanceof HeadObjectCommand?'blueprint.storage.head':command instanceof PutObjectCommand?'blueprint.storage.put':'blueprint.storage.get';
+ if(error===undefined)return {stage,code:'S3_OK'};
+ let name:unknown,status:unknown;
+ try{name=(error as Error)?.name;status=(error as {$metadata?:{httpStatusCode?:unknown}})?.$metadata?.httpStatusCode;}catch{/* Never reflect hostile provider fields. */}
+ return {stage,code:typeof name==='string'&&safeCodes.has(name)?name:'S3_ERROR',...(typeof status==='number'&&Number.isInteger(status)&&status>=100&&status<=599?{http:status}:{})};
+}
+
 export class NeonObjectStorage implements BlueprintStorageProvider {
   private readonly bucket: string;
   private readonly send: ObjectTransport;
-  constructor(env: Record<string, string | undefined> = process.env, transport?: ObjectTransport, private readonly timeoutMs = 8000) {
+  constructor(env: Record<string, string | undefined> = process.env, transport?: ObjectTransport, private readonly timeoutMs = 8000, observe?: (event:StorageDiagnostic)=>void) {
     const config = neonStorageConfiguration(env);
     this.bucket = config.bucket;
     const options: S3ClientConfig = { endpoint: config.endpoint, region: config.region, credentials: config.credentials,
@@ -42,7 +52,7 @@ export class NeonObjectStorage implements BlueprintStorageProvider {
       requestChecksumCalculation: 'WHEN_REQUIRED', responseChecksumValidation: 'WHEN_REQUIRED',
       requestHandler: { connectionTimeout: 3000, requestTimeout: timeoutMs, httpsAgent: { rejectUnauthorized: true } } };
     const client = transport ? null : new S3Client(options);
-    this.send = transport ?? (async (command, signal) => {
+    const send: ObjectTransport = transport ?? (async (command, signal) => {
       const options = { abortSignal: signal };
       if (command instanceof GetObjectCommand) return client!.send(command, options) as Promise<ObjectResult>;
       if (command instanceof PutObjectCommand) { await client!.send(command, options); return {}; }
@@ -50,6 +60,11 @@ export class NeonObjectStorage implements BlueprintStorageProvider {
       if (command instanceof GetBucketPolicyCommand) return client!.send(command, options);
       return client!.send(command, options);
     });
+    const notify=(event:StorageDiagnostic)=>{if(!observe)return;try{void Promise.resolve(observe(event)).catch(()=>{});}catch{/* Diagnostics never change authorization or transport results. */}};
+    this.send=async(command,signal)=>{
+      try{const result=await send(command,signal);notify(diagnostic(command));return result;}
+      catch(error){notify(diagnostic(command,error));throw error;}
+    };
   }
   operationalInfo() { return { backend: 'neon' as const, persistent: true }; }
   async exists(file: BlueprintFile) {

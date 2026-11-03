@@ -46,6 +46,6 @@ test('pilot implementation email is scoped, encoded and never accepts injected c
  const href=leadImplementationInquiry('team@example.invalid',slug)!;const url=new URL(href);
  assert.equal(decodeURIComponent(url.pathname),'team@example.invalid');
  assert.equal(url.searchParams.get('subject'),'[Piloto] Implementación Lead Flow');
- for(const question of ['Company or project','Country','Form platform','Google Sheets availability','Slack availability','Approximate monthly leads','What needs to be automated'])assert.ok(url.searchParams.get('body')!.includes(question));
+ for(const question of ['Company or project','Country','Tools currently used','Required integrations','Form platform','Google Sheets availability','Slack availability','Approximate monthly leads','What needs to be automated'])assert.ok(url.searchParams.get('body')!.includes(question));
  assert.ok(!/450[.,]?000|149|48 hours/.test(href));
 });

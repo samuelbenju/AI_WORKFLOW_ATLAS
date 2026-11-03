@@ -9,6 +9,8 @@ import { homeCatalog } from "@/server/data/public-catalog";
 import { AdvertisingPlacement } from "@/components/advertising/placement";
 import { cache, Suspense } from "react";
 import Loading from "./loading";
+import {legalConfiguration} from "@/lib/legal";
+import {leadImplementationInquiry} from "@/lib/blueprint-display";
 import { serializeJsonLd } from "@/lib/editorial";
 
 export const dynamic = "force-dynamic";
@@ -16,9 +18,11 @@ const homeData=cache(()=>homeCatalog());
 export async function generateMetadata() { const data=await homeData(); return publicMetadata(`${site.name} — Discover What AI Can Actually Do`, "Explore practical AI workflows, powerful tools, and real-world automation ideas.", "/",{absoluteTitle:true,noindex:!data.categories.length&&!data.tools.length&&!data.workflows.length&&!data.articles.length}); }
 
 export default function Home() {
+  const contact=legalConfiguration();
+  const inquiry=contact.reviewed?leadImplementationInquiry(contact.email,"qualify-tally-leads-with-n8n-and-slack"):null;
   return <>
     <section className="hero atlas-hero container" aria-labelledby="hero-title">
-      <div className="hero-copy"><p className="eyebrow"><span className="status-dot" /> YOUR GUIDE TO APPLIED AI</p><h1 id="hero-title">Discover What AI <span className="gradient-text">Can Actually Do</span></h1><p className="hero-description">Explore practical AI workflows, powerful tools, and real-world automation ideas.</p><SearchForm /><div className="hero-actions"><Link href="/use-cases" className="button button-text">Explore practical workflows <ArrowUpRight size={16} aria-hidden="true" /></Link><Link prefetch={false} href="/categories" className="button button-text">Browse by topic <ArrowRight size={16} aria-hidden="true" /></Link></div><p className="hero-note"><Compass size={14} aria-hidden="true" /> Find a direction. Understand the possibilities.</p></div>
+      <div className="hero-copy"><p className="eyebrow"><span className="status-dot" /> YOUR GUIDE TO APPLIED AI</p><h1 id="hero-title">Discover What AI <span className="gradient-text">Can Actually Do</span></h1><p className="hero-description">Explore free automation guides and AI tools for form intake, lead organization and team alerts. Use reviewed downloads when available, or ask about implementation in your own accounts.</p><SearchForm /><div className="hero-actions"><Link href="/use-cases" className="button button-text">Explore Free Workflows <ArrowUpRight size={16} aria-hidden="true" /></Link>{inquiry?<a href={inquiry} className="button button-outline">Request Implementation <ArrowRight size={16} aria-hidden="true" /></a>:<Link prefetch={false} href="/contact" className="button button-text">Implementation contact &amp; availability <ArrowRight size={16} aria-hidden="true" /></Link>}</div><p className="hero-note"><Compass size={14} aria-hidden="true" /> Free guides for small teams. Download links appear only for reviewed, available releases.</p></div>
       <WorkflowMap /><div className="hero-bottom"><span className="mono">LESS HYPE. MORE KNOW-HOW.</span><ArrowDownRight size={20} aria-hidden="true" /></div>
     </section>
     <div className="value-strip"><div className="container"><span><Compass size={16} aria-hidden="true" /> Start with a real problem</span><span><GitBranch size={16} aria-hidden="true" /> Connect tools to practical steps</span><span><ShieldCheck size={16} aria-hidden="true" /> Keep human judgment in the loop</span></div></div>

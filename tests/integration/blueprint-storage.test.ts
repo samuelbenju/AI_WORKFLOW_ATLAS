@@ -178,3 +178,27 @@ test('page availability uses only metadata and preserves missing/unavailable err
   assert.deepEqual(await blueprintAvailability(files, provider), { available: 'available', missing: 'missing', broken: 'unavailable', four: 'available', five: 'available' });
   assert.equal(peak, 4);
 });
+
+test('SIMULATED S3: opt-in diagnostics contain fixed command stages and codes, never provider details',async()=>{
+ const observations:unknown[]=[];
+ const provider=new NeonObjectStorage(env,async()=>{throw Object.assign(Error('private credential or URL must never leave the boundary'),{name:'AccessDenied',$metadata:{httpStatusCode:403,requestId:'private-request-id'}});},1000,event=>observations.push(event));
+ await assert.rejects(provider.exists(file));
+ assert.deepEqual(observations,[{stage:'blueprint.storage.acl',code:'AccessDenied',http:403}]);
+ assert.ok(!JSON.stringify(observations).includes('private'));
+});
+test('SIMULATED S3: read-only probe records ACL, policy, HEAD and GET without PUT or privacy bypass',async()=>{
+ const mock=mockStorage(),events:unknown[]=[];
+ const provider=new NeonObjectStorage(env,mock.transport,1000,event=>events.push(event));
+ assert.equal(await provider.exists(file),false);assert.deepEqual(await provider.inspect(file),{exists:false,integrity:'missing'});
+ assert.ok(events.length>=6);assert.ok(!mock.calls.includes('PutObjectCommand'));
+ // A diagnostic listener must not be able to change a successful authorization.
+ const isolated=new NeonObjectStorage(env,mock.transport,1000,()=>{throw Error('observer failure');});
+ assert.equal(await isolated.exists(file),false);
+ mock.public();await assert.rejects(provider.exists(file));
+});
+
+test('SIMULATED S3: rejected asynchronous diagnostic observers do not escape as unhandled rejections',async()=>{
+ const mock=mockStorage();const provider=new NeonObjectStorage(env,mock.transport,1000,async()=>{throw Error('Isolated observer rejection');});
+ assert.equal(await provider.exists(file),false);
+ await new Promise(resolve=>setImmediate(resolve));
+});

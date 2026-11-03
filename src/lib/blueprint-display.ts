@@ -17,7 +17,7 @@ export function downloadFailure(status: number) {
 // This proposal is not a booking, a price or an operator availability promise.
 export function leadImplementationInquiry(email:string|null,guideSlug:string){
   if(guideSlug!=='qualify-tally-leads-with-n8n-and-slack'||!email||!emailSchema.safeParse(email).success)return null;
-  const body=['Company or project:','Country:','Form platform:','Google Sheets availability:',
+  const body=['Company or project:','Country:','Tools currently used:','Required integrations:','Form platform:','Google Sheets availability:',
     'Slack availability:','Approximate monthly leads:','What needs to be automated:','',
     'Please do not include passwords, API keys, customer data or other credentials.'].join('\n');
   return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent('[Piloto] Implementación Lead Flow')}&body=${encodeURIComponent(body)}`;

@@ -438,3 +438,13 @@ Base99479df/main limpia; propietario confirma Live99479df/Auto-Deploy Off. Cache
 ZIP privado original SHA0349bfb…ac5c55 presente/conservado. n8n2.45.6 reejecutado17/17 en copia aislada, proveedores sintéticos, cleanup propio; guías originales inglesas intactas. QA paquete real localHTTP/integridad/reinicio/retirada; no descarga Neon real. CTA piloto acotado a guía/release/email revisados, mailto con preguntas, sin precio/plazo/CRM/envíos. Bucket/scopes/contacto/legal pendientes según propietario; no publicación o activaciones. Ver docs/MVP_RELEASE.md para aceptación y acciones mínimas externas. E2E/CI del nuevo SHA se registran al cierre.
 
 Cierre local MVP: check94/lint/TS, DB99, build, runtime11, SEO6, Blueprint35 (incluye4paquete original), n8n17 y E2E126/126 (5,0min) PASS. Catálogo validado65/30/6DRAFT/20/24, sin reimportar. Minor de revisión de evidencia corregido y reinicio real Next probado; sin hallazgos bloqueantes. Git/secretos y CI del candidato se comprueban al publicar; no desplegar ni afirmar MVP productivo aceptado.
+
+
+## Cierre MVP y P0 de facetas — 03-11-2026
+
+Live41b86ab confirmado externamente15:20–15:21UTC; aceptación FALLIDA por200conerror, ETIMEDOUT y P2028/TRANSACTION_START_TIMEOUT. Se reproduce espera real del pool2600ms→batchP2028~2053ms; facetas independientes secuenciales→~2610ms/2SQL. Conexiones retenidas5000ms siguen fallando. Sin causalidad física remota certificada. Se retira inicio/expiración lógica de facetas, no RR filas/conteo ni límites del pool; ver docs/MVP_CLOSURE.md. Clasificación pg segura sin mensajes privados.
+
+Sonda privada exclusivamente READ para storage del destino original, diagnóstico S3 opt-in y pruebas, sin bypass ACL/policy o PUT real. Hero/CTA existentes y políticas borrador ajustados, sin precio/plazo/contacto inventado. Material manual de captación privado y diagrama derivado del JSON, no captura de ejecución; originalZIP íntegro. Carga/persistencia/publicación/licencia/identidad/contacto/recepción y despliegue requieren verificaciones/aprobaciones propias. Sin cambios remotos/flags/datos/migraciones/dependencias; CI del candidato se observa después de push normal.
+
+
+Cierre local final: check96/lint/TS/PrismaValidate, PostgreSQL99, build, runtime13, SEO6, Blueprint34(26backend+8UI), catálogo válido65/30/6DRAFT/20categorías/24etiquetas y E2E126/126 PASS. E2E completa repetida tras la corrección P0, no reutilizada del build previo. Revisión independiente sin hallazgos bloqueantes; main remota conservaba41b86ab antes de preparar commits. SHA/CI del candidato se verifican después del push normal, sin despliegue. Producción continúa sin aceptar según evidencia externa.

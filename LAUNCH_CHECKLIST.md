@@ -129,3 +129,18 @@ Evidencia03-11 aportada por propietario:4bcf3aa ya Live y contenido recuperado03
 - [ ] Propietario verifica/configura bucket privado/cuotas/scopes y carga/revisa/publica original por el motor existente, prueba SHA/HTTP/persistencia/retiro real. No publicar para esquivar bloqueo storage.
 - [ ] Aprobar datos legales/contacto/autoría/licencia y alcance comercial, después publicación. No asumir domicilio, precio o48h aprobados.
 - [ ] Autorizar nuevo SHA con CI y aceptar catálogo+Blueprint+CTA reales en Render, incluidos arranque/HTTP200conerror/readiness/logs. Mantener Free sin SLA, indexación/AdSense/pagos/IA/correo desactivados.
+
+
+## Cierre MVP — estado actualizado03-11, sin deploy
+
+- [x] Reproducción RED→GREEN del batch innecesario de facetas y códigos seguros del pool; lectura secuencial y menor solapamiento por listado. No certifica causalidad física de los fallos remotos.
+- [x] Sonda storage READ preparada para destino/paquete original; privacidad fail-closed conservada, sinPUT/credenciales rotadas/variables actualizadas.
+- [x] Hero/contacto/presupuesto reutilizados con gates y políticas borrador, sin precio/plazo/identidad inventada; material manual privado sin publicación.
+- [ ] Aceptar producción tras autorizar nuevoSHA/CI y comprobar HTTP+contenido/readiness/logs repetidos. Live41b86ab falló15:20–15:21UTC; health200 no cierraP0.
+- [ ] Verificar storage runtime y permisos/ACL/policy reales, aprobar carga/licencia/editorial y descarga persistente íntegra/revocable; bucket vacío reportado no es producto descargable.
+- [ ] Aprobar identidad/contacto/políticas y disponibilidad comercial; probar recepción real y proveedores con cuentas autorizadas. No activar indexación/AdSense/pagos/IA por estas pruebas.
+
+Reporte: docs/MVP_CLOSURE.md. Incidente de variables→deploy implícito registrado; mantenerAuto-DeployOff y no guardar cambios remotos sin conocer/autorizar el efecto.
+
+
+Cierre local final: check96/lint/TS/PrismaValidate, PostgreSQL99, build, runtime13, SEO6, Blueprint34(26backend+8UI), catálogo válido65/30/6DRAFT/20categorías/24etiquetas y E2E126/126 PASS. E2E completa repetida tras la corrección P0, no reutilizada del build previo. Revisión independiente sin hallazgos bloqueantes; main remota conservaba41b86ab antes de preparar commits. SHA/CI del candidato se verifican después del push normal, sin despliegue. Producción continúa sin aceptar según evidencia externa.
