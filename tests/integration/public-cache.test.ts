@@ -47,7 +47,7 @@ test('fresh client caches and free-text searches never reuse another client cach
   const start=count();await homeCatalog('published');assert.ok(count()-start>1);
   const q={q:'isolated search',sort:'recent' as const,page:1};
   let before=count();await queryTools(q);const first=count()-before;
-  before=count();await queryTools(q);assert.equal(count()-before,first);assert.ok(first>1);
+  before=count();await queryTools(q);assert.equal(count()-before,first);assert.equal(first,1);
  });
 });
 

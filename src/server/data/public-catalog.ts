@@ -2,7 +2,7 @@ import "server-only";
 import { cachedPublicRead } from "./public-read-cache";
 import { publishedArticleWhere,articleCardSelect } from "@/server/editorial/public";
 import { cache } from "react";
-import type { Prisma, PrismaClient } from "@/generated/prisma/client";
+import { Prisma, type PrismaClient } from "@/generated/prisma/client";
 import { databaseOperation } from "@/server/db/diagnostics";
 import type { DatabaseStage } from "@/lib/database-diagnostics";
 import { getDatabase } from "@/server/db/client";
@@ -53,34 +53,39 @@ export async function getCatalogFacets(kind: "tools" | "use-cases", mode = catal
   },db,mode==='published'?JSON.stringify(['facets',kind,mode]):undefined);
 }
 
+// One PostgreSQL statement supplies rows, taxonomy and total from one snapshot.
+// All identifiers below come exclusively from this closed server-side mapping.
+async function directoryPage<T>(db:PrismaClient,kind:'Tool'|'UseCase',query:CatalogQuery,mode:CatalogMode){
+  const table=Prisma.raw('"'+kind+'"'),categoryJoin=Prisma.raw('"_CategoryTo'+kind+'"'),tagJoin=Prisma.raw('"_TagTo'+kind+'"');
+  const name=Prisma.raw(kind==='Tool'?'t."name"':'t."title"');
+  const order=query.sort==='recent'?Prisma.sql`t."createdAt" DESC,t.id ASC`:Prisma.sql`${name} ${Prisma.raw(query.sort==='name'?'ASC':'DESC')},t.id ASC`;
+  const filters=[mode==='demo'?Prisma.sql`t."isDemo"=true AND t.status::text='DRAFT'`:Prisma.sql`t."isDemo"=false AND t.status::text='PUBLISHED' AND t."publishedAt"<=${new Date()}`];
+  if(query.q){const pattern='%'+query.q+'%';filters.push(kind==='Tool'?Prisma.sql`(t.name ILIKE ${pattern} OR t.summary ILIKE ${pattern})`:Prisma.sql`(t.title ILIKE ${pattern} OR t.problem ILIKE ${pattern} OR t.solution ILIKE ${pattern})`);}
+  if(query.category)filters.push(Prisma.sql`EXISTS(SELECT 1 FROM ${categoryJoin} j JOIN "Category" c ON c.id=j."A" WHERE j."B"=t.id AND c.slug=${query.category})`);
+  if(query.tag)filters.push(Prisma.sql`EXISTS(SELECT 1 FROM ${tagJoin} j JOIN "Tag" c ON c.id=j."A" WHERE j."B"=t.id AND c.slug=${query.tag})`);
+  if(kind==='UseCase'&&query.difficulty)filters.push(Prisma.sql`t.difficulty::text=${query.difficulty}`);
+  const columns=Prisma.raw(kind==='Tool'?'t.name,t.summary':'t.title,t.problem,t.difficulty');
+  const fields=kind==='Tool'?Prisma.sql`jsonb_build_object('name',t.name,'summary',t.summary)`:Prisma.sql`jsonb_build_object('title',t.title,'problem',t.problem,'difficulty',t.difficulty)`;
+  const [result]=await db.$queryRaw<{items:T[];total:number}[]>(Prisma.sql`
+    WITH filtered AS (SELECT t.id,t.slug,t."isDemo",t.featured,t."createdAt",${columns} FROM ${table} t WHERE ${Prisma.join(filters,' AND ')}),
+    paged AS (SELECT t.*,row_number() OVER(ORDER BY ${order}) AS position FROM filtered t ORDER BY ${order} LIMIT ${CATALOG_PAGE_SIZE} OFFSET ${(query.page-1)*CATALOG_PAGE_SIZE})
+    SELECT (SELECT count(*)::int FROM filtered) AS total,
+      COALESCE((SELECT jsonb_agg(jsonb_build_object('id',t.id,'slug',t.slug,'isDemo',t."isDemo",'featured',t.featured,
+        'categories',COALESCE((SELECT jsonb_agg(jsonb_build_object('slug',c.slug,'name',c.name) ORDER BY c.id) FROM ${categoryJoin} j JOIN "Category" c ON c.id=j."A" WHERE j."B"=t.id),'[]'::jsonb),
+        'tags',COALESCE((SELECT jsonb_agg(jsonb_build_object('slug',c.slug,'name',c.name) ORDER BY c.id) FROM ${tagJoin} j JOIN "Tag" c ON c.id=j."A" WHERE j."B"=t.id),'[]'::jsonb)) || ${fields} ORDER BY t.position) FROM paged t),'[]'::jsonb) AS items`);
+  if(!result)throw Error('CATALOG_RESULT_MISSING');
+  return {...result,pageCount:Math.ceil(result.total/CATALOG_PAGE_SIZE)};
+}
+
 export async function queryTools(query: CatalogQuery, mode = catalogMode(), db?: PrismaClient) {
   return readCatalog("catalog.tools",async (db) => {
-    const where: Prisma.ToolWhereInput = { ...visibility(mode),
-      ...(query.q ? { OR: [{ name: { contains: query.q, mode: "insensitive" } }, { summary: { contains: query.q, mode: "insensitive" } }] } : {}),
-      ...(query.category ? { categories: { some: { slug: query.category } } } : {}),
-      ...(query.tag ? { tags: { some: { slug: query.tag } } } : {}),
-    };
-    const orderBy: Prisma.ToolOrderByWithRelationInput[] = query.sort === "recent" ? [{ createdAt: "desc" }, { id: "asc" }] : [{ name: query.sort === "name" ? "asc" : "desc" }, { id: "asc" }];
-    const [items, total] = await db.$transaction([
-      db.tool.findMany({ where, select: toolCardSelect, orderBy, take: CATALOG_PAGE_SIZE, skip: (query.page - 1) * CATALOG_PAGE_SIZE }), db.tool.count({ where }),
-    ], { isolationLevel: "RepeatableRead" });
-    return { items, total, pageCount: Math.ceil(total / CATALOG_PAGE_SIZE) };
+    return directoryPage<PublicToolCard>(db,'Tool',query,mode);
   },db,mode==='published'&&!query.q?JSON.stringify(['tools',mode,query]):undefined);
 }
 
 export async function queryWorkflows(query: CatalogQuery, mode = catalogMode(), db?: PrismaClient) {
   return readCatalog("catalog.use-cases",async (db) => {
-    const where: Prisma.UseCaseWhereInput = { ...visibility(mode),
-      ...(query.q ? { OR: [{ title: { contains: query.q, mode: "insensitive" } }, { problem: { contains: query.q, mode: "insensitive" } }, { solution: { contains: query.q, mode: "insensitive" } }] } : {}),
-      ...(query.category ? { categories: { some: { slug: query.category } } } : {}),
-      ...(query.tag ? { tags: { some: { slug: query.tag } } } : {}),
-      ...(query.difficulty ? { difficulty: query.difficulty } : {}),
-    };
-    const orderBy: Prisma.UseCaseOrderByWithRelationInput[] = query.sort === "recent" ? [{ createdAt: "desc" }, { id: "asc" }] : [{ title: query.sort === "name" ? "asc" : "desc" }, { id: "asc" }];
-    const [items, total] = await db.$transaction([
-      db.useCase.findMany({ where, select: workflowCardSelect, orderBy, take: CATALOG_PAGE_SIZE, skip: (query.page - 1) * CATALOG_PAGE_SIZE }), db.useCase.count({ where }),
-    ], { isolationLevel: "RepeatableRead" });
-    return { items, total, pageCount: Math.ceil(total / CATALOG_PAGE_SIZE) };
+    return directoryPage<PublicWorkflowCard>(db,'UseCase',query,mode);
   },db,mode==='published'&&!query.q?JSON.stringify(['workflows',mode,query]):undefined);
 }
 

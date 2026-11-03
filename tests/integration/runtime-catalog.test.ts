@@ -36,6 +36,15 @@ test('published fixture content and relationships survive concurrent read-only c
   await writer.tag.create({data:{id:ids.tag,slug:`runtime-${suffix}`,name:'Isolated runtime tag'}});
   await writer.tool.create({data:{id:ids.tool,slug:`runtime-${suffix}`,name:'Isolated published tool',summary:'Runtime fixture, not a real tool.',description:'Temporary database fixture.',websiteUrl:'https://example.invalid',status:'PUBLISHED',publishedAt,featured:true,categories:{connect:{id:ids.category}},tags:{connect:{id:ids.tag}}}});
   await writer.useCase.create({data:{id:ids.workflow,slug:`runtime-${suffix}`,title:'Isolated published workflow',problem:'Runtime fixture.',solution:'Test fixture only.',instructions:[],references:[],limitations:'Not a real automation.',status:'PUBLISHED',publishedAt,featured:true,tools:{connect:{id:ids.tool}},categories:{connect:{id:ids.category}},tags:{connect:{id:ids.tag}}}});
+  for(const sort of ['recent','name','name-desc'] as const)for(const page of [1,2,999])for(const q of ['','fixture',"%' OR TRUE --"]){
+   const filters={q,sort,page,category:`runtime-${suffix}`,tag:`runtime-${suffix}`};
+   const tools=await queryTools(filters,'published',db),workflows=await queryWorkflows({...filters,difficulty:'BEGINNER'},'published',db);
+   const expected=q!=="%' OR TRUE --";
+   // Search uses public card fields for tools and title/problem/solution for guides.
+   assert.equal(tools.total,expected?1:0);assert.equal(workflows.total,q=== "%' OR TRUE --"?0:1);
+   assert.equal(tools.items.length,page===1&&expected?1:0);assert.equal(workflows.items.length,page===1&&q!=="%' OR TRUE --"?1:0);
+   if(workflows.items.length){assert.equal(workflows.items[0]?.categories[0]?.slug,filters.category);assert.equal(workflows.items[0]?.tags[0]?.slug,filters.tag);}
+  }
   const home=await homeCatalog('published',db);
   assert.equal(home.tools[0]?.id,ids.tool);assert.equal(home.workflows[0]?.id,ids.workflow);
   assert.equal(home.tools[0]?.categories[0]?.slug,`runtime-${suffix}`);assert.equal(home.tools[0]?.tags[0]?.slug,`runtime-${suffix}`);
@@ -141,7 +150,7 @@ test('production HTTP serves normal empty pages and keeps detailed readiness pri
    response=await fetch(origin+'/api/internal/readiness?catalog=1',{headers:{Authorization:'Bearer '+token}});assert.equal(response.status,503);const result=await response.json();assert.equal(result.diagnostic.stage,'catalog.home');assert.ok(result.diagnostic.codes.includes('42501'));
    const body=JSON.stringify(result);assert.ok(!body.includes(role)&&!body.includes('_CategoryToTool')&&!body.includes(url));
    const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
-   try{const page=await browser.newPage();const response=await page.goto(origin+'/tools');await page.getByRole('heading',{name:'The atlas is temporarily unavailable.',exact:true}).waitFor();assert.ok(response&&[200,500,503].includes(response.status()));console.log(JSON.stringify({experiment:'catalog-functional-rejection',http:response.status(),catalogUsable:false}));assert.equal(await page.getByText('No tools match just yet.',{exact:true}).count(),0);}finally{await browser.close();}
+   try{const page=await browser.newPage();for(const route of ['/tools','/use-cases?q=presentation']){const response=await page.goto(origin+route);await page.getByRole('heading',{name:'The atlas is temporarily unavailable.',exact:true}).waitFor();assert.ok(response&&[200,500,503].includes(response.status()));console.log(JSON.stringify({experiment:'catalog-functional-rejection',http:response.status(),catalogUsable:false}));assert.equal(await page.getByText(route.startsWith('/tools')?'No tools match just yet.':'No workflows match just yet.',{exact:true}).count(),0);}}finally{await browser.close();}
   }finally{await owner.query(`GRANT SELECT ON TABLE public."_CategoryToTool" TO "${role}"`);}
  });
 });
@@ -205,4 +214,60 @@ test('a real exhausted pg pool reaches its existing 5s queue deadline with a saf
     assert.ok(error instanceof DatabaseOperationError);assert.deepEqual(error.diagnostic.codes,['PG_POOL_QUEUE_TIMEOUT']);return true;
   });
  }finally{for(const client of held)client.release();await constrained.$disconnect();await pool.end();}
+});
+
+test('directory reads survive 2.6s pool acquisition without a Prisma transaction',async()=>{
+ for(const load of [queryTools,queryWorkflows]){
+  const pool=new pg.Pool({connectionString:url,max:5,connectionTimeoutMillis:5000,idleTimeoutMillis:30000});
+  const client=new PrismaClient({adapter:new PrismaPg(pool),log:[{emit:'event',level:'query'}]});let statements=0;client.$on('query',()=>statements++);
+  const held:pg.PoolClient[]=[];let timer:ReturnType<typeof setTimeout>|undefined;
+  try{for(let i=0;i<5;i++)held.push(await pool.connect());timer=setTimeout(()=>{for(const c of held.splice(0))c.release();},2600);
+   const start=performance.now();await load({...query,q:'presentation'},'published',client);assert.equal(statements,1);
+   console.log(JSON.stringify({experiment:'directory-acquisition',ms:Math.round(performance.now()-start),statements}));
+  }finally{if(timer)clearTimeout(timer);for(const c of held)c.release();await client.$disconnect();await pool.end();}
+ }
+});
+
+test('directory strategy comparison and bounded concurrent search reads on a five-connection pool',async()=>{
+ const pool=new pg.Pool({connectionString:url,max:5,connectionTimeoutMillis:5000,idleTimeoutMillis:30000});
+ const client=new PrismaClient({adapter:new PrismaPg(pool),log:[{emit:'event',level:'query'}]});let statements=0;client.$on('query',()=>statements++);
+ try{
+  const alternatives={batch:()=>client.$transaction([client.useCase.findMany({take:6}),client.useCase.count()],{isolationLevel:'RepeatableRead'}),sequential:async()=>{await client.useCase.findMany({take:6});await client.useCase.count();},parallel:()=>Promise.all([client.useCase.findMany({take:6}),client.useCase.count()]),single:()=>queryWorkflows({...query,q:'presentation'},'published',client)};
+  for(const [strategy,load] of Object.entries(alternatives)){
+   const start=performance.now(),before=statements;await load();console.log(JSON.stringify({experiment:'directory-strategy',strategy,ms:Math.round(performance.now()-start),statements:statements-before}));
+  }
+  for(const concurrency of [1,5,10,20]){
+   let peakUsed=0,peakPending=0;const sample=()=>{peakUsed=Math.max(peakUsed,pool.totalCount-pool.idleCount);peakPending=Math.max(peakPending,pool.waitingCount);};
+   const timer=setInterval(sample,1),start=performance.now(),before=statements;
+   try{await Promise.all(Array.from({length:concurrency},async(_,i)=>{const load=i%2?queryTools:queryWorkflows;const result=await load({...query,q:'presentation',category:'absent',tag:'absent',difficulty:'BEGINNER',page:2},'published',client);assert.deepEqual(result,{items:[],total:0,pageCount:0});sample();}));}
+   finally{clearInterval(timer);}
+   assert.equal(statements-before,concurrency);assert.ok(peakUsed<=5);
+   console.log(JSON.stringify({experiment:'directory-concurrency',concurrency,ms:Math.round(performance.now()-start),statements:statements-before,peakUsed,peakPending,errors:0}));
+  }
+ }finally{await client.$disconnect();await pool.end();}
+});
+
+test('an interrupted directory statement fails safely and reconnects without a retry',async()=>{
+ if(!['127.0.0.1','localhost','[::1]'].includes(new URL(ownerUrl).hostname))throw Error('Connection interruption tests require loopback PostgreSQL');
+ const application=`runtime-interrupt-${randomUUID()}`;
+ const pool=new pg.Pool({connectionString:url,max:1,connectionTimeoutMillis:5000,application_name:application});
+ const interrupted=new PrismaClient({adapter:new PrismaPg(pool),log:[]});
+ let pending:Promise<{error?:unknown;unexpectedSuccess?:boolean}>|undefined;
+ try{
+  await owner.query('BEGIN');await owner.query('LOCK TABLE "Tool" IN ACCESS EXCLUSIVE MODE');
+  pending=queryTools({...query,q:'presentation'},'published',interrupted).then(()=>({unexpectedSuccess:true}),error=>({error}));
+  let pid:number|undefined;
+  for(let attempt=0;attempt<100;attempt++){
+   await owner.query('SELECT pg_stat_clear_snapshot()');
+   const rows=(await owner.query("SELECT pid FROM pg_stat_activity WHERE application_name=$1 AND datname=current_database() AND wait_event_type='Lock' AND pid<>pg_backend_pid()",[application])).rows;
+   assert.ok(rows.length<=1);if(rows.length===1){pid=rows[0].pid;break;}
+   await new Promise(resolve=>setTimeout(resolve,20));
+  }
+  assert.ok(pid&&Number.isInteger(pid));
+  assert.equal((await owner.query('SELECT pg_terminate_backend($1) AS terminated',[pid])).rows[0]?.terminated,true);
+  const outcome=await pending;assert.ok(outcome.error instanceof DatabaseOperationError);assert.equal(outcome.unexpectedSuccess,undefined);
+  assert.equal(outcome.error.diagnostic.stage,'catalog.tools');assert.equal(outcome.error.cause,undefined);
+  const diagnostic=JSON.stringify(outcome.error.diagnostic);assert.ok(!diagnostic.includes(url)&&!diagnostic.includes(application));
+  await owner.query('ROLLBACK');assert.equal((await queryTools({...query,q:'presentation'},'published',interrupted)).items.length,0);
+ }finally{await owner.query('ROLLBACK');if(pending)await pending;await interrupted.$disconnect();await pool.end();}
 });

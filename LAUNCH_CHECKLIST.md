@@ -144,3 +144,11 @@ Reporte: docs/MVP_CLOSURE.md. Incidente de variables→deploy implícito registr
 
 
 Cierre local final: check96/lint/TS/PrismaValidate, PostgreSQL99, build, runtime13, SEO6, Blueprint34(26backend+8UI), catálogo válido65/30/6DRAFT/20categorías/24etiquetas y E2E126/126 PASS. E2E completa repetida tras la corrección P0, no reutilizada del build previo. Revisión independiente sin hallazgos bloqueantes; main remota conservaba41b86ab antes de preparar commits. SHA/CI del candidato se verifican después del push normal, sin despliegue. Producción continúa sin aceptar según evidencia externa.
+
+
+## P0 directorios — 03-11-2026, base569b00e
+
+RED real queryTools búsqueda con pool5 ocupado2600ms→P2028inicio~2063ms. Estrategias A/B dosSQL sin snapshot común; C unaSQL parametrizada con filas/taxonomía/conteo en snapshot único, elegida sin cambiar caché/pool/home/facetas. GREEN tools2607ms/use-cases2605ms. Concurrencia1/5/10/20→1/5/10/20SQL y pool≤5; cifras locales, no Neon/Render. Regresiones de filtros/paginación/inyección/interrupción/recuperación y controles existentes. No retries/timeouts nuevos/deploy/servicios/datos/migraciones/Blueprint. Ver docs/P0_DIRECTORY_READS.md; contacto solo informe separado docs/CONTACT_READINESS.md. Suites finales/CI propia se registran al cierre; producción sin certificar.
+
+
+Validación local final: check96 (lint/TS/Prisma/unitarias), PostgreSQL99, build, runtime16, SEO6 y E2E126/126 PASS. Runtime verifica /tools y /use-cases?q=presentation con error visible y HTTP200/500/503 como fallo funcional; no catálogo vacío ficticio. Revisión independiente sin bloqueos; materialización reducida a columnas de tarjeta y riesgo de casts enum documentado. Sin cambios en schema/16migraciones/deps/Blueprint/envs/Neon/Render. CI propia se verifica tras push, no reutilizar CI base. Despliegue y validación productiva pendientes de autorización.
