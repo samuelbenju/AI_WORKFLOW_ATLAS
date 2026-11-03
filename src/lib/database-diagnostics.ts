@@ -19,6 +19,7 @@ const permittedCodes = new Set([
   'DEPTH_ZERO_SELF_SIGNED_CERT','SELF_SIGNED_CERT_IN_CHAIN',
   'TLS_CONNECTION_ERROR','DATABASE_NOT_REACHABLE','DATABASE_URL_INVALID',
   'PRISMA_INITIALIZATION_ERROR','PRISMA_VALIDATION_ERROR','READINESS_TIMEOUT',
+  'TRANSACTION_START_TIMEOUT','TRANSACTION_EXECUTION_TIMEOUT',
   'UNCLASSIFIED_DATABASE_ERROR',
 ]);
 const kindCodes: Record<string,string> = {
@@ -31,6 +32,20 @@ const kindCodes: Record<string,string> = {
 };
 export type DatabaseDiagnostic = {stage:DatabaseStage;codes:string[]};
 function field(value:object,key:string):unknown {try{return Reflect.get(value,key);}catch{return undefined;}}
+function transactionSubtype(value:object):string|undefined {
+  if(field(value,'code')!=='P2028')return;
+  const meta=field(value,'meta');
+  if(meta&&typeof meta==='object'){
+    const operation=field(meta,'operation'),timeout=field(meta,'timeout'),timeTaken=field(meta,'timeTaken');
+    if(typeof operation==='string'&&['query','commit','rollback'].includes(operation)
+      &&typeof timeout==='number'&&Number.isSafeInteger(timeout)&&timeout>0
+      &&typeof timeTaken==='number'&&Number.isSafeInteger(timeTaken)&&timeTaken>=timeout)return 'TRANSACTION_EXECUTION_TIMEOUT';
+  }
+  // Prisma 7.10.1 supplies no timing metadata for start expiry. Inspect only its
+  // fixed suffix; never return, log or retain the contextual message/SQL prefix.
+  const message=field(value,'message');
+  if(typeof message==='string'&&message.endsWith('Transaction API error: Unable to start a transaction in the given time.'))return 'TRANSACTION_START_TIMEOUT';
+}
 export function databaseDiagnostic(error:unknown,fallback:DatabaseStage):DatabaseDiagnostic {
   let stage=stageSet.has(fallback)?fallback:'database.unknown' as DatabaseStage;
   const codes=new Set<string>(),seen=new Set<object>();
@@ -42,6 +57,7 @@ export function databaseDiagnostic(error:unknown,fallback:DatabaseStage):Databas
   function visit(value:unknown,depth:number){
     if(!value||typeof value!=='object'||seen.has(value)||depth>6||seen.size>=32)return;
     seen.add(value);
+    const subtype=transactionSubtype(value);if(subtype)codes.add(subtype);
     for(const key of ['code','originalCode','sqlState']){const code=field(value,key);if(typeof code==='string'&&permittedCodes.has(code))codes.add(code);}
     for(const key of ['kind','name']){const kind=field(value,key);if(typeof kind==='string'&&Object.hasOwn(kindCodes,kind))codes.add(kindCodes[kind]!);}
     for(const key of ['cause','meta','driverAdapterError','error'])visit(field(value,key),depth+1);

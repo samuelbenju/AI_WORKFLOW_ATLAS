@@ -100,3 +100,10 @@ Actualización 26-10-2026 (America/Bogota): Fases 1–12 respaldadas y Render Fr
 - [ ] Para experimentos: baseline, población/denominador, ventana, umbral y parada definidos antes de observar; sin datos declarar inconcluso.
 
 Continuidad 30-10-2026: [preflight y operación concreta de solo lectura](docs/RENDER_STAGING.md#preflight-de-continuidad--30-10-2026-americabogota). Render MCP funciona en otro cliente según el propietario, pero no está expuesto a esta sesión Cloud. SHA Live/configuración aportados por propietario pendientes de reconfirmar; P2028 histórico no se da por vigente ni corregido. No recrear el runtime existente. Las aprobaciones de deploy, storage, editorial, legales, Google y comercial siguen separadas.
+
+## P0 — catálogo, incidente del 02-11-2026
+
+- [x] Reproducir y distinguir P2028 de inicio/ejecución en PostgreSQL aislado y conservar errores seguros; controles reales de PgBouncer/concurrencia/recuperación. Check93, DB91, build, runtime10, SEO5 y E2E122 locales PASS; no equivalen a Neon o Render.
+- [ ] Confirmar subtipo/causa de Render y corregirla: logs aportados solo P2028, sin causa suficiente; [matriz/evidencia](docs/RENDER_CATALOG_DIAGNOSTICS.md#p0--incidente-del-02-11-2026-evidencia-y-límites). No aumentar plazos o pool por intuición.
+- [ ] Si se decide usar el diagnóstico nuevo: autorizar SHA exacto tras CI/preflight y desplegar por separado. No presentarlo como solución definitiva. Repetir HTTP+contenido/readiness/logs y condición de arranque autorizada; un health200 no certifica catálogo.
+- [ ] Cerrar reparación productiva solo con contenido real estable, causa respaldada y comprobaciones posteriores; hasta entonces lanzamiento/indexación/comercial continúan sin aprobación.

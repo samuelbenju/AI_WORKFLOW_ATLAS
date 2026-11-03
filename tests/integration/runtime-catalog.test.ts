@@ -1,6 +1,9 @@
 import {test,after,before} from 'node:test';
 import {strict as assert} from 'node:assert';
+import {randomUUID} from 'node:crypto';
 import pg from 'pg';
+import {PrismaPg} from '@prisma/adapter-pg';
+import {PrismaClient} from '../../src/generated/prisma/client';
 import {chromium} from '@playwright/test';
 import {createDatabaseClient} from '../../src/server/db/client';
 import {homeCatalog,queryTools,queryWorkflows,getCatalogFacets} from '../../src/server/data/public-catalog';
@@ -20,6 +23,28 @@ test('empty public queries work with a read-only runtime role and no access to m
  for(const result of [await queryTools(query,'published',db),await queryWorkflows(query,'published',db)]){assert.equal(result.total,0);assert.deepEqual(result.items,[]);assert.equal(result.pageCount,0);}
  for(const kind of ['tools','use-cases'] as const)assert.deepEqual(await getCatalogFacets(kind,'published',db),{categories:[],tags:[]});
  assert.equal((await readiness(db,{catalog:true})).catalogVerified,true);
+});
+
+test('published fixture content and relationships survive concurrent read-only catalog batches',async()=>{
+ const writer=createDatabaseClient(ownerUrl);
+ const ids={category:randomUUID(),tag:randomUUID(),tool:randomUUID(),workflow:randomUUID()};
+ const suffix=randomUUID(),publishedAt=new Date(Date.now()-1000);
+ try{
+  await writer.category.create({data:{id:ids.category,slug:`runtime-${suffix}`,name:'Isolated runtime category'}});
+  await writer.tag.create({data:{id:ids.tag,slug:`runtime-${suffix}`,name:'Isolated runtime tag'}});
+  await writer.tool.create({data:{id:ids.tool,slug:`runtime-${suffix}`,name:'Isolated published tool',summary:'Runtime fixture, not a real tool.',description:'Temporary database fixture.',websiteUrl:'https://example.invalid',status:'PUBLISHED',publishedAt,featured:true,categories:{connect:{id:ids.category}},tags:{connect:{id:ids.tag}}}});
+  await writer.useCase.create({data:{id:ids.workflow,slug:`runtime-${suffix}`,title:'Isolated published workflow',problem:'Runtime fixture.',solution:'Test fixture only.',instructions:[],references:[],limitations:'Not a real automation.',status:'PUBLISHED',publishedAt,featured:true,tools:{connect:{id:ids.tool}},categories:{connect:{id:ids.category}},tags:{connect:{id:ids.tag}}}});
+  const home=await homeCatalog('published',db);
+  assert.equal(home.tools[0]?.id,ids.tool);assert.equal(home.workflows[0]?.id,ids.workflow);
+  assert.equal(home.tools[0]?.categories[0]?.slug,`runtime-${suffix}`);assert.equal(home.tools[0]?.tags[0]?.slug,`runtime-${suffix}`);
+  const results=await Promise.all(Array.from({length:8},async()=>{
+   const [tools,workflows,facets]=await Promise.all([queryTools(query,'published',db),queryWorkflows(query,'published',db),getCatalogFacets('tools','published',db)]);
+   assert.equal(tools.total,1);assert.equal(workflows.total,1);assert.equal(facets.categories[0]?.count,1);return true;
+  }));assert.equal(results.length,8);
+ }finally{
+  await writer.useCase.deleteMany({where:{id:ids.workflow}});await writer.tool.deleteMany({where:{id:ids.tool}});
+  await writer.category.deleteMany({where:{id:ids.category}});await writer.tag.deleteMany({where:{id:ids.tag}});await writer.$disconnect();
+ }
 });
 
 test('missing connection configuration is diagnosed inside the catalog boundary',async()=>{
@@ -44,6 +69,63 @@ test('missing implicit join permission still throws and logs only stage plus all
  assert.equal((await homeCatalog('published',db)).tools.length,0);
 });
 
+test('real batch pool exhaustion is distinguished from an execution expiry and recovers after release',async()=>{
+ const pool=new pg.Pool({connectionString:url,max:5,connectionTimeoutMillis:5000,idleTimeoutMillis:30000});
+ const constrained=new PrismaClient({adapter:new PrismaPg(pool),log:[]});
+ const held:pg.PoolClient[]=[];
+ try{
+  try{
+   for(let index=0;index<5;index++)held.push(await pool.connect());
+   await assert.rejects(homeCatalog('published',constrained),(error:unknown)=>{
+    assert.ok(error instanceof DatabaseOperationError);
+    assert.deepEqual(error.diagnostic,{stage:'catalog.home',codes:['P2028','TRANSACTION_START_TIMEOUT']});
+    assert.equal(error.cause,undefined);return true;
+   });
+  }finally{held.forEach(client=>client.release());}
+  assert.equal((await homeCatalog('published',constrained)).tools.length,0);
+ }finally{await constrained.$disconnect();await pool.end();}
+});
+
+test('real catalog SQL blocked past the default batch deadline is diagnosed as execution expiry',async()=>{
+ await owner.query('BEGIN');await owner.query('LOCK TABLE "Tool" IN ACCESS EXCLUSIVE MODE');
+ let unlockError:unknown;
+ const release=setTimeout(()=>{void owner.query('ROLLBACK').catch(error=>{unlockError=error;});},6000);
+ try{
+  await assert.rejects(homeCatalog('published',db),(error:unknown)=>{
+   assert.ok(error instanceof DatabaseOperationError);
+   assert.deepEqual(error.diagnostic,{stage:'catalog.home',codes:['P2028','TRANSACTION_EXECUTION_TIMEOUT']});
+   assert.equal(error.cause,undefined);return true;
+  });
+ }finally{clearTimeout(release);await owner.query('ROLLBACK');}
+ if(unlockError)throw unlockError;
+ assert.equal((await homeCatalog('published',db)).tools.length,0);
+});
+
+test('an interrupted owned catalog connection throws safely and a later request reconnects',async()=>{
+ if(!['127.0.0.1','localhost','[::1]'].includes(new URL(ownerUrl).hostname))throw Error('Connection interruption tests require loopback PostgreSQL');
+ const application=`runtime-interrupt-${randomUUID()}`;
+ const pool=new pg.Pool({connectionString:url,max:1,connectionTimeoutMillis:5000,application_name:application});
+ const interrupted=new PrismaClient({adapter:new PrismaPg(pool),log:[]});
+ let pending:Promise<{error?:unknown;unexpectedSuccess?:boolean}>|undefined;
+ try{
+  await owner.query('BEGIN');await owner.query('LOCK TABLE "Tool" IN ACCESS EXCLUSIVE MODE');
+  pending=homeCatalog('published',interrupted).then(()=>({unexpectedSuccess:true}),error=>({error}));
+  let pid:number|undefined;
+  for(let attempt=0;attempt<100;attempt++){
+   await owner.query('SELECT pg_stat_clear_snapshot()');
+   const rows=(await owner.query("SELECT pid FROM pg_stat_activity WHERE application_name=$1 AND datname=current_database() AND wait_event_type='Lock' AND pid<>pg_backend_pid()",[application])).rows;
+   assert.ok(rows.length<=1);if(rows.length===1){pid=rows[0].pid;break;}
+   await new Promise(resolve=>setTimeout(resolve,20));
+  }
+  assert.ok(pid&&Number.isInteger(pid));
+  assert.equal((await owner.query('SELECT pg_terminate_backend($1) AS terminated',[pid])).rows[0]?.terminated,true);
+  const outcome=await pending;assert.ok(outcome.error instanceof DatabaseOperationError);assert.equal(outcome.unexpectedSuccess,undefined);
+  assert.equal(outcome.error.diagnostic.stage,'catalog.home');assert.equal(outcome.error.cause,undefined);
+  const diagnostic=JSON.stringify(outcome.error.diagnostic);assert.ok(!diagnostic.includes(url)&&!diagnostic.includes(application));
+  await owner.query('ROLLBACK');assert.equal((await homeCatalog('published',interrupted)).tools.length,0);
+ }finally{await owner.query('ROLLBACK');if(pending)await pending;await interrupted.$disconnect();await pool.end();}
+});
+
 test('production HTTP serves normal empty pages and keeps detailed readiness private',async()=>{
  const token='runtime-fixture-monitor-token-'.repeat(3);
  await withAppServer({DATABASE_URL:url,CATALOG_DEMO_MODE:'false',OPS_MONITOR_TOKEN:token,OPS_EXPECT_WORKER:'false',NEWSLETTER_MODE:'disabled',ANALYTICS_ENABLED:'false',AGENTS_ENABLED:'false'},async origin=>{
@@ -59,5 +141,30 @@ test('production HTTP serves normal empty pages and keeps detailed readiness pri
    const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
    try{const page=await browser.newPage();await page.goto(origin+'/tools');await page.getByRole('heading',{name:'The atlas is temporarily unavailable.',exact:true}).waitFor();assert.equal(await page.getByText('No tools match just yet.',{exact:true}).count(),0);}finally{await browser.close();}
   }finally{await owner.query(`GRANT SELECT ON TABLE public."_CategoryToTool" TO "${role}"`);}
+ });
+});
+
+test('HTTP liveness remains healthy while a disconnected database fails protected readiness',async()=>{
+ const token='isolated-database-down-monitor-token-'.repeat(2);
+ await withAppServer({DATABASE_URL:'postgresql://fixture:fixture@127.0.0.1:1/unavailable_test',OPS_MONITOR_TOKEN:token,AGENTS_ENABLED:'false',ANALYTICS_ENABLED:'false'},async origin=>{
+  const live=await fetch(origin+'/api/health');assert.equal(live.status,200);assert.deepEqual(await live.json(),{status:'ok'});
+  assert.equal((await fetch(origin+'/api/internal/readiness?catalog=1')).status,401);
+  const response=await fetch(origin+'/api/internal/readiness?catalog=1',{headers:{Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(8000)});
+  assert.equal(response.status,503);const body=await response.json();assert.equal(body.ok,false);assert.equal(body.diagnostic.stage,'readiness.connection');
+  assert.ok(!JSON.stringify(body).includes('postgresql:')&&!JSON.stringify(body).includes(token));
+ });
+});
+
+test('a stalled readiness alert query respects the HTTP deadline without exposing details',async()=>{
+ const token='isolated-readiness-deadline-monitor-token-'.repeat(2);
+ await withAppServer({DATABASE_URL:url,OPS_MONITOR_TOKEN:token,OPS_EXPECT_WORKER:'false',AGENTS_ENABLED:'false',ANALYTICS_ENABLED:'false'},async origin=>{
+  await owner.query('BEGIN');await owner.query('LOCK TABLE "AgentWorkerHeartbeat" IN ACCESS EXCLUSIVE MODE');
+  try{
+   assert.equal((await fetch(origin+'/api/health')).status,200);
+   const response=await fetch(origin+'/api/internal/readiness',{headers:{Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(8000)});
+   assert.equal(response.status,503);const body=await response.json();
+   assert.deepEqual(body.diagnostic,{stage:'readiness.timeout',codes:['READINESS_TIMEOUT']});
+   assert.equal(body.ok,false);assert.ok(!JSON.stringify(body).includes(token));
+  }finally{await owner.query('ROLLBACK');}
  });
 });

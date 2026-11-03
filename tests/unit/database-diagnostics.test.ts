@@ -24,3 +24,25 @@ test('safe database exceptions preserve approved stage/codes without retaining t
  assert.equal(safe.cause,undefined);
  assert.deepEqual(databaseDiagnostic(safe,'catalog.home'),{stage:'database.configure',codes:['DATABASE_URL_INVALID']});
 });
+
+test('P2028 start timeout retains only a fixed subtype from its exact known suffix',()=>{
+ const privateText='Bearer fixture-only-private-material';
+ const error={code:'P2028',message:`${privateText}\nTransaction API error: Unable to start a transaction in the given time.`,meta:{modelName:privateText}};
+ const diagnostic=databaseDiagnostic(error,'catalog.home');
+ assert.deepEqual(diagnostic,{stage:'catalog.home',codes:['P2028','TRANSACTION_START_TIMEOUT']});
+ assert.ok(!JSON.stringify(diagnostic).includes(privateText));
+ assert.deepEqual(databaseDiagnostic(new DatabaseOperationError(diagnostic),'readiness.connection'),diagnostic);
+});
+test('P2028 execution expiry uses validated timing metadata without reading the message',()=>{
+ const error={code:'P2028',meta:{operation:'rollback',timeout:5000,timeTaken:6004}};
+ Object.defineProperty(error,'message',{get(){throw Error('Do not read message when metadata identifies expiry');}});
+ assert.deepEqual(databaseDiagnostic(error,'catalog.home').codes,['P2028','TRANSACTION_EXECUTION_TIMEOUT']);
+});
+test('unknown P2028 reasons and untrusted timing metadata remain unclassified and safe',()=>{
+ for(const meta of [{operation:'private',timeout:5000,timeTaken:6004},{operation:'query',timeout:-1,timeTaken:6004},{operation:'query',timeout:5000,timeTaken:100},{operation:'query',timeout:5000,timeTaken:Infinity}]){
+  assert.deepEqual(databaseDiagnostic({code:'P2028',meta,message:'Unrecognized private transaction error'},'catalog.home').codes,['P2028']);
+ }
+ const hostile={code:'P2028'};Object.defineProperty(hostile,'message',{get(){throw Error('private');}});
+ assert.deepEqual(databaseDiagnostic(hostile,'catalog.home').codes,['P2028']);
+ assert.deepEqual(databaseDiagnostic({code:'P2010',message:'Transaction API error: Unable to start a transaction in the given time.'},'catalog.home').codes,['P2010']);
+});

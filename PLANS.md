@@ -71,3 +71,13 @@ Alcance autorizado: auditoría/preflight y correcciones demostradas, sin etapa n
 - [x] Corregir exclusivamente el fixture del caso CEO: reutilizar paquete disponible o preparar uno explícitamente ficticio en esa DB; conservar precios existentes cuando se reutiliza y todas las aserciones.
 - [x] Repetir las 19 pruebas aisladas de agentes, ejecutar `npm run check` y la integración general para verificar convivencia con los fixtures anteriores: 19/19, 90/90 y 91/91 PASS. Sin cambios de aplicación, reutilizar build/E2E de la CI exacta, sin repetirlos localmente.
 - [x] Corregir instrucciones operativas históricas de creación del runtime/push pendiente y revisar diff/secretos; revisión independiente sin hallazgos bloqueantes. Commit/push normal autorizado solo sin divergencia; la CI del SHA resultante se informa después de publicarlo, sin desplegar.
+
+## P0 — discriminar P2028 antes de corregir su causa remota
+
+Incidente aportado: 02-11-2026 19:11:46 America/Bogota, catalog.home/P2028, liveness200 y portada200 con error. Base96e0164, Render Live b3f39f5 según propietario; no acceso MCP/Neon en esta sesión. No se modifican pool, aislamiento o plazos sin confirmar cuál falla.
+
+- [x] Trazar Prisma/adapter-pg/pg7.10.1/7.10.1/8.23.1 y fuente oficial de la versión: batch multi usa plazos2000/5000; singleton/pool5 y sin disconnect en runtime. Reproducción real aislada: pool ocupado→P2028 al inicio; bloqueo SQL→P2028 expirado. Ambos pierden el subtipo en el diagnóstico actual. No prueban causa de Render.
+- [x] RED: unitarias y regresiones reales de ambos P2028 exigen códigos fijos distintos y ausencia de material privado; fallaron dos unitarias y dos casos reales por subtipo perdido, manteniendo stage/codes y error público.
+- [x] GREEN: clasificar solo metadata numérica validada o sufijo exacto de inicio P2028, sin imprimir/retener mensajes; ejecución/retries intactos. Catálogo con datos/relaciones/concurrencia, interrupción y liveness/readiness/autorización/deadline cubiertos. Experimento PgBouncer real distingue cola servidor de cola aplicación; no acredita Neon.
+- [x] Check93, integración91, build, runtime10, SEO5 y E2E122/122 locales PASS. Matriz A–K y evidencia externa mínima registradas en RENDER_CATALOG_DIAGNOSTICS; corrección del diagnóstico, no causa productiva determinada.
+- [x] Revisión independiente focal y corrección de limpieza del fixture: nueva repetición check93/runtime10 PASS. Revisar secretos/diff/main antes de push normal y consultar su CI propia después. Reparación del catálogo aún bloqueada por subtipo/evidencia remotos: cualquier despliegue diagnóstico requiere autorización específica del SHA, no es una solución productiva certificada.
