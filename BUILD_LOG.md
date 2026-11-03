@@ -1012,3 +1012,14 @@ RED real queryTools búsqueda con pool5 ocupado2600ms→P2028inicio~2063ms. Estr
 
 
 Validación local final: check96 (lint/TS/Prisma/unitarias), PostgreSQL99, build, runtime16, SEO6 y E2E126/126 PASS. Runtime verifica /tools y /use-cases?q=presentation con error visible y HTTP200/500/503 como fallo funcional; no catálogo vacío ficticio. Revisión independiente sin bloqueos; materialización reducida a columnas de tarjeta y riesgo de casts enum documentado. Sin cambios en schema/16migraciones/deps/Blueprint/envs/Neon/Render. CI propia se verifica tras push, no reutilizar CI base. Despliegue y validación productiva pendientes de autorización.
+
+
+## MVP controlado tres gates —03-11-2026
+
+Base31faa6a, sin cambioscatálogo/cache/pool/Prisma/16migraciones/Neon/Render/roles/secretos o flags. Etapa1 reutiliza ServiceInquiryCard/contacto con mensaje mínimo validado y CTA público/móvil condicionado a legal.reviewed; sinCRM/envíos/precios/plazos. RED helper faltante→GREEN; Minor revisión mailtoespacios+→RED→encodeURIComponentGREEN. Check97/build/SEO6/Blueprint34 focales PASS; E2E126PASS previa al ajuste de codificación, focales posteriores PASS y CI repetirá finalexacto. DB99/runtime16PASS. No recepción/correo/identidad legal real verificados: Gate1 código completo/configuración pendiente.
+
+Etapa2 originalZIP0349bfb…ac5c55 intacto, checker y38Atlas(26+8+4paquete)PASS con SQL/archivos/HTTP locales; noS3real. n8n2.45.6 histórico17PASS sintéticos separado: nuevos intentos en copia encuentranSQLite duplicatecolumn conCLI/servidor concurrentes; CLI exclusivo permiteIMPORTED, servidor posterior sale139 sinOOMmarcado y no completaescenarios. Recursos propios retirados, causaexit139no determinada. No se modifica original/historia ni publica licenciaMITpropuesta o release. Gate2 nueva ejecución nativa/proveedores reales/storage remoto/publicación pendientes.
+
+Etapa3 conservaSEO/GSC/robots/sitemap/canónicas/OG/JSON-LD y gates. SEO6/E2E126 cubren privados/drafts/noindex/filtros/404/mobile. TTFBloopbackmedido noCWV/Google/producción. FuenteREADMEoficialn8nHTTP200; dosdocpaths404 no usados, Renderdocs/preciosURLError no verificados. Análisiskeywords cualitativo sinSERP/volúmenes y cinco secciones originales privadas, no artículos publicados; calendario existente reutilizado. Noindexación/AdSense/analytics/IA/pagos/correo habilitados. Reporte docs/MVP_THREE_GATES.md y fuentes docs/MVP_SEO_SOURCES.json. No se declara MVP comercial listo.
+
+Entorno: montaje bwrap fallaba porraíztemporalfaltante, directorio vacío /tmp recreado para recuperar terminal; sin políticas/secrets modificados. IPC/socketlocales/networkGit necesitan ejecución autorizada fuera del sandbox en esta revisión; nunca TLS desactivado. Fixtures/DB/n8n privados, sin escritura sobre producción. PublicaciónGit normal solo sin divergencia y CI propia delSHAfinal, sin deploy.
