@@ -15,13 +15,19 @@ export const metadata: Metadata = {
   description: site.description,
   robots: { index: indexingEnabled(), follow: indexingEnabled() },
   openGraph: { title: site.name, description: site.description, type: "website", locale: "en_US" },
-  verification: { google: /^[A-Za-z0-9_-]{10,200}$/.test(process.env.GSC_VERIFICATION_TOKEN ?? "") ? process.env.GSC_VERIFICATION_TOKEN : undefined },
-  other: /^ca-pub-\d{16}$/.test(process.env.ADSENSE_PUBLISHER_ID ?? "") ? { "google-adsense-account": process.env.ADSENSE_PUBLISHER_ID! } : {},
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const verification = /^[A-Za-z0-9_-]{10,200}$/.test(process.env.GSC_VERIFICATION_TOKEN ?? "") ? process.env.GSC_VERIFICATION_TOKEN : undefined;
+  const publisher = /^ca-pub-\d{16}$/.test(process.env.ADSENSE_PUBLISHER_ID ?? "") ? process.env.ADSENSE_PUBLISHER_ID : undefined;
   return (
     <html lang={site.publicLocale}>
+      <head>
+        {/* Ownership verifiers need these in the initial head, even when page
+            metadata streams into body. Public identifiers never load scripts. */}
+        {verification && <meta name="google-site-verification" content={verification} />}
+        {publisher && <meta name="google-adsense-account" content={publisher} />}
+      </head>
       <body>
         <SiteChrome header={<SiteHeader />} notice={<DemoNotice />} footer={<SiteFooter />}
           advertisingPreferences={advertisingConfiguration().ready ? <AdvertisingPreferences /> : null}>{children}</SiteChrome>

@@ -109,3 +109,14 @@ Continuidad 30-10-2026: [preflight y operación concreta de solo lectura](docs/R
 - [ ] Cerrar reparación productiva solo con contenido real estable, causa respaldada y comprobaciones posteriores; hasta entonces lanzamiento/indexación/comercial continúan sin aprobación.
 
 CI de diagnóstico6ecf8c5 falló solo en E2E (41556428028); no usarla como aprobación. Se reproduce/corrige además cierre ilimitado del servidor aislado de QA, sin alterar producción o assertions; runtime11/check93/SEO5 locales PASS. Revisar nueva CI del commit siguiente antes de proponer siquiera el despliegue diagnóstico.
+
+## Misión 18 — checkpoint de preparación (03-11-2026)
+
+- [x] Corregir propiedad GSC ajena antes del transporte/persistencia y head inicial de verificaciones; pruebas focales y documentación en [PHASE18_REPORT.md](docs/PHASE18_REPORT.md). Sin cambios de publicidad, indexación o credenciales.
+- [ ] Cerrar estabilidad remota con SHA/UTC, HTTP+contenido, readiness autorizado, nuevos stage/codes y métricas. TRANSACTION_START_TIMEOUT observado no distingue pool/PgBouncer/compute; no subir límites a ciegas.
+- [ ] Verificar propiedad URL-prefix real en Google mediante token oficial y head del deployment autorizado; OAuth webmasters.readonly limitado al mismo origen para informes manuales. No inferirlo por configuración ni enviar sitemap antes de aprobación.
+- [ ] Revisar CMP certificada/TCF y Google EEE/Reino Unido/Suiza, privacidad Colombia/otros mercados, operador/contacto y políticas con revisión humana; conservar flags false hasta aprobación.
+- [ ] Contrastar precio/cuotas oficiales del mismo servicio siempre activo, robots tras inactividad natural y límites Neon; sin pings artificiales o compras. Free no implica disponibilidad o rastreo continuo.
+- [ ] Revisión humana de sitio/cuenta/emplazamientos AdSense y aceptación del hostname. Verificación meta ≠ aprobación ≠ anuncios activos; no cambiar ADSENSE_SITE_APPROVED/ENABLED por aprobar CI.
+
+Evidencia03-11 aportada por propietario:4bcf3aa ya Live y contenido recuperado03:07:07 tras503 de arranque y errores de catálogo03:06:36–39. No repetir ese deploy; no cerrar estabilidad por esta recuperación. Faltan métricas contemporáneas Neon/pool/event-loop para determinar la causa. El candidato18 no está desplegado ni autoriza flags de lanzamiento/Google.

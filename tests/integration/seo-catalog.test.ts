@@ -76,6 +76,12 @@ test('published catalog SEO and discovery, isolated PostgreSQL and browser only'
         });
         await t.test('sitemap contains canonical published pages and excludes all draft articles and the empty journal',async()=>{
           const xml=await(await fetch(origin+'/sitemap.xml')).text();
+          const urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match=>new URL(match[1]!));
+          assert.equal(new Set(urls.map(url=>url.href)).size,urls.length);
+          for(const url of urls){
+            assert.equal(url.origin,canonical);assert.equal(url.search,'');assert.equal(url.hash,'');
+            assert.ok(!/^\/(?:admin(?:\/|$)|api(?:\/|$)|login(?:\/|$)|payments(?:\/|$)|newsletter\/(?:confirm|unsubscribe)(?:\/|$))/.test(url.pathname));
+          }
           assert.ok(xml.includes(canonical+'/about</loc>')&&xml.includes(canonical+'/categories/transcription</loc>'));
           assert.ok(!xml.includes(canonical+'/blog</loc>')&&!xml.includes('hidden-fixture-topic'));
           assert.ok(!xml.includes(canonical+'/categories/scientific-research</loc>'));

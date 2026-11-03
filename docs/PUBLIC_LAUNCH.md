@@ -47,7 +47,7 @@ En [Google Search Console](https://search.google.com/search-console), con la cue
 2. Método etiqueta HTML: copiar únicamente el valor `content` que Google entregue a `GSC_VERIFICATION_TOKEN` en Render y reconstruir. El código valida y publica esa cadena en `google-site-verification`; no es token OAuth ni contraseña. No inventarlo.
 3. Comprobar desde la web la etiqueta, HTTP 200 y disponibilidad; pulsar Verificar en Google. El asistente no puede certificar la propiedad sin acceso autorizado.
 4. Tras cumplir la puerta anterior, comprobar robots y noindex y enviar `https://ai-workflow-atlas.onrender.com/sitemap.xml`. Inspeccionar home, tools, use-cases y una ficha/guía real. Solicitar indexación desde la UI cuando proceda; revisar excluidas, canonical, rastreo y cobertura semanalmente.
-5. La integración administrativa existente usa `GSC_SITE_URL` y OAuth `webmasters.readonly` para consultar informes manualmente. Eso **no** verifica propiedad ni solicita indexación. Mantener tokens privados y renovarlos al caducar.
+5. La integración administrativa existente usa `GSC_SITE_URL` y OAuth `webmasters.readonly` para consultar informes manualmente. `GSC_SITE_URL` debe ser el prefijo HTTPS raíz exacto de `SITE_URL`, normalizado con `/` final; otro host, subruta, puerto diferente o propiedad `sc-domain` bloquea la consulta antes de usar el transporte o guardar snapshots. El adaptador no acredita por sí mismo el scope concedido al token: comprobarlo en el gestor OAuth de Google. Eso **no** verifica propiedad ni solicita indexación. Mantener tokens privados y renovarlos al caducar. Con dominio propio, actualizar primero el origen aprobado y verificar su prefijo; la lectura de propiedades Dominio queda fuera de este adaptador.
 
 La indexación y posición dependen de Google; no se promete plazo o ranking. Fuente oficial que el propietario debe contrastar: [verificación](https://support.google.com/webmasters/answer/9008080?hl=en).
 
@@ -153,3 +153,9 @@ Estas comprobaciones requieren la cuenta real y las políticas vigentes; la ayud
 - [ ] Prohibir autoclics, visitas artificiales, incentivos de clic, anuncios disfrazados y tráfico de baja calidad. E2E siempre interceptados/sin impresiones reales. Comparar experiencia/CLS antes y después de una activación real autorizada; no prometer cobertura o ingresos.
 
 El orden de activación conserva todas las puertas existentes. Esta entrega no cambia flags privados de Render, no habilita indexación, analítica, anuncios, correo, pagos o agentes y no presume revisión legal completada.
+
+## Misión 18 — verificación inicial y evidencia actual
+
+03-11-2026: [reporte18](PHASE18_REPORT.md) actualiza el estado aportado por el propietario (Live4bcf3aa, timeout de inicio y posterior carga), sin certificar estabilidad remota. Dos correcciones demostradas: scope GSC al prefijo raíz exacto de SITE_URL y etiquetas GSC/AdSense en el head HTTP inicial. Next16 puede transmitir metadata agregada en body; estas dos metas se emiten en RootLayout y se eliminan de metadata para no duplicarlas. Se conservan validación, escape, resto de streaming, approvals y scripts apagados. La excepción acotada debe conservar su regresión al actualizar Next/React.
+
+La meta AdSense admite preparar verificación antes de aprobación; no es preciso habilitar anuncios o relajar ads.txt. Cuenta/sitio/CMP/legales, condiciones oficiales actuales, elegibilidad del hostname y verificación Google siguen sin evidencia privada aquí. No se hizo deploy, solicitud a Google, indexación o cambio de plan.

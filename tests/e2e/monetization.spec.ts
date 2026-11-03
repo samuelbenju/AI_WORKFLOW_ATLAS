@@ -53,7 +53,49 @@ test("release and legal gates control robots while Google verification uses only
     await expect(page.locator('meta[name="google-site-verification"]')).toHaveAttribute("content", "isolated-verification-token");
     await expect(page.locator('meta[name="google-adsense-account"]')).toHaveAttribute("content", ads.ADSENSE_PUBLISHER_ID);
     await expect(page.locator('script[src*="adsbygoogle"], script[src*="fundingchoicesmessages"]')).toHaveCount(0);
-    expect(await (await page.request.get(origin + "/ads.txt")).text()).toBe("google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0\n");
+    const seller = await page.request.get(origin + "/ads.txt");
+    expect(seller.status()).toBe(200); expect(seller.headers()["content-type"]).toMatch(/^text\/plain/);
+    expect(await seller.text()).toBe("google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0\n");
+  });
+});
+
+test("Google can inspect verification tags before approval without advertising, tracking or indexation", async ({ page }) => {
+  let externalRequests = 0;
+  await withAppServer({ ...released, ...ads, ADSENSE_ENABLED: "false", ADSENSE_SITE_APPROVED: "false",
+    ADSENSE_CONSENT_READY: "false", ADSENSE_PLACEMENTS_REVIEWED: "false", ANALYTICS_ENABLED: "false",
+    SEO_INDEXING_ENABLED: "false", PUBLIC_LAUNCH_CONFIRMED: "false", LEGAL_REVIEW_CONFIRMED: "false",
+    GSC_VERIFICATION_TOKEN: "isolated-verification-token", GSC_ACCESS_TOKEN: "isolated-private-oauth-token" }, async origin => {
+    // No Google request can leave this isolated browser, including subframes.
+    await page.route("**/*", route => {
+      if (new URL(route.request().url()).origin === origin) return route.continue();
+      externalRequests++; return route.abort();
+    });
+    const response = await page.goto(origin + "/");
+    expect(response?.status()).toBe(200);
+    const html = await response!.text(), head = html.slice(0, html.indexOf("</head>"));
+    for (const [name, value] of [["google-site-verification", "isolated-verification-token"], ["google-adsense-account", ads.ADSENSE_PUBLISHER_ID]]) {
+      const tag = page.locator(`head meta[name="${name}"]`);
+      await expect(tag).toHaveCount(1); await expect(tag).toHaveAttribute("content", value!);
+      await expect(page.locator(`meta[name="${name}"]`)).toHaveCount(1);
+      expect(head).toContain(`<meta name="${name}" content="${value}"`);
+    }
+    expect(html).not.toContain("isolated-private-oauth-token");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+    await expect(page.locator('script[src*="googlesyndication"], script[src*="fundingchoicesmessages"], ins.adsbygoogle')).toHaveCount(0);
+    const robots = await page.request.get(origin + "/robots.txt"); expect(await robots.text()).toContain("Disallow: /");
+    const sitemap = await page.request.get(origin + "/sitemap.xml"); expect(await sitemap.text()).not.toContain("<loc>");
+    const seller = await page.request.get(origin + "/ads.txt"); expect(seller.status()).toBe(404);
+    expect(seller.headers()["content-type"]).toMatch(/^text\/plain/); expect(await seller.text()).toBe("");
+    expect(externalRequests).toBe(0);
+  });
+});
+
+test("invalid Google verification values never produce verification tags or executable markup", async ({ page }) => {
+  await withAppServer({ ADSENSE_ENABLED: "false", ADSENSE_PUBLISHER_ID: 'ca-pub-1234567890123456"><script>',
+    GSC_VERIFICATION_TOKEN: 'invalid"><script>alert(1)</script>' }, async origin => {
+    await page.goto(origin + "/");
+    await expect(page.locator('meta[name="google-site-verification"], meta[name="google-adsense-account"]')).toHaveCount(0);
+    await expect(page.locator('script[src*="googlesyndication"], script[src*="fundingchoicesmessages"]')).toHaveCount(0);
   });
 });
 

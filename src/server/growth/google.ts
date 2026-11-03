@@ -3,12 +3,22 @@ import "server-only";
 import {z} from "zod";
 import type {AnalyticsEvent,PrismaClient} from "@/generated/prisma/client";
 import {site} from "@/lib/config/site";
+import {parseSiteOrigin} from "@/lib/config/env";
 import {AccessError} from "@/server/auth/policy";
 import {googleDimensions,googleDimensionSchema,parseGa4Report,type GoogleDimension} from '@/lib/google-reports';
 import {publicPath} from "@/lib/growth";
 const measurement=()=>/^G-[A-Z0-9]{4,20}$/.test(process.env.GA4_MEASUREMENT_ID??'')?process.env.GA4_MEASUREMENT_ID!:null;
 export function googleStatus(){return {ga4Collection:{configured:!!measurement()&&!!process.env.GA4_API_SECRET&&['validation','live'].includes(process.env.GA4_MODE??''),mode:process.env.GA4_MODE==='live'?'live':process.env.GA4_MODE==='validation'?'validation':'disabled'},ga4Reports:{configured:/^\d+$/.test(process.env.GA4_PROPERTY_ID??'')&&!!process.env.GA4_ACCESS_TOKEN},searchConsole:{configured:!!validSearchSite(process.env.GSC_SITE_URL??'')&&!!process.env.GSC_ACCESS_TOKEN}};}
-export function validSearchSite(value:string){try{if(/^sc-domain:(?:[a-z0-9-]+\.)+[a-z]{2,}$/.test(value))return value;const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password&&!u.search&&!u.hash?u.toString():null;}catch{return null;}}
+export function validSearchSite(value:string){
+ // This integration reads the site's root URL-prefix property only. A token
+ // authorizing other properties must not import their metrics into Atlas.
+ if(!process.env.SITE_URL)return null;
+ try{
+  const origin=parseSiteOrigin(process.env.SITE_URL),expected=new URL(origin),property=new URL(value);
+  return expected.protocol==='https:'&&!['localhost','127.0.0.1','[::1]'].includes(expected.hostname)
+   &&property.href===origin+'/'?property.href:null;
+ }catch{return null;}
+}
 function testTransport(transport:typeof fetch){if(transport!==fetch&&(!process.env.DATABASE_URL||!new URL(process.env.DATABASE_URL).pathname.endsWith('_test')))throw new Error('Fake transports require isolated tests');}
 export async function forwardGa4(db:PrismaClient,event:AnalyticsEvent,visitorHash:string,startedAt:Date,transport:typeof fetch=fetch){
  if(!googleStatus().ga4Collection.configured)return;testTransport(transport);

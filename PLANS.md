@@ -85,3 +85,14 @@ Incidente aportado: 02-11-2026 19:11:46 America/Bogota, catalog.home/P2028, live
 CI41556428028 del commit6ecf8c5 falló exclusivamente en E2E, timeout catalog.spec.ts111; check/DB/build/runtime/SEO/Blueprint PASS. No se declara CI aprobada. Logs públicos404; evidencia de acción pendiente solicitada al cliente conectado. Probe real reproduce además cierre sin cota de withAppServer ante HTTP incompleto; probar RED→GREEN y acotar solo limpieza del proceso propio, sin aumentar timeout global/retries o quitar assertions. No atribuirlo al P2028 ni al fallo exacto de CI sin la traza.
 
 Checkpoint del harness: RED10/11→GREEN11/11 runtime; check93/SEO5/Blueprint31/importador10/E2E122 PASS, revisión independiente sin hallazgos. Commit separado y CI propia posterior; código productivo/Neon/Render sin cambios adicionales. La misión causal del catálogo sigue parcial y el despliegue diagnóstico requiere autorización propia.
+## Misión 18 — estabilidad, Search Console y AdSense (03-11-2026)
+
+Ejecución autorizada sobre 4bcf3aa, sin despliegue nuevo ni cambios remotos. Diseño mínimo: conservar la metaetiqueta AdSense existente (verificación sin anuncios); restringir el adaptador GSC existente al prefijo HTTPS raíz de SITE_URL. No aceptar propiedades de terceros, subrutas o sc-domain del proveedor. Una propiedad Dominio propia requiere una decisión posterior, no inferir control DNS de onrender.com.
+
+- [x] Auditar estado observado y distinguir el Live/TRANSACTION_START_TIMEOUT aportados por el propietario de verificaciones independientes. No modificar pool/timeouts sin métricas.
+- [x] RED: pruebas de propiedad GSC ajena/malformada y de rechazo sin transporte ni persistencia. GREEN: corrección mínima en src/server/growth/google.ts y ajuste explícito del origen de fixtures.
+- [x] Probar en navegador/HTTP las etiquetas públicas GSC/AdSense con aprobaciones apagadas, rechazo de valores inválidos, cero scripts/peticiones comerciales y ads.txt 404 text/plain. Mantener la entrega actual aprobada separada.
+- [x] Ejecutar check, integración aislada, build, runtime, SEO y E2E completa; revisión independiente del diff. No repetir importaciones o migraciones remotas.
+- [ ] Registrar evidencia y límites en los controles y reporte 18; push normal solo con árbol revisado, sin secretos y main remota sin divergencia; consultar CI del nuevo SHA. Google/Render real, precios oficiales y revisiones humanas pendientes si no hay acceso.
+
+Cierre local: check93, DB93, build, catálogo, runtime11, SEO5 y E2E126/126 PASS; revisión independiente sin hallazgos. Persisten bloqueos remotos/Google y precio oficial no verificado. Push/CI nueva se comprueban tras el commit, sin desplegar.
