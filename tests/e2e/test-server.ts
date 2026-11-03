@@ -18,14 +18,28 @@ export async function withAppServer<T>(environment: Record<string, string>, call
   try {
     let ready = false;
     for (let attempt = 0; attempt < 100; attempt++) {
-      if (server.exitCode !== null) throw new Error("Isolated application server exited.");
+      if (server.exitCode !== null || server.signalCode !== null) throw new Error("Isolated application server exited.");
       try { if ((await fetch(`${origin}/api/health`)).ok) { ready = true; break; } } catch { /* Wait for our own server only. */ }
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
     if (!ready) throw new Error("Isolated application server did not become ready.");
     return await callback(origin);
   } finally {
-    server.kill("SIGTERM");
-    await new Promise<void>((resolve) => { if (server.exitCode !== null) resolve(); else server.once("exit", () => resolve()); });
+    await new Promise<void>((resolve) => {
+      if (server.exitCode !== null || server.signalCode !== null) { resolve(); return; }
+      const stopped = () => { clearTimeout(timer); server.removeListener("exit", stopped); resolve(); };
+      // Next's production server waits for active HTTP requests on SIGTERM.
+      // Only this helper's own disposable child may be forced down after grace.
+      const timer = setTimeout(() => {
+        if (server.exitCode !== null || server.signalCode !== null) stopped();
+        else {
+          console.warn(JSON.stringify({ stage: "test-server.shutdown", codes: ["ISOLATED_SERVER_FORCE_STOP"] }));
+          server.kill("SIGKILL");
+        }
+      }, 2000);
+      timer.unref();
+      server.once("exit", stopped);
+      server.kill("SIGTERM");
+    });
   }
 }

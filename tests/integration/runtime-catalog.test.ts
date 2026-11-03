@@ -1,6 +1,8 @@
 import {test,after,before} from 'node:test';
 import {strict as assert} from 'node:assert';
 import {randomUUID} from 'node:crypto';
+import {createConnection,type Socket} from 'node:net';
+import {once} from 'node:events';
 import pg from 'pg';
 import {PrismaPg} from '@prisma/adapter-pg';
 import {PrismaClient} from '../../src/generated/prisma/client';
@@ -167,4 +169,17 @@ test('a stalled readiness alert query respects the HTTP deadline without exposin
    assert.equal(body.ok,false);assert.ok(!JSON.stringify(body).includes(token));
   }finally{await owner.query('ROLLBACK');}
  });
+});
+
+test('an owned isolated server stops within a bounded grace period despite an incomplete HTTP request',async()=>{
+ let socket:Socket|undefined,safety:ReturnType<typeof setTimeout>|undefined,callbackFinishedAt=0;
+ try{
+  await withAppServer({DATABASE_URL:url,AGENTS_ENABLED:'false',ANALYTICS_ENABLED:'false'},async origin=>{
+   socket=createConnection({host:'127.0.0.1',port:Number(new URL(origin).port)});socket.on('error',()=>{});await once(socket,'connect');
+   socket.write('GET /api/health HTTP/1.1\r\nHost: localhost\r\n');
+   assert.equal((await fetch(origin+'/api/health')).status,200);
+   callbackFinishedAt=performance.now();safety=setTimeout(()=>socket?.destroy(),7000);
+  });
+  assert.ok(performance.now()-callbackFinishedAt<4000,'Owned test server cleanup must not consume the E2E test deadline');
+ }finally{clearTimeout(safety);socket?.destroy();}
 });

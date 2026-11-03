@@ -107,3 +107,5 @@ Continuidad 30-10-2026: [preflight y operación concreta de solo lectura](docs/R
 - [ ] Confirmar subtipo/causa de Render y corregirla: logs aportados solo P2028, sin causa suficiente; [matriz/evidencia](docs/RENDER_CATALOG_DIAGNOSTICS.md#p0--incidente-del-02-11-2026-evidencia-y-límites). No aumentar plazos o pool por intuición.
 - [ ] Si se decide usar el diagnóstico nuevo: autorizar SHA exacto tras CI/preflight y desplegar por separado. No presentarlo como solución definitiva. Repetir HTTP+contenido/readiness/logs y condición de arranque autorizada; un health200 no certifica catálogo.
 - [ ] Cerrar reparación productiva solo con contenido real estable, causa respaldada y comprobaciones posteriores; hasta entonces lanzamiento/indexación/comercial continúan sin aprobación.
+
+CI de diagnóstico6ecf8c5 falló solo en E2E (41556428028); no usarla como aprobación. Se reproduce/corrige además cierre ilimitado del servidor aislado de QA, sin alterar producción o assertions; runtime11/check93/SEO5 locales PASS. Revisar nueva CI del commit siguiente antes de proponer siquiera el despliegue diagnóstico.
