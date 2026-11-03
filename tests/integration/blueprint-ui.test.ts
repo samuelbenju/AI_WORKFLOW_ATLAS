@@ -27,7 +27,7 @@ test('blueprint UI on isolated PostgreSQL, local private files and real producti
     const owner = await db.user.create({ data: { email: 'isolated-owner@blueprint-ui.invalid', active: true, role: 'OWNER' } });
     const slug = 'isolated-blueprint-guide';
     const instructions = [{ step: 1, text: 'Inspect non-sensitive fixture input.' }, { step: 2, text: 'Keep a human review gate.' }];
-    for (const guideSlug of [slug, 'guide-without-blueprints']) await db.useCase.create({ data: { slug: guideSlug, title: guideSlug === slug ? 'Isolated blueprint guide fixture' : 'Guide without blueprints',
+    for (const guideSlug of [slug, 'guide-without-blueprints', 'qualify-tally-leads-with-n8n-and-slack']) await db.useCase.create({ data: { slug: guideSlug, title: guideSlug === slug ? 'Isolated blueprint guide fixture' : 'Guide without blueprints',
       problem: 'Isolated UI fixture, not an actual automation.', solution: 'Understand the fixture safely.', limitations: 'Never a production workflow.', instructions, references: [], status: 'PUBLISHED', publishedAt: new Date() } });
     const manifest: BlueprintManifest = { schemaVersion: 1, id: 'ui-fixture', version: '1.0.0', useCaseSlug: slug, title: 'Isolated downloadable fixture',
       description: 'This download exists only in an isolated test database.', attribution: { credit: 'Test fixture only', license: 'Test only', sources: ['https://example.org/docs'] }, files,
@@ -143,6 +143,24 @@ test('blueprint UI on isolated PostgreSQL, local private files and real producti
             const html = await (await fetch(`${contactOrigin}/use-cases/${slug}?blueprintRelease=${manifest.id}%400.9.0`)).text();
             assert.ok(html.includes('mailto:fixture%40contact.invalid?subject=Workflow%20implementation%20inquiry'));
             assert.ok(!html.includes('/api/crm/inquiries'));
+            assert.ok(!html.includes('[Piloto]'));assert.ok(!html.includes('Implementation Sprint'));
+            const pilotSlug='qualify-tally-leads-with-n8n-and-slack';
+            await register({...manifest,id:'pilot-contact-fixture',useCaseSlug:pilotSlug},'PUBLISHED');
+            const contactPage=await browser.newPage({viewport:{width:390,height:844}});
+            await contactPage.route('**/*',route=>new URL(route.request().url()).origin===contactOrigin?route.continue():route.abort());
+            try{
+            await contactPage.goto(`${contactOrigin}/use-cases/${pilotSlug}`);
+            const contact=contactPage.getByRole('link',{name:'Contact Atlas about implementation',exact:true});
+            await expect(contact).toBeVisible();
+            const inquiry=new URL((await contact.getAttribute('href'))!);
+            assert.equal(decodeURIComponent(inquiry.pathname),'fixture@contact.invalid');
+            assert.equal(inquiry.searchParams.get('subject'),'[Piloto] Implementación Lead Flow');
+            assert.ok(inquiry.searchParams.get('body')!.includes('Google Sheets availability:'));
+            assert.ok(inquiry.searchParams.get('body')!.includes('Please do not include passwords'));
+            assert.ok(await contactPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+            await expect(contactPage.locator('.blueprint-service')).not.toContainText('48 hours');
+            await expect(contactPage.locator('.blueprint-service')).not.toContainText('450');
+            }finally{await contactPage.close();}
           });
         });
         await t.test('stale registry rows do not hide an authorized release beyond the first discovery page', async () => {

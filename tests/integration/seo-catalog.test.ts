@@ -34,6 +34,19 @@ test('published catalog SEO and discovery, isolated PostgreSQL and browser only'
         const context=await browser.newContext();
         const page=await context.newPage();
         await page.route('**/*',route=>new URL(route.request().url()).origin===origin?route.continue():route.abort());
+        await t.test('consecutive HTTP catalog reads retain real content and report local TTFB separately from full body time',async()=>{
+          for(const path of ['/','/tools','/use-cases']){
+            const samples=[];
+            for(let visit=0;visit<3;visit++){
+              const start=performance.now(),response=await fetch(origin+path),ttfbMs=performance.now()-start;
+              const body=await response.text();assert.equal(response.status,200);
+              assert.ok(!body.includes('The atlas is temporarily unavailable.'));
+              assert.ok(body.includes('Whisper')||body.includes('n8n')||body.includes('AI tools'));
+              samples.push({ttfbMs:Math.round(ttfbMs),bodyMs:Math.round(performance.now()-start)});
+            }
+            console.log(JSON.stringify({experiment:'isolated-http-catalog',path,samples}));
+          }
+        });
         await t.test('pagination has distinct titles and self-canonicals; empty and filtered views stay noindex',async()=>{
           await page.goto(origin+'/');await expect(page).toHaveTitle('AI Workflow Atlas — Discover What AI Can Actually Do');
           await page.goto(origin+'/tools?page=2');
@@ -92,6 +105,13 @@ test('published catalog SEO and discovery, isolated PostgreSQL and browser only'
         });
         await page.close();
       }finally{await browser.close();}
+    });
+    // A new child Next process has no previous in-memory cache or files to reuse.
+    await withAppServer({DATABASE_URL:url,SITE_URL:canonical,CATALOG_DEMO_MODE:'false',ADSENSE_ENABLED:'false',ANALYTICS_ENABLED:'false'},async restarted=>{
+      const response=await fetch(restarted+'/tools'),body=await response.text();
+      assert.equal(response.status,200);assert.ok(body.includes('data-testid="tool-card"'));
+      assert.ok(!body.includes('The atlas is temporarily unavailable.'));
+      console.log(JSON.stringify({experiment:'isolated-next-process-restart',http:response.status,realCatalog:true}));
     });
   }finally{await db.$disconnect();}
 });

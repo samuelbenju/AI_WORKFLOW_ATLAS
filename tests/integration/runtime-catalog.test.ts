@@ -141,7 +141,7 @@ test('production HTTP serves normal empty pages and keeps detailed readiness pri
    response=await fetch(origin+'/api/internal/readiness?catalog=1',{headers:{Authorization:'Bearer '+token}});assert.equal(response.status,503);const result=await response.json();assert.equal(result.diagnostic.stage,'catalog.home');assert.ok(result.diagnostic.codes.includes('42501'));
    const body=JSON.stringify(result);assert.ok(!body.includes(role)&&!body.includes('_CategoryToTool')&&!body.includes(url));
    const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
-   try{const page=await browser.newPage();await page.goto(origin+'/tools');await page.getByRole('heading',{name:'The atlas is temporarily unavailable.',exact:true}).waitFor();assert.equal(await page.getByText('No tools match just yet.',{exact:true}).count(),0);}finally{await browser.close();}
+   try{const page=await browser.newPage();const response=await page.goto(origin+'/tools');await page.getByRole('heading',{name:'The atlas is temporarily unavailable.',exact:true}).waitFor();assert.ok(response&&[200,500,503].includes(response.status()));console.log(JSON.stringify({experiment:'catalog-functional-rejection',http:response.status(),catalogUsable:false}));assert.equal(await page.getByText('No tools match just yet.',{exact:true}).count(),0);}finally{await browser.close();}
   }finally{await owner.query(`GRANT SELECT ON TABLE public."_CategoryToTool" TO "${role}"`);}
  });
 });

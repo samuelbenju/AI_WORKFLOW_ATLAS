@@ -72,7 +72,7 @@ export async function BlueprintSection(props: SectionProps) {
             : <p>Use the guide’s step-by-step instructions and the official platform documentation. Release-specific import instructions have not been provided. Check compatibility before importing.</p>}
           <a href="#workflow-toolkit">Review tools and their official documentation</a>
         </section>
-        <ServiceInquiryCard email={legal.reviewed ? legal.email : null} />
+        <ServiceInquiryCard email={legal.reviewed ? legal.email : null} guideSlug={props.slug} />
       </>}
     </section>;
 }

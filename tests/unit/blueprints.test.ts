@@ -36,3 +36,16 @@ test('download display uses precise units and actionable public errors without p
   assert.match(downloadFailure(404), /no longer available/); assert.match(downloadFailure(429), /Too many/);
   assert.match(downloadFailure(503), /temporarily unavailable/); assert.match(downloadFailure(500), /could not start/);
 });
+
+test('pilot implementation email is scoped, encoded and never accepts injected contact headers',async()=>{
+ const {leadImplementationInquiry}=await import('../../src/lib/blueprint-display');
+ const slug='qualify-tally-leads-with-n8n-and-slack';
+ assert.equal(leadImplementationInquiry(null,slug),null);
+ assert.equal(leadImplementationInquiry('team@example.invalid','unrelated-guide'),null);
+ assert.equal(leadImplementationInquiry('team@example.invalid\r\nBcc:other@example.invalid',slug),null);
+ const href=leadImplementationInquiry('team@example.invalid',slug)!;const url=new URL(href);
+ assert.equal(decodeURIComponent(url.pathname),'team@example.invalid');
+ assert.equal(url.searchParams.get('subject'),'[Piloto] Implementación Lead Flow');
+ for(const question of ['Company or project','Country','Form platform','Google Sheets availability','Slack availability','Approximate monthly leads','What needs to be automated'])assert.ok(url.searchParams.get('body')!.includes(question));
+ assert.ok(!/450[.,]?000|149|48 hours/.test(href));
+});

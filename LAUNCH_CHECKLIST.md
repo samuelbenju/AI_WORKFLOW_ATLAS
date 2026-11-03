@@ -120,3 +120,12 @@ CI de diagnóstico6ecf8c5 falló solo en E2E (41556428028); no usarla como aprob
 - [ ] Revisión humana de sitio/cuenta/emplazamientos AdSense y aceptación del hostname. Verificación meta ≠ aprobación ≠ anuncios activos; no cambiar ADSENSE_SITE_APPROVED/ENABLED por aprobar CI.
 
 Evidencia03-11 aportada por propietario:4bcf3aa ya Live y contenido recuperado03:07:07 tras503 de arranque y errores de catálogo03:06:36–39. No repetir ese deploy; no cerrar estabilidad por esta recuperación. Faltan métricas contemporáneas Neon/pool/event-loop para determinar la causa. El candidato18 no está desplegado ni autoriza flags de lanzamiento/Google.
+
+## MVP — cierre técnico y aceptación real
+
+- [x] Cache granular de DTO públicos con revisión DB viva y sin stale fallback; retiro sin updatedAt, concurrencia, recuperación, búsqueda y read-only/regresiones locales. No cachear descarga/privados.
+- [x] Original Lead Flow íntegro, n8n17 escenarios aislados y QA Atlas del paquete real local; no prueba de proveedores reales o storage remoto.
+- [x] CTA piloto reutiliza contacto validado/revisado, guía exacta y release autorizada, sin precios/plazo/envíos automáticos.
+- [ ] Propietario verifica/configura bucket privado/cuotas/scopes y carga/revisa/publica original por el motor existente, prueba SHA/HTTP/persistencia/retiro real. No publicar para esquivar bloqueo storage.
+- [ ] Aprobar datos legales/contacto/autoría/licencia y alcance comercial, después publicación. No asumir domicilio, precio o48h aprobados.
+- [ ] Autorizar nuevo SHA con CI y aceptar catálogo+Blueprint+CTA reales en Render, incluidos arranque/HTTP200conerror/readiness/logs. Mantener Free sin SLA, indexación/AdSense/pagos/IA/correo desactivados.

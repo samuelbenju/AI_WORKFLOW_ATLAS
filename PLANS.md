@@ -96,3 +96,11 @@ Ejecución autorizada sobre 4bcf3aa, sin despliegue nuevo ni cambios remotos. Di
 - [ ] Registrar evidencia y límites en los controles y reporte 18; push normal solo con árbol revisado, sin secretos y main remota sin divergencia; consultar CI del nuevo SHA. Google/Render real, precios oficiales y revisiones humanas pendientes si no hay acceso.
 
 Cierre local: check93, DB93, build, catálogo, runtime11, SEO5 y E2E126/126 PASS; revisión independiente sin hallazgos. Persisten bloqueos remotos/Google y precio oficial no verificado. Push/CI nueva se comprueban tras el commit, sin desplegar.
+
+## MVP final — catálogo, descarga y contacto (03-11-2026)
+
+Sin cacheComponents ni ISR global. Probar una caché granular en memoria (32 entradas,15s,256KiB por entrada, single-flight acotado), autorizada por snapshot MVCC y época PostgreSQL leídos sin transacción Prisma antes de reutilizar datos. Mantener RR filas/conteo y Proxy404; búsquedas libres, demos, DB explícita/readiness y descargas no se cachean. No stale-on-error. El gate en DB es necesario para detectar revocación desde otros procesos/SQL sin tablas/servicios nuevos. Comparar SQL/latencia/24lecturas, retiro sin updatedAt, reinicio y fallo DB; rechazar diseño si no reduce consultas o conserva garantías.
+
+Reutilizar paquete privado original y QA existente, sin reconstruir ZIP; verificar hash, estructura y ejecuciones aisladas si entorno disponible. No afirmar descarga remota sin bucket/credenciales/prueba HTTP real. CTA piloto específico únicamente para slug de guía propuesto, email público validado/revisado y release aprobada; no publicar precios/plazos ni crear CRM.
+
+Pruebas RED→GREEN, check/build/DB/runtime/SEO/Blueprint/E2E; revisión independiente, push normal con CI exacta. Sin despliegues/Neon/migraciones/importaciones/remotos o activaciones comerciales no aprobadas. Evidencias y bloqueos en reporte breve al cerrar.

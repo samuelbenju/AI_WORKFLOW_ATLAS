@@ -1,4 +1,5 @@
 import "server-only";
+import { cachedPublicRead } from "./public-read-cache";
 import { publishedArticleWhere,articleCardSelect } from "@/server/editorial/public";
 import { cache } from "react";
 import type { Prisma, PrismaClient } from "@/generated/prisma/client";
@@ -32,8 +33,9 @@ export type PublicWorkflowCard = Prisma.UseCaseGetPayload<{ select: typeof workf
 export type Facets = Awaited<ReturnType<typeof getCatalogFacets>>;
 
 // Fail visibly and generically; never turn database errors into empty/static data.
-async function readCatalog<T>(stage:DatabaseStage,operation:(db:PrismaClient)=>Promise<T>,db?:PrismaClient):Promise<T> {
-  return databaseOperation(stage,()=>operation(db??getDatabase()),"The catalog is temporarily unavailable. Please try again shortly.");
+async function readCatalog<T>(stage:DatabaseStage,operation:(db:PrismaClient)=>Promise<T>,db?:PrismaClient,key?:string):Promise<T> {
+  // Explicit clients (readiness/operators/tests) always execute the real queries.
+  return databaseOperation(stage,()=>{const client=db??getDatabase();return !db&&key?cachedPublicRead(client,key,()=>operation(client)):operation(client);},"The catalog is temporarily unavailable. Please try again shortly.");
 }
 
 export async function getCatalogFacets(kind: "tools" | "use-cases", mode = catalogMode(), db?: PrismaClient) {
@@ -46,7 +48,7 @@ export async function getCatalogFacets(kind: "tools" | "use-cases", mode = catal
       db.tag.findMany({ where, select: { slug: true, name: true }, orderBy: { name: "asc" } }),
     ]);
     return { categories: categories.map(({ _count, ...category }) => ({ ...category, count: kind === "tools" ? _count.tools : _count.useCases })), tags };
-  },db);
+  },db,mode==='published'?JSON.stringify(['facets',kind,mode]):undefined);
 }
 
 export async function queryTools(query: CatalogQuery, mode = catalogMode(), db?: PrismaClient) {
@@ -61,7 +63,7 @@ export async function queryTools(query: CatalogQuery, mode = catalogMode(), db?:
       db.tool.findMany({ where, select: toolCardSelect, orderBy, take: CATALOG_PAGE_SIZE, skip: (query.page - 1) * CATALOG_PAGE_SIZE }), db.tool.count({ where }),
     ], { isolationLevel: "RepeatableRead" });
     return { items, total, pageCount: Math.ceil(total / CATALOG_PAGE_SIZE) };
-  },db);
+  },db,mode==='published'&&!query.q?JSON.stringify(['tools',mode,query]):undefined);
 }
 
 export async function queryWorkflows(query: CatalogQuery, mode = catalogMode(), db?: PrismaClient) {
@@ -77,7 +79,7 @@ export async function queryWorkflows(query: CatalogQuery, mode = catalogMode(), 
       db.useCase.findMany({ where, select: workflowCardSelect, orderBy, take: CATALOG_PAGE_SIZE, skip: (query.page - 1) * CATALOG_PAGE_SIZE }), db.useCase.count({ where }),
     ], { isolationLevel: "RepeatableRead" });
     return { items, total, pageCount: Math.ceil(total / CATALOG_PAGE_SIZE) };
-  },db);
+  },db,mode==='published'&&!query.q?JSON.stringify(['workflows',mode,query]):undefined);
 }
 
 // Primitive keys let metadata and the page share one listing read per request.
@@ -113,20 +115,20 @@ export const toolBySlug = cache(async (slug: string) => {
       {categories:{some:{slug:{in:tool.categories.map(c=>c.slug)}}}},{tags:{some:{slug:{in:tool.tags.map(t=>t.slug)}}}}]},
       select:toolCardSelect,orderBy:[{name:'asc'},{id:'asc'}],take:3});
     return {...tool,related};
-  });
+  },undefined,catalogMode()==='published'?JSON.stringify(['tool',slug]):undefined);
 });
 export const workflowBySlug = cache(async (slug: string) => {
   if (!validSlug(slug)) return null;
   return readCatalog("catalog.use-case",(db) => db.useCase.findFirst({ where: { slug, ...visibility(catalogMode()) },
     select: { ...workflowSelect, tools: { where: visibility(catalogMode()), select: toolCardSelect, orderBy: { name: "asc" } },
-      articles:{where:publishedArticleWhere(),select:articleCardSelect,take:3,orderBy:{publishedAt:'desc'}} } }));
+      articles:{where:publishedArticleWhere(),select:articleCardSelect,take:3,orderBy:{publishedAt:'desc'}} } }),undefined,catalogMode()==='published'?JSON.stringify(['workflow',slug]):undefined);
 });
 
 const categoryVisibility=(mode:CatalogMode)=>({OR:[{tools:{some:visibility(mode)}},{useCases:{some:visibility(mode)}}]});
 export async function catalogCategories(mode=catalogMode(),db?:PrismaClient){
   return readCatalog('catalog.facets.tools',client=>client.category.findMany({where:categoryVisibility(mode),
     select:{slug:true,name:true,description:true,updatedAt:true,_count:{select:{tools:{where:visibility(mode)},useCases:{where:visibility(mode)}}}},
-    orderBy:{name:'asc'}}),db);
+    orderBy:{name:'asc'}}),db,mode==='published'?'categories':undefined);
 }
 export const categoryBySlug=cache(async(slug:string)=>{
   if(!validSlug(slug))return null;
@@ -135,7 +137,7 @@ export const categoryBySlug=cache(async(slug:string)=>{
     select:{slug:true,name:true,description:true,updatedAt:true,
       _count:{select:{tools:{where:visibility(mode)},useCases:{where:visibility(mode)}}},
       tools:{where:visibility(mode),select:toolCardSelect,orderBy:{name:'asc'},take:6},
-      useCases:{where:visibility(mode),select:workflowCardSelect,orderBy:{title:'asc'},take:6}}}));
+      useCases:{where:visibility(mode),select:workflowCardSelect,orderBy:{title:'asc'},take:6}}}),undefined,mode==='published'?JSON.stringify(['category',slug]):undefined);
 });
 
 export async function homeCatalog(mode = catalogMode(), db?: PrismaClient) {
@@ -149,5 +151,5 @@ export async function homeCatalog(mode = catalogMode(), db?: PrismaClient) {
     ], { isolationLevel: "RepeatableRead" });
     return { tools, workflows, articles: articles.map(({ useCase, ...article }) => ({ ...article,
       workflowSlug: useCase && (mode === "demo" ? useCase.isDemo && useCase.status === "DRAFT" : !useCase.isDemo && useCase.status === "PUBLISHED" && useCase.publishedAt && useCase.publishedAt <= new Date()) ? useCase.slug : null })), categories };
-  },db);
+  },db,mode==='published'?'home':undefined);
 }
